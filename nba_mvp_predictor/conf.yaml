@@ -14,6 +14,21 @@ data:
     sep: ;
     encoding: utf-8
     compression: zip
+  bronze:
+    path: data/bronze.csv.zip
+    sep: ;
+    encoding: utf-8
+    compression: zip
+  silver:
+    path: data/silver.csv.zip
+    sep: ;
+    encoding: utf-8
+    compression: zip
+  gold:
+    path: data/gold.csv.zip
+    sep: ;
+    encoding: utf-8
+    compression: zip
 
 web:
   tab-title: Predicting the MVP
