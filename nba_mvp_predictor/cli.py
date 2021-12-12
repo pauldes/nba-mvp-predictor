@@ -3,7 +3,7 @@ import sys
 
 import streamlit.cli
 
-from nba_mvp_predictor import conf
+from nba_mvp_predictor import conf, logger
 
 
 def download_data(args=None):
@@ -33,16 +33,10 @@ def get_parser():
     """
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest="command")
-    web_command = subparser.add_parser(
-        "web", help="Run the web application showing predictions"
-    )
-    download_command = subparser.add_parser("download", help="Download data")
-    train_command = subparser.add_parser(
-        "train", help="Train a model on dowloaded data"
-    )
-    predict_command = subparser.add_parser(
-        "predict", help="Make predictions with the trained model"
-    )
+    subparser.add_parser("web", help="Run the web application showing predictions")
+    subparser.add_parser("download", help="Download data")
+    subparser.add_parser("train", help="Train a model on dowloaded data")
+    subparser.add_parser("predict", help="Make predictions with the trained model")
     return parser
 
 
@@ -52,13 +46,14 @@ def run(args=None):
     Args:
         args : List of args as input of the command line.
     """
+    logger.debug(f"CLI run called with arguments : {args}")
     parser = get_parser()
     args = parser.parse_args(args)
     if args.command == "web":
         run_webapp(args)
-    if args.command == "download":
+    elif args.command == "download":
         download_data(args)
-    if args.command == "train":
+    elif args.command == "train":
         train_model(args)
-    if args.command == "predict":
+    elif args.command == "predict":
         make_predictions(args)
