@@ -73,7 +73,9 @@ class BasketballReferenceScrapper(Scrapper):
             data = data.rename(columns={"SHARE": "MVP_VOTES_SHARE"})
             data = data.rename(columns={"TM": "TEAM"})
             data = data[["PLAYER", "TEAM", "SEASON", "MVP_VOTES_SHARE", "RANK"]]
-            data.loc[:, "PLAYER"] = data["PLAYER"].str.replace("[^A-Za-z]", "", regex=True)
+            data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
+                "[^A-Za-z]", "", regex=True
+            )
             data.loc[:, "MVP_WINNER"] = False
             data["RANK"] = (
                 data["RANK"]
@@ -95,7 +97,7 @@ class BasketballReferenceScrapper(Scrapper):
     def get_mvp(self, subset_by_seasons: list = None):
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month
-        if month>9:
+        if month > 9:
             # Season starts after september
             year += 1
         allowed_seasons = range(1974, year)
@@ -170,7 +172,7 @@ class BasketballReferenceScrapper(Scrapper):
         """
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month
-        if month>9:
+        if month > 9:
             # Season starts after september
             year += 1
         allowed_seasons = range(1974, year + 1)
@@ -192,7 +194,9 @@ class BasketballReferenceScrapper(Scrapper):
                 data = data.reset_index(drop=True)
                 data.loc[:, "CONF"] = conference
                 data.loc[:, "CONF_RANK"] = data.index + 1
-                data.loc[:, "TEAM"] = data["TEAM"].str.upper().str.replace("[^A-Z]", "", regex=True)
+                data.loc[:, "TEAM"] = (
+                    data["TEAM"].str.upper().str.replace("[^A-Z]", "", regex=True)
+                )
                 team_names = {}
                 for raw, short in self.team_names.items():
                     raw = "".join(filter(str.isalpha, raw)).upper()
@@ -234,7 +238,7 @@ class BasketballReferenceScrapper(Scrapper):
         """
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month
-        if month>9:
+        if month > 9:
             # Season starts after september
             year += 1
         allowed_stat_types = [
