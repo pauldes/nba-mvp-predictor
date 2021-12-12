@@ -13,6 +13,7 @@ pyyaml = "*"
 seaborn = "*"
 python-box = "*"
 nba-mvp-predictor = {editable = true, path = "./nba_mvp_predictor"}
+basketball-reference-scraper = "*"
 
 [dev-packages]
 black = "*"

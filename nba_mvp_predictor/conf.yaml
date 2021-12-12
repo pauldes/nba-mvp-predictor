@@ -1,3 +1,20 @@
+data:
+  player-stats:
+    path: data/player_stats.csv.zip
+    sep: ;
+    encoding: utf-8
+    compression: zip
+  mvp-votes:
+    path: data/mvp_votes.csv.zip
+    sep: ;
+    encoding: utf-8
+    compression: zip
+  team-standings:
+    path: data/team_standings.csv.zip
+    sep: ;
+    encoding: utf-8
+    compression: zip
+
 web:
   tab-title: Predicting the MVP
   page-title: "🏀 Predicting the MVP"

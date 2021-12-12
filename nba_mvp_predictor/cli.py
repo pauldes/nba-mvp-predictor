@@ -1,19 +1,21 @@
 import argparse
 import sys
+from typing import List
 
 import streamlit.cli
 
 from nba_mvp_predictor import conf, logger
+from nba_mvp_predictor import download, train
 
 
 def download_data(args=None):
     """Download data"""
-    pass
+    download.download_data(args.seasons)
 
 
 def train_model(args=None):
     """Train a model on dowloaded data"""
-    pass
+    train.train_model()
 
 
 def make_predictions(args=None):
@@ -34,7 +36,14 @@ def get_parser():
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest="command")
     subparser.add_parser("web", help="Run the web application showing predictions")
-    subparser.add_parser("download", help="Download data")
+    download_parser = subparser.add_parser("download", help="Download data")
+    download_parser.add_argument(
+        "--seasons",
+        required=False,
+        help="Seasons to download data for",
+        nargs="+",
+        type=int,
+    )
     subparser.add_parser("train", help="Train a model on dowloaded data")
     subparser.add_parser("predict", help="Make predictions with the trained model")
     return parser

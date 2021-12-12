@@ -1,15 +1,11 @@
 import logging
 import os
 
-import yaml
-import box
+from nba_mvp_predictor import utils
 
 
 def get_conf():
-    with open("nba_mvp_predictor/conf.yaml", "r", encoding="utf-8") as f:
-        conf_dict = yaml.safe_load(f)
-    conf = box.Box(conf_dict)
-    return conf
+    return utils.get_dict_from_yaml("nba_mvp_predictor/conf.yaml")
 
 
 def get_logger():
