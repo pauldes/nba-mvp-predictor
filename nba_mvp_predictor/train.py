@@ -13,7 +13,9 @@ from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import load
 
 
-def consolidate_data():
+def make_bronze_data():
+    """ Make bronze training data from raw downloaded data.
+    """
     player_stats = load.load_player_stats()
     mvp_votes = load.load_mvp_votes()
     team_standings = load.load_team_standings()
@@ -47,9 +49,20 @@ def consolidate_data():
     )
 
 
-def preprocess_data():
-    nrows = 10
+def make_silver_data():
+    """Make silver training data from bronze data.
+    """
+    pass
 
+def make_gold_data():
+    """Make gold training data from silver data
+    """
+    pass
 
 def train_model():
-    consolidate_data()
+    try:
+        make_bronze_data()
+        make_silver_data()
+        make_gold_data()
+    except Exception as e:
+        logger.error("Training model failed")
