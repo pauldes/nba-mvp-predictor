@@ -1,4 +1,5 @@
 ![Actions badge](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/tests.yml/badge.svg)
+![Actions badge](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/run.yml/badge.svg)
 
 # nba-mvp-predictor: 🏀 Predicting the NBA Most Valuable Player
 

@@ -78,7 +78,7 @@ class BasketballReferenceScrapper(Scrapper):
             data["RANK"] = (
                 data["RANK"]
                 .astype(str)
-                .str.replace("[^0-9]", "")
+                .str.replace("[^0-9]", "", regex=True)
                 .astype(int, errors="raise")
             )
             data.loc[data["RANK"] == 1, "MVP_WINNER"] = True
@@ -107,7 +107,7 @@ class BasketballReferenceScrapper(Scrapper):
             seasons = allowed_seasons
         total_dfs = []
         for season in seasons:
-            logger.debug(f"Retrieving MVP of season{season}...")
+            logger.debug(f"Retrieving MVP of season {season}...")
             results = self.retrieve_mvp_votes(season)
             results.loc[:, "player_season_team"] = (
                 results["PLAYER"].str.replace(" ", "")
