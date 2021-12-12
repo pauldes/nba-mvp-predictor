@@ -3,7 +3,8 @@ pyproject.toml
 
 # Data
 *.csv
-*.json
+*.zip
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

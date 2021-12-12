@@ -1,6 +1,6 @@
 from typing import List
 
-from nba_mvp_predictor import conf
+from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import scrappers
 
 
@@ -8,9 +8,21 @@ def download_data(
     seasons: List[int] = None,
     scrapper: scrappers.Scrapper = scrappers.BasketballReferenceScrapper(),
 ):
-    download_player_stats(seasons=seasons, scrapper=scrapper)
-    download_mvp_votes(seasons=seasons, scrapper=scrapper)
-    download_team_standings(seasons=seasons, scrapper=scrapper)
+    logger.info("Downloading player stats...")
+    try:
+        download_player_stats(seasons=seasons, scrapper=scrapper)
+    except Exception as e:
+        logger.error("Downloading player stats failed")
+    logger.info("Downloading MVP votes...")
+    try:
+        download_mvp_votes(seasons=seasons, scrapper=scrapper)
+    except Exception as e:
+        logger.error("Downloading MVP votes failed")
+    logger.info("Downloading team standings...")
+    try:
+        download_team_standings(seasons=seasons, scrapper=scrapper)
+    except Exception as e:
+        logger.error("Downloading team standings failed")
 
 
 def download_player_stats(seasons: List[int], scrapper: scrappers.Scrapper):

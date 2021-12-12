@@ -7,7 +7,8 @@ import pandas
 from bs4 import BeautifulSoup
 from basketball_reference_scraper.seasons import get_standings
 
-from nba_mvp_predictor import utils, logger, conf
+from nba_mvp_predictor import utils
+from nba_mvp_predictor import conf, logger
 
 """ 
 1955-56 through 1979-1980: Voting was done by players. Rules prohibited player from voting for himself or any teammate.
@@ -72,7 +73,7 @@ class BasketballReferenceScrapper(Scrapper):
             data = data.rename(columns={"SHARE": "MVP_VOTES_SHARE"})
             data = data.rename(columns={"TM": "TEAM"})
             data = data[["PLAYER", "TEAM", "SEASON", "MVP_VOTES_SHARE", "RANK"]]
-            data.loc[:, "PLAYER"] = data["PLAYER"].str.replace("[^A-Za-z]", "")
+            data.loc[:, "PLAYER"] = data["PLAYER"].str.replace("[^A-Za-z]", "", regex=True)
             data.loc[:, "MVP_WINNER"] = False
             data["RANK"] = (
                 data["RANK"]
@@ -93,6 +94,10 @@ class BasketballReferenceScrapper(Scrapper):
 
     def get_mvp(self, subset_by_seasons: list = None):
         year = datetime.datetime.now().year
+        month = datetime.datetime.now().month
+        if month>9:
+            # Season starts after september
+            year += 1
         allowed_seasons = range(1974, year)
         if subset_by_seasons is not None:
             seasons = [
@@ -102,7 +107,7 @@ class BasketballReferenceScrapper(Scrapper):
             seasons = allowed_seasons
         total_dfs = []
         for season in seasons:
-            print("Retrieving MVP of season", season, "...")
+            logger.debug(f"Retrieving MVP of season{season}...")
             results = self.retrieve_mvp_votes(season)
             results.loc[:, "player_season_team"] = (
                 results["PLAYER"].str.replace(" ", "")
@@ -164,6 +169,10 @@ class BasketballReferenceScrapper(Scrapper):
         TODO : Use the season dataset to find last game date.
         """
         year = datetime.datetime.now().year
+        month = datetime.datetime.now().month
+        if month>9:
+            # Season starts after september
+            year += 1
         allowed_seasons = range(1974, year + 1)
         if subset_by_seasons is not None:
             seasons = [
@@ -173,7 +182,7 @@ class BasketballReferenceScrapper(Scrapper):
             seasons = allowed_seasons
         total_dfs = []
         for season in seasons:
-            print("Retrieving standings of season", season, "...")
+            logger.debug(f"Retrieving standings of season {season}...")
             date = "06-01-" + str(season)
             dfs = []
             results = get_standings(date=date)
@@ -183,7 +192,7 @@ class BasketballReferenceScrapper(Scrapper):
                 data = data.reset_index(drop=True)
                 data.loc[:, "CONF"] = conference
                 data.loc[:, "CONF_RANK"] = data.index + 1
-                data.loc[:, "TEAM"] = data["TEAM"].str.upper().str.replace("[^A-Z]", "")
+                data.loc[:, "TEAM"] = data["TEAM"].str.upper().str.replace("[^A-Z]", "", regex=True)
                 team_names = {}
                 for raw, short in self.team_names.items():
                     raw = "".join(filter(str.isalpha, raw)).upper()
@@ -224,6 +233,10 @@ class BasketballReferenceScrapper(Scrapper):
         Defaults to all teams, all seasons, all stat types.
         """
         year = datetime.datetime.now().year
+        month = datetime.datetime.now().month
+        if month>9:
+            # Season starts after september
+            year += 1
         allowed_stat_types = [
             "totals",
             "per_game",
@@ -272,15 +285,12 @@ class BasketballReferenceScrapper(Scrapper):
             ]
             stat_type_dfs = []
             for stat_type in stat_types:
-                print("Retrieving", stat_type, "stats for season", season, "...")
+                logger.debug(f"Retrieving {stat_type} stats for season {season}...")
                 try:
                     stat_type_df = self.get_roster_stats_v2(season, stat_type)
                 except Exception as e:
-                    print(
-                        "Could not retrieve data. Are you sure NBA was played in season",
-                        str(season),
-                        "?",
-                        e,
+                    logger.warning(
+                        f"Could not retrieve data. Are you sure NBA was played in season {season}? {e}"
                     )
                 else:
                     stat_type_df.columns = [
