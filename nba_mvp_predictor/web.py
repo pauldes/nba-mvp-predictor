@@ -12,4 +12,3 @@ def run():
     st.title(conf.web.page_title)
     st.sidebar.markdown(conf.web.sidebar_top_text)
     st.sidebar.markdown(conf.web.sidebar_bottom_text)
-    st.title(conf.web.page_title)
