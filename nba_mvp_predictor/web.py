@@ -2,6 +2,7 @@ import streamlit as st
 
 from nba_mvp_predictor import conf
 
+
 def run():
     st.set_page_config(
         page_title=conf.web.tab_title,
