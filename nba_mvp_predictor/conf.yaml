@@ -1,2 +1,11 @@
 web:
-  page-title: Hello world!
+  tab-title: Predicting the MVP
+  page-title: "🏀 Predicting the MVP"
+  sidebar-top-text: >
+    **How does it work ?**
+
+    A statistical regression model is fitted on historical data (player and team stats, and MVP voting results).
+    It is then used to predict this season MVP based on current data.
+    The model predicts the *award share* (the number of points a player received for MVP award over the total points of all first-place votes).
+    This share can then be converted to a chance/probability using various methods (see *Predictions parameters*).
+  sidebar-bottom-text: "*Made by [pauldes](https://github.com/pauldes). Code on [GitHub](https://github.com/pauldes/nba-mvp-prediction).*"
