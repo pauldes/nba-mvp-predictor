@@ -4,7 +4,7 @@ on:
     - cron:  '0 8 * * *' # Everyday at 8
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
-  download-data-and-audit-quality:
+  download-data-and-train-model:
     runs-on: ubuntu-latest
     steps:
       - name: Setup timezone to Europe/Paris
