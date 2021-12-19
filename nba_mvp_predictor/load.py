@@ -35,3 +35,33 @@ def load_team_standings(nrows: int = None):
         index_col=0,
         nrows=nrows,
     )
+
+def load_bronze_data(nrows: int = None):
+    return pandas.read_csv(
+        conf.data.bronze.path,
+        sep=conf.data.bronze.sep,
+        encoding=conf.data.bronze.encoding,
+        compression=conf.data.bronze.compression,
+        index_col=0,
+        nrows=nrows,
+    )
+
+def load_silver_data(nrows: int = None):
+    return pandas.read_csv(
+        conf.data.silver.path,
+        sep=conf.data.silver.sep,
+        encoding=conf.data.silver.encoding,
+        compression=conf.data.silver.compression,
+        index_col=0,
+        nrows=nrows,
+    )
+
+def load_gold_data(nrows: int = None):
+    return pandas.read_csv(
+        conf.data.gold.path,
+        sep=conf.data.gold.sep,
+        encoding=conf.data.gold.encoding,
+        compression=conf.data.gold.compression,
+        index_col=0,
+        nrows=nrows,
+    )

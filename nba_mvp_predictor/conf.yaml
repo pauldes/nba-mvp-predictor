@@ -1,4 +1,6 @@
 data:
+  model:
+    path: data/model.joblib
   player-stats:
     path: data/player_stats.csv.zip
     sep: ;
@@ -25,10 +27,9 @@ data:
     encoding: utf-8
     compression: zip
   gold:
-    path: data/gold.csv.zip
+    path: data/gold.csv
     sep: ;
     encoding: utf-8
-    compression: zip
 
 web:
   tab-title: Predicting the MVP

@@ -1,7 +1,7 @@
 name: run
 on:
   schedule:
-    - cron:  '0 8 * * *' # Everyday at 8
+    - cron:  '0 8 1 * *' # Every 1st day of the month at 8
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
   download-data-and-train-model:
@@ -21,15 +21,15 @@ jobs:
         run: |
           python -m pip install --upgrade pipenv
           pipenv install --deploy
-      - name: Run the CLI command to download data for 4 seasons
+      - name: Run the CLI command to download data for all seasons
         run: |
-          pipenv run python . download --seasons 2018 2019 2020 2021
+          pipenv run python . download
       - name: Run the CLI command to train model
         run: |
           pipenv run python . train
-      - name: Upload bronze training data as artifact
+      - name: Upload model as artifact
         uses: actions/upload-artifact@v2
         with: 
-          name: bronze.csv.zip
-          path: ./data/bronze.csv.zip
+          name: model.joblib
+          path: ./data/model.joblib
           retention-days: 90

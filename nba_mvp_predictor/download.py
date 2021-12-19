@@ -12,17 +12,17 @@ def download_data(
     try:
         download_player_stats(seasons=seasons, scrapper=scrapper)
     except Exception as e:
-        logger.error("Downloading player stats failed")
+        logger.error(f"Downloading player stats failed : {e}")
     logger.info("Downloading MVP votes...")
     try:
         download_mvp_votes(seasons=seasons, scrapper=scrapper)
     except Exception as e:
-        logger.error("Downloading MVP votes failed")
+        logger.error(f"Downloading MVP votes failed : {e}")
     logger.info("Downloading team standings...")
     try:
         download_team_standings(seasons=seasons, scrapper=scrapper)
     except Exception as e:
-        logger.error("Downloading team standings failed")
+        logger.error(f"Downloading team standings failed : {e}")
 
 
 def download_player_stats(seasons: List[int], scrapper: scrappers.Scrapper):

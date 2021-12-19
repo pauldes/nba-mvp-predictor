@@ -1,3 +1,6 @@
+from datetime import datetime
+import joblib
+
 from sklearn import (
     dummy,
     tree,
@@ -8,9 +11,11 @@ from sklearn import (
     ensemble,
     neural_network,
 )
+import pandas
+import numpy
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load
+from nba_mvp_predictor import load, preprocess, analyze
 
 
 def make_bronze_data():
@@ -52,17 +57,270 @@ def make_bronze_data():
 def make_silver_data():
     """Make silver training data from bronze data.
     """
-    pass
+    data = load.load_bronze_data()
+    logger.debug(f"Before filters: {len(data)} players - {len(data[data.MVP_CANDIDATE])} MVP candidates - {len(data[data.MVP_WINNER])} winners")
+    data_copy = data.copy()
+    # Apply filters
+    # 50% games played
+    # 50% of time played per game (24mn)
+    # Team ranked 10th in conference at least
+    for season in data.SEASON.unique():
+        max_g = data[data.SEASON==season]["G"].max()
+        treshold = 0.5 * max_g
+        data = data[(data.SEASON!=season) | ((data.SEASON==season) & (data.G>=treshold))]
+    data = data[data["CONF_RANK"] <= 10]
+    data = data[data["MP"] >= 24.0]
+    removed_players = data_copy.loc[~data_copy.index.isin(data.index)]
+    cols = ["SEASON", "G", "CONF_RANK", "MP"]
+    removed_mvp_candidates = removed_players[removed_players.MVP_CANDIDATE]
+    logger.debug(f"{len(removed_mvp_candidates)} MVP candidates removed due to filters")
+    if len(removed_mvp_candidates) > 0:
+        print(removed_mvp_candidates.head()[cols])
+    logger.debug(f"After filters: {len(data)} players - {len(data[data.MVP_CANDIDATE])} MVP candidates - {len(data[data.MVP_WINNER])} winners")
+    data.to_csv(
+        conf.data.silver.path,
+        sep=conf.data.silver.sep,
+        encoding=conf.data.silver.encoding,
+        compression=conf.data.silver.compression,
+        index=True,
+    )
 
-def make_gold_data():
+def make_gold_data_and_train_model():
     """Make gold training data from silver data
     """
-    pass
+    data = load.load_silver_data()
+    not_features = ["PLAYER", "MVP_VOTES_SHARE", "MVP_WINNER", "MVP_PODIUM", "MVP_CANDIDATE", "TEAM", "SEASON"] #Conf and season maybe should be used
+    features = [col for col in data.columns if col not in not_features]
+    num_features = list(preprocess.get_numerical_columns(data[features]))
+    cat_features = list(preprocess.get_categorical_columns(data[features]))
+    print("Not features", "(", len(not_features), ") :\n", ", ".join(not_features))
+    print("\nNumerical features", "(", len(num_features), ") :\n", ", ".join(num_features))
+    print("\nCategorical features", "(", len(cat_features), ") :\n", ", ".join(cat_features))
+
+    # Maximum two players per team ?
+    # Include team ? Include already_won, won_last_year..? Include won_over_other_contenders.. ? Include has_top_performance ?
+
+
+    corr_treshold = 0.98
+    num_features = list(analyze.get_columns_with_inter_correlations_under(data[num_features], corr_treshold))
+    data = data[num_features + cat_features + not_features]
+    #Add MVP rank
+    for season in data.SEASON.unique():
+        data.loc[data.SEASON==season, "MVP_RANK"] = data[data.SEASON==season]["MVP_VOTES_SHARE"].rank(ascending=False, method='average')
+    ranks_reference = data.MVP_RANK.copy()
+    not_features.append("MVP_RANK")
+
+
+    target = "MVP_VOTES_SHARE"
+
+    selected_num_features = list(num_features)
+    selected_cat_features = list(cat_features)
+    min_max_scaling  = False #else it's stdev
+
+    if min_max_scaling:
+        standardized_type = "min_max"
+    else:
+        standardized_type = "std"
+
+    print("'" + "', '".join(selected_cat_features) + "'")
+    print("'" + "', '".join(selected_num_features) + "'")
+
+    data_processed_features_only, data_raw = preprocess.scale_per_value_of(data, selected_cat_features, selected_num_features, data["SEASON"], min_max_scaler=min_max_scaling)
+    selected_cat_features_numerized = [f for f in data_processed_features_only.columns if f not in selected_num_features]
+    data_not_features = data[not_features]
+
+    data_processed = pandas.concat([data_processed_features_only, data_not_features], axis=1)
+
+    data_processed.to_csv(
+        conf.data.gold.path,
+        sep=conf.data.gold.sep,
+        encoding=conf.data.gold.encoding,
+        compression=conf.data.gold.compression,
+        index=True,
+    )
+
+    data = load.load_gold_data()
+
+    selected_num_features = list(num_features)
+    selected_cat_features = list(cat_features)
+
+    current_season = datetime.now().year + 1 if datetime.now().month>9 else datetime.now().year
+    logger.debug(f"Current season : {current_season}")
+    prediction_data = data[data.SEASON==current_season]
+    data = data[data.SEASON<current_season]
+    percent_test_seasons = 0.2
+    num_test_seasons = int(data.SEASON.nunique() * percent_test_seasons)
+    test_seasons = sorted(data.SEASON.unique())[-num_test_seasons:]
+    trainval_seasons = sorted(data.SEASON.unique())[:-num_test_seasons]
+    logger.debug(f"Test seasons : {test_seasons[0]} to {test_seasons[-1]}")
+    logger.debug(f"Trainval seasons : {trainval_seasons[0]} to {trainval_seasons[-1]}")
+    data_test = data[data.SEASON.isin(test_seasons)]
+    data_trainval = data[data.SEASON.isin(trainval_seasons)]
+    data_all = data.copy()
+
+    #n_features = 50
+    #treshold = None
+    n_features = None
+    treshold = 0.05
+
+    data_for_corr_analysis = data_trainval[selected_num_features] #we make the choice of not looking into numerized cat features
+
+    method = "pearson"
+    top_corr_pearson = filter_by_correlation_with_target(pandas.concat([data_for_corr_analysis, data_trainval[target]], axis=1), target, method=method, n_features=n_features, treshold=treshold)
+    method = "kendall"
+    top_corr_kendall = filter_by_correlation_with_target(pandas.concat([data_for_corr_analysis, data_trainval[target]], axis=1), target, method=method, n_features=n_features, treshold=treshold)
+    method = "spearman"
+    top_corr_spearman = filter_by_correlation_with_target(pandas.concat([data_for_corr_analysis, data_trainval[target]], axis=1), target, method=method, n_features=n_features, treshold=treshold)
+
+    selected_features_pearson = top_corr_pearson.index.tolist()
+    selected_features_kendall = top_corr_kendall.index.tolist()
+    selected_features_spearman = top_corr_spearman.index.tolist()
+
+    selected_features = selected_features_pearson + selected_features_kendall + selected_features_spearman
+    selected_features = list(set(selected_features))
+    print("Selected features :", len(selected_features))
+
+    selected_features = [f for f in selected_features if data_trainval[f].isna().sum()==0]
+
+    X_trainval = data_trainval[selected_features + selected_cat_features_numerized]
+    y_trainval = data_trainval[target]
+
+    X_test = data_test[selected_features + selected_cat_features_numerized]
+    y_test = data_test[target]
+
+    X_all = data_all[selected_features + selected_cat_features_numerized]
+    y_all = data_all[target]
+
+    print("'" + "', '".join(selected_features + selected_cat_features_numerized) + "'")
+
+    regressor = neural_network.MLPRegressor(hidden_layer_sizes=9, learning_rate='adaptive', learning_rate_init=0.065, random_state=666)
+    regressors = [regressor]
+
+    splits = 3
+    repeats = 2
+    splitter = model_selection.RepeatedKFold(n_splits=splits, n_repeats=repeats, random_state=666)
+
+
+    for step, regressor in enumerate(regressors):
+        regressor_name = str(regressor.__class__.__name__)
+        non_default_params = str(regressor).split("(")[1].split(")")[0]
+
+        print("Model", step+1, "of", len(regressors), ":", regressor_name, non_default_params)
+
+        train_MAEs = []
+        train_MSEs = []
+        train_MAXs = []
+        val_MAEs = []
+        val_MSEs = []
+        val_MSLEs = []
+        val_MAPEs = []
+        val_MAXs = []
+
+        #End run if ened abnormally
+        # try:
+        #     mlflow.end_run()
+        # except Exception as e:
+        #     pass
+
+        #mlflow.start_run(experiment_id=1)
+
+        # mlflow.log_param("model", regressor_name)
+        # mlflow.log_param("non_default_params", non_default_params)
+        # mlflow.log_param("standardized_type", standardized_type)
+        # mlflow.log_param("num_features", len(selected_num_features))
+        # mlflow.log_param("cat_features", len(selected_cat_features))
+        # SMOGN (SMOTE for regression) ?
+
+        for step, (train_index, val_index) in enumerate(splitter.split(X_trainval, y_trainval)):
+            print(" Step", step+1, "of", splits*repeats)
+            X_train = X_trainval.iloc[train_index, :]
+            X_val = X_trainval.iloc[val_index, :]
+            y_train = y_trainval.iloc[train_index]
+            y_val = y_trainval.iloc[val_index]
+            regressor.fit(X_train, y_train)
+            y_pred = regressor.predict(X_val)
+            y_pred_train = regressor.predict(X_train)
+            train_MAEs.append(metrics.mean_absolute_error(y_train, y_pred_train))
+            train_MSEs.append(metrics.mean_squared_error(y_train, y_pred_train))
+            train_MAXs.append(metrics.max_error(y_train, y_pred_train))
+            val_MAEs.append(metrics.mean_absolute_error(y_val, y_pred))
+            val_MSEs.append(metrics.mean_squared_error(y_val, y_pred))
+            #val_MSLEs.append(metrics.mean_squared_log_error(y_val, y_pred))
+            val_MAPEs.append(metrics.mean_absolute_percentage_error(y_val, y_pred))
+            val_MAXs.append(metrics.max_error(y_val, y_pred))
+            # mlflow.log_metric(key="val_MAE", value=metrics.mean_absolute_error(y_val, y_pred), step=step)
+            # mlflow.log_metric(key="val_MSE", value=metrics.mean_squared_error(y_val, y_pred), step=step)
+            # #mlflow.log_metric(key="val_MSLE", value=metrics.mean_squared_log_error(y_val, y_pred), step=step)
+            # mlflow.log_metric(key="val_MAPE", value=metrics.mean_absolute_percentage_error(y_val, y_pred), step=step)
+            # mlflow.log_metric(key="train_MAE", value=metrics.mean_absolute_error(y_train, y_pred_train), step=step)
+            # mlflow.log_metric(key="train_MSE", value=metrics.mean_squared_error(y_train, y_pred_train), step=step)
+            # Add a MSE/MAE on MVP candidates
+            # Add a metrics on MVP or MVP top 3
+            # Clip predictions between 0.0 and 1.0 !
+
+        print("  Training MAE:", numpy.mean(train_MAEs))
+        print("  Training MSE:", numpy.mean(train_MSEs))
+        print("  Training MaxAE:", numpy.mean(train_MAXs))
+        print("  Validation MAE:", numpy.mean(val_MAEs))
+        print("  Validation MSE:", numpy.mean(val_MSEs))
+        #print("  Validation MSLE:", numpy.mean(val_MSLEs))
+        print("  Validation MAPE:", numpy.mean(val_MAPEs))
+        print("  Validation MaxAE:", numpy.mean(val_MAXs))
+
+        #mlflow.end_run()
+
+    results = y_val.rename("TRUTH").to_frame()
+    results.loc[:, "PRED"] = y_pred
+    results.loc[:, "AE"] = (results["TRUTH"] - results["PRED"]).abs()
+    #results = results.merge(X_trainval, left_index=True, right_index=True)
+    results = results.sort_values(by=["AE", "TRUTH"], ascending=False)
+    print(results.head(10))
+
+    regressor.fit(X_trainval, y_trainval)
+    y_pred_test = regressor.predict(X_test)
+    results = y_test.rename("TRUTH").to_frame()
+    results.loc[:, "PRED"] = y_pred_test
+    results.loc[:, "AE"] = (results["TRUTH"] - results["PRED"]).abs()
+    results = results.merge(data_test[["SEASON"]], left_index=True, right_index=True)
+    real_winners = data_test.sort_values(by=target, ascending=False).drop_duplicates(subset=["SEASON"], keep='first')[["SEASON"]]
+    real_winners["True MVP"] = real_winners.index
+    real_winners = real_winners.set_index("SEASON", drop=True)
+    winners = results.sort_values(by="PRED", ascending=False).drop_duplicates(subset=["SEASON"], keep='first')
+    winners["Pred. MVP"] = winners.index
+    winners = winners.set_index("SEASON", drop=True)
+    winners = winners.merge(real_winners, left_index=True, right_index=True)
+    winners.loc[:, "REAL_RANK"] = winners["Pred. MVP"].map(ranks_reference)
+    winners = winners.sort_index(ascending=True)
+    print(winners)
+    print(numpy.mean(results.AE))
+    print(results.AE.max())
+    print(numpy.mean(results.AE ** 2))
+    winners["Real MVP rank"] = 1
+    print("Pourcentage de MVP bien trouvé sur le jeu de test :")
+    print((winners["Pred. MVP"] == winners["True MVP"]).sum() / len(winners))
+    print("Rang réel moyen du MVP prédit:")
+    print((winners["REAL_RANK"]).mean())
+    regressor.fit(X_all, y_all)
+    joblib.dump(regressor, conf.data.model.path) 
+
+def filter_by_correlation_with_target(data, target, method="pearson", n_features=None, treshold=None):
+    print("Method :", method)
+    if n_features is not None and treshold is None:
+        top_corr = analyze.get_columns_correlation_with_target(data, target, method=method)[:n_features]
+    elif n_features is None and treshold is not None:
+        top_corr = analyze.get_columns_correlation_with_target(data, target, method=method)
+        top_corr = top_corr[top_corr>treshold]
+    else:
+        raise Exception("Invalid arguments")
+    
+    return top_corr
 
 def train_model():
     try:
-        make_bronze_data()
-        make_silver_data()
-        make_gold_data()
+        #make_bronze_data()
+        #make_silver_data()
+        # make_gold_data()
+        # train_on_gold()
+        make_gold_data_and_train_model()
     except Exception as e:
-        logger.error("Training model failed")
+        logger.error(f"Training model failed : {e}")

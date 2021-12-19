@@ -190,10 +190,6 @@ class BasketballReferenceScrapper(Scrapper):
             results = get_standings(date=date)
             for conference, data in results.items():
                 data = data.dropna(axis="index", how="any")
-                data = data.sort_values(by="W/L%", ascending=False)
-                data = data.reset_index(drop=True)
-                data.loc[:, "CONF"] = conference
-                data.loc[:, "CONF_RANK"] = data.index + 1
                 data.loc[:, "TEAM"] = (
                     data["TEAM"].str.upper().str.replace("[^A-Z]", "", regex=True)
                 )
@@ -202,6 +198,10 @@ class BasketballReferenceScrapper(Scrapper):
                     raw = "".join(filter(str.isalpha, raw)).upper()
                     team_names[raw] = short
                 data = data[~data["TEAM"].str.contains("DIVISION")]
+                data = data.sort_values(by="W/L%", ascending=False)
+                data = data.reset_index(drop=True)
+                data.loc[:, "CONF"] = conference
+                data.loc[:, "CONF_RANK"] = data.index + 1
                 unmapped_teams = [
                     team
                     for team in data["TEAM"].unique()
