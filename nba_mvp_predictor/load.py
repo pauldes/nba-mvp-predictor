@@ -1,8 +1,18 @@
+import joblib
+
 import pandas
 
 from nba_mvp_predictor import conf
 from nba_mvp_predictor import scrappers
 
+
+def load_model():
+    """Load the model.
+
+    Returns:
+        sklearn.base.BaseEstimator: The model to use for prediction
+    """
+    return joblib.load(conf.data.model.path)
 
 def load_player_stats(nrows: int = None):
     return pandas.read_csv(

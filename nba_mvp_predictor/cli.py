@@ -5,7 +5,7 @@ from typing import List
 import streamlit.cli
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import download, train
+from nba_mvp_predictor import download, train, predict
 
 
 def download_data(args=None):
@@ -20,7 +20,7 @@ def train_model(args=None):
 
 def make_predictions(args=None):
     """Make predictions with the trained model"""
-    pass
+    predict.make_predictions()
 
 
 def run_webapp(args=None):
@@ -55,7 +55,6 @@ def run(args=None):
     Args:
         args : List of args as input of the command line.
     """
-    logger.debug(f"CLI run called with arguments : {args}")
     parser = get_parser()
     args = parser.parse_args(args)
     if args.command == "web":
