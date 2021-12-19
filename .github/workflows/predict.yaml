@@ -27,3 +27,9 @@ jobs:
       - name: Run the CLI command to predict model
         run: |
           pipenv run python . predict
+      - name: Upload predictions as artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: predictions.csv
+          path: ./data/predictions.csv
+          retention-days: 90

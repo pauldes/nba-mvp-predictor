@@ -30,6 +30,10 @@ data:
     path: data/gold.csv
     sep: ;
     encoding: utf-8
+  predictions:
+    path: data/predictions.csv
+    sep: ;
+    encoding: utf-8
 
 web:
   tab-title: Predicting the MVP

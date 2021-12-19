@@ -100,7 +100,6 @@ def make_gold_data_and_train_model():
     # Maximum two players per team ?
     # Include team ? Include already_won, won_last_year..? Include won_over_other_contenders.. ? Include has_top_performance ?
 
-
     corr_treshold = 0.98
     num_features = list(analyze.get_columns_with_inter_correlations_under(data[num_features], corr_treshold))
     data = data[num_features + cat_features + not_features]
@@ -146,7 +145,6 @@ def make_gold_data_and_train_model():
 
     current_season = datetime.now().year + 1 if datetime.now().month>9 else datetime.now().year
     logger.debug(f"Current season : {current_season}")
-    prediction_data = data[data.SEASON==current_season]
     data = data[data.SEASON<current_season]
     percent_test_seasons = 0.2
     num_test_seasons = int(data.SEASON.nunique() * percent_test_seasons)
