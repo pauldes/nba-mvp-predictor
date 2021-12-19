@@ -1,5 +1,6 @@
 from datetime import datetime
 import joblib
+import json
 
 from sklearn import (
     dummy,
@@ -140,9 +141,6 @@ def make_gold_data_and_train_model():
 
     data = load.load_gold_data()
 
-    selected_num_features = list(num_features)
-    selected_cat_features = list(cat_features)
-
     current_season = datetime.now().year + 1 if datetime.now().month>9 else datetime.now().year
     logger.debug(f"Current season : {current_season}")
     data = data[data.SEASON<current_season]
@@ -190,6 +188,14 @@ def make_gold_data_and_train_model():
     y_all = data_all[target]
 
     print("'" + "', '".join(selected_features + selected_cat_features_numerized) + "'")
+
+    features_dict = {
+        "cat":selected_cat_features,
+        "num":selected_num_features,
+        "model":selected_features + selected_cat_features_numerized
+    }
+    with open("data/features.json", "w") as outfile:
+        json.dump(features_dict, outfile, indent=2)
 
     regressor = neural_network.MLPRegressor(hidden_layer_sizes=9, learning_rate='adaptive', learning_rate_init=0.065, random_state=666)
     regressors = [regressor]

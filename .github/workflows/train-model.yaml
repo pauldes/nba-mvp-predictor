@@ -33,3 +33,9 @@ jobs:
           name: model.joblib
           path: ./data/model.joblib
           retention-days: 90
+      - name: Upload features as artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: features.json
+          path: ./data/features.json
+          retention-days: 90
