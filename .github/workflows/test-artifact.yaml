@@ -10,10 +10,5 @@ jobs:
         with:
           name: features.json
           path: features.json
-      - name: Run the CLI command to train model
-        run: |
-          ls
-          cat features.json
-          ls -R
       - name: Display structure of downloaded files
         run: ls -R
