@@ -2,9 +2,9 @@ from datetime import datetime
 import json
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, preprocess
+from nba_mvp_predictor import load, preprocess, train
 
-def load_model_make_predictions():
+def load_model_make_predictions(top_n=50):
     model = load.load_model()
     data = load.load_silver_data()
     data = data.fillna(0.0)
@@ -29,7 +29,7 @@ def load_model_make_predictions():
     data.loc[:, "PRED"] = predictions
     data.loc[:, "PRED"] = data["PRED"].clip(lower=0.0)
     data.loc[:, "PRED_RANK"] = data["PRED"].rank(ascending=False)
-    data = data.sort_values(by="PRED", ascending=False).head(50)
+    data = data.sort_values(by="PRED", ascending=False).head(top_n)
     data.to_csv(
         conf.data.predictions.path,
         sep=conf.data.predictions.sep,
@@ -40,6 +40,8 @@ def load_model_make_predictions():
 
 def make_predictions():
     try:
+        train.make_bronze_data()
+        train.make_silver_data()
         load_model_make_predictions()
     except Exception as e:
         logger.error(f"Predicting failed : {e}")

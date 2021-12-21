@@ -321,8 +321,8 @@ def filter_by_correlation_with_target(data, target, method="pearson", n_features
 
 def train_model():
     try:
-        #make_bronze_data()
-        #make_silver_data()
+        make_bronze_data()
+        make_silver_data()
         # make_gold_data()
         # train_on_gold()
         make_gold_data_and_train_model()
