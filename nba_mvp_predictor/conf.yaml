@@ -35,6 +35,14 @@ data:
     path: data/predictions.csv
     sep: ;
     encoding: utf-8
+  history:
+    path: data/history.json
+    indent: 4
+    encoding: utf-8
+  features:
+    path: data/features.json
+    indent: 4
+    encoding: utf-8
 
 web:
   tab-title: Predicting the MVP

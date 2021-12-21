@@ -1,0 +1,77 @@
+from datetime import datetime
+import logging
+import zipfile
+import json
+import os
+
+import requests
+
+from nba_mvp_predictor import conf
+from nba_mvp_predictor import load, evaluate
+
+
+def get_artifacts():
+    """Obtient les artifacts depuis le projet GitHub.
+
+    Returns:
+        dict: Dictionnaire d'artifacts
+    """
+    github_repo = conf.web.projet_github
+    url = f"https://api.github.com/repos/{github_repo}/actions/artifacts"
+    artifacts = load_json_from_url(url)
+    return artifacts
+
+
+def load_json_from_url(url: str):
+    """Charge un fichier JSON en mémoire depuis une URL
+
+    Args:
+        url (str): URL du fichier
+
+    Returns:
+        dict: Dictionnaire issu du fichier JSON
+    """
+    response = requests.get(url)
+    if response.status_code == 403:
+        raise Exception(f"Erreur 403 en requêtant {url} : {response.content}")
+    return response.json()
+
+
+def get_github_auth():
+    """Obtient un tuple d'authentification pour l'API GitHub.
+
+    Returns:
+        (str, str): Tuple (utilisateur, jeton) à utiliser lors des appels API
+    """
+    username = os.environ["GITHUB_USERNAME"]
+    token = os.environ["GITHUB_TOKEN"]
+    return (username, token)
+
+
+def get_last_artifact(artifact_name: str):
+    """Obtient le dernier artifact disponible.
+
+    Params:
+        artifact_name: Nom de l'artifact recherché
+
+    Returns:
+        dict: Dernier artifact disponible (date:url)
+    """
+    artifacts = get_artifacts()
+    num_artifacts = artifacts.get("total_count")
+    logging.debug(f"{num_artifacts} artifacts disponibles sur le projet")
+    artifacts = [
+        a
+        for a in artifacts.get("artifacts")
+        if a.get("name") == artifact_name and a.get("expired") == False
+    ]
+    logging.debug(f"{len(artifacts)} artifacts ayant pour nom {artifact_name}")
+    results = dict()
+    for artifact in artifacts:
+        artifact_datetime = artifact.get("created_at")
+        artifact_url = artifact.get("archive_download_url")
+        artifact_datetime = datetime.strptime(artifact_datetime, "%Y-%m-%dT%H:%M:%SZ")
+        results[artifact_datetime] = artifact_url
+    last_result = sorted(results.items(), reverse=True)[0]
+    logging.debug(f"Dernier artifact disponible : {last_result}")
+    return last_result

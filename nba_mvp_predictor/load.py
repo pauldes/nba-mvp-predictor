@@ -1,4 +1,5 @@
 import joblib
+import json
 
 import pandas
 
@@ -79,3 +80,24 @@ def load_gold_data(nrows: int = None):
         index_col=0,
         nrows=nrows,
     )
+
+def load_predictions(nrows: int = None):
+    return pandas.read_csv(
+        conf.data.predictions.path,
+        sep=conf.data.predictions.sep,
+        encoding=conf.data.predictions.encoding,
+        compression=conf.data.predictions.compression,
+        index_col=0,
+        nrows=nrows,
+        dtype={}
+    )
+
+def load_history():
+    with open(conf.data.history.path, encoding=conf.data.history.encoding) as json_file:
+        history_dict = json.load(json_file)
+    return history_dict
+
+def load_features():
+    with open(conf.data.features.path, encoding=conf.data.features.encoding) as json_file:
+        features_dict = json.load(json_file)
+    return features_dict

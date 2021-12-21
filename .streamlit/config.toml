@@ -9,7 +9,6 @@ developmentMode = false
 headless = true
 enableCORS=true
 enableXsrfProtection=true
-folderWatchBlacklist = ['*', '.']
 
 [theme]
 primaryColor =  "#F7630C"
