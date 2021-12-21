@@ -47,6 +47,7 @@ data:
 web:
   tab-title: Predicting the MVP
   page-title: "🏀 Predicting the MVP"
+  github-repo: pauldes/nba-mvp-predictor
   sidebar-top-text: >
     **How does it work ?**
     

@@ -3,8 +3,8 @@ from datetime import datetime
 import streamlit as st
 import pandas
 
-from nba_mvp_predictor import conf
-from nba_mvp_predictor import load, evaluate, artifacts
+from nba_mvp_predictor import conf, logger
+from nba_mvp_predictor import load, evaluate, artifacts, download
 
 # Constants
 PAGE_PREDICTIONS = "Current year predictions"
@@ -13,10 +13,33 @@ CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
 
 
+def build_predictions():
+    date, url = artifacts.get_last_artifact("predictions.csv")
+    logger.debug(f"Downloading history from {url}")
+    download.download_data_from_url_to_file(url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth())
+    predictions = pandas.read_csv(
+        "./data/predictions-artifact.csv.zip",
+        sep=conf.data.predictions.sep,
+        encoding=conf.data.predictions.encoding,
+        compression="zip",
+        index_col=0,
+        dtype={},
+    )
+    predictions = predictions.set_index("PLAYER", drop=True)
+    return predictions
+
 def build_history():
-    artifact = artifacts.get_last_artifact("history.csv.zip")
-    print(artifact)
-    history = load.load_history()
+    date, url = artifacts.get_last_artifact("history.csv")
+    logger.debug(f"Downloading history from {url}")
+    download.download_data_from_url_to_file(url, "./data/history-artifact.csv.zip", auth=artifacts.get_github_auth())
+    history = pandas.read_csv(
+        "./data/history-artifact.csv.zip",
+        sep=conf.data.history.sep,
+        encoding=conf.data.history.encoding,
+        compression="zip",
+        index_col=False,
+        dtype={},
+    )
     history = history.rename(
         columns={"DATE": "date", "PLAYER": "player", "PRED": "prediction"}
     )
@@ -70,8 +93,7 @@ def run():
     st.sidebar.markdown(conf.web.sidebar_top_text)
     st.sidebar.markdown(conf.web.sidebar_bottom_text)
 
-    predictions = load.load_predictions()
-    predictions = predictions.set_index("PLAYER", drop=True)
+    predictions = build_predictions()
     initial_columns = list(predictions.columns)
 
     if navigation_page == PAGE_PREDICTIONS:

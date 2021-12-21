@@ -6,7 +6,7 @@ import os
 
 import requests
 
-from nba_mvp_predictor import conf
+from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import load, evaluate
 
 
@@ -16,7 +16,7 @@ def get_artifacts():
     Returns:
         dict: Dictionnaire d'artifacts
     """
-    github_repo = conf.web.projet_github
+    github_repo = conf.web.github_repo
     url = f"https://api.github.com/repos/{github_repo}/actions/artifacts"
     artifacts = load_json_from_url(url)
     return artifacts
@@ -59,13 +59,13 @@ def get_last_artifact(artifact_name: str):
     """
     artifacts = get_artifacts()
     num_artifacts = artifacts.get("total_count")
-    logging.debug(f"{num_artifacts} artifacts disponibles sur le projet")
+    logger.debug(f"{num_artifacts} artifacts disponibles sur le projet")
     artifacts = [
         a
         for a in artifacts.get("artifacts")
         if a.get("name") == artifact_name and a.get("expired") == False
     ]
-    logging.debug(f"{len(artifacts)} artifacts ayant pour nom {artifact_name}")
+    logger.debug(f"{len(artifacts)} artifacts ayant pour nom {artifact_name}")
     results = dict()
     for artifact in artifacts:
         artifact_datetime = artifact.get("created_at")
@@ -73,5 +73,5 @@ def get_last_artifact(artifact_name: str):
         artifact_datetime = datetime.strptime(artifact_datetime, "%Y-%m-%dT%H:%M:%SZ")
         results[artifact_datetime] = artifact_url
     last_result = sorted(results.items(), reverse=True)[0]
-    logging.debug(f"Dernier artifact disponible : {last_result}")
+    logger.debug(f"Dernier artifact disponible : {last_result}")
     return last_result
