@@ -33,7 +33,7 @@ jobs:
           path: ./data/
       - name: Run the CLI command to download data for season 2022
         run: |
-          pipenv run python . download --season 2022
+          pipenv run python . download --season 2021 2022
       - name: Run the CLI command to predict model
         run: |
           pipenv run python . predict
