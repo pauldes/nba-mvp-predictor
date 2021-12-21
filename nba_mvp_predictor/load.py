@@ -81,6 +81,7 @@ def load_gold_data(nrows: int = None):
         nrows=nrows,
     )
 
+
 def load_predictions(nrows: int = None):
     return pandas.read_csv(
         conf.data.predictions.path,
@@ -89,8 +90,9 @@ def load_predictions(nrows: int = None):
         compression=conf.data.predictions.compression,
         index_col=0,
         nrows=nrows,
-        dtype={}
+        dtype={},
     )
+
 
 def load_history(nrows: int = None):
     return pandas.read_csv(
@@ -100,10 +102,13 @@ def load_history(nrows: int = None):
         compression=conf.data.history.compression,
         index_col=False,
         nrows=nrows,
-        dtype={}
+        dtype={},
     )
 
+
 def load_features():
-    with open(conf.data.features.path, encoding=conf.data.features.encoding) as json_file:
+    with open(
+        conf.data.features.path, encoding=conf.data.features.encoding
+    ) as json_file:
         features_dict = json.load(json_file)
     return features_dict

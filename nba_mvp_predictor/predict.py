@@ -30,7 +30,7 @@ def load_model_make_predictions(max_n=50):
     data.loc[:, "PRED"] = predictions
     data.loc[:, "PRED_RANK"] = data["PRED"].rank(ascending=False)
     data = data.sort_values(by="PRED", ascending=False).head(max_n)
-    data = data[data["PRED"]>0.0]
+    data = data[data["PRED"] > 0.0]
     data.to_csv(
         conf.data.predictions.path,
         sep=conf.data.predictions.sep,
@@ -45,7 +45,7 @@ def load_model_make_predictions(max_n=50):
         history = pandas.DataFrame(columns=["DATE", "PLAYER", "PRED"])
         logger.warning(f"No history found")
     today = datetime.now().date().strftime("%d-%m-%Y")
-    #if today in history
+    # if today in history
     data["DATE"] = today
     data = data[["DATE", "PLAYER", "PRED"]]
     if today in history.DATE.unique():
@@ -63,8 +63,8 @@ def load_model_make_predictions(max_n=50):
 
 def make_predictions():
     try:
-        #train.make_bronze_data()
-        #train.make_silver_data()
+        # train.make_bronze_data()
+        # train.make_silver_data()
         load_model_make_predictions()
     except Exception as e:
         logger.error(f"Predicting failed : {e}")

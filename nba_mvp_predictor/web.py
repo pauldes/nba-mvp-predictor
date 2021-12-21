@@ -12,11 +12,15 @@ PAGE_PERFORMANCE = "Model performance analysis"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
 
+
 def build_history():
     history = load.load_history()
-    history = history.rename(columns={"DATE":"date", "PLAYER":"player", "PRED":"prediction"})
+    history = history.rename(
+        columns={"DATE": "date", "PLAYER": "player", "PRED": "prediction"}
+    )
     history.date = pandas.to_datetime(history.date, format="%d-%m-%Y")
     return history
+
 
 def prepare_history(stats, keep_top_n, confidence_mode, compute_probs_based_on_top_n):
     keep_players = stats.sort_values(by=["date", "prediction"], ascending=False)[
@@ -40,6 +44,7 @@ def prepare_history(stats, keep_top_n, confidence_mode, compute_probs_based_on_t
     stats = stats.fillna(0.0)
     return stats
 
+
 def run():
     st.set_page_config(
         page_title=conf.web.tab_title,
@@ -52,12 +57,14 @@ def run():
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
     st.markdown(
-    f"""
+        f"""
     *Predicting the NBA Most Valuable Player for the {current_season-1}-{str(current_season)[-2:]} season using machine learning.*
     """
     )
 
-    navigation_page = st.sidebar.radio("Navigate to", [PAGE_PREDICTIONS, PAGE_PERFORMANCE])
+    navigation_page = st.sidebar.radio(
+        "Navigate to", [PAGE_PREDICTIONS, PAGE_PERFORMANCE]
+    )
     st.sidebar.markdown(conf.web.sidebar_top_text)
     st.sidebar.markdown(conf.web.sidebar_bottom_text)
 
@@ -88,7 +95,9 @@ def run():
                 predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
             ] = (
                 evaluate.softmax(
-                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n]["PRED"]
+                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
+                        "PRED"
+                    ]
                 )
                 * 100
             )
@@ -97,14 +106,18 @@ def run():
                 predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
             ] = (
                 evaluate.share(
-                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n]["PRED"]
+                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
+                        "PRED"
+                    ]
                 )
                 * 100
             )
         predictions.loc[
             predictions.PRED_RANK > compute_probs_based_on_top_n, "MVP probability"
         ] = 0.0
-        predictions["MVP probability"] = predictions["MVP probability"].map("{:,.2f}%".format)
+        predictions["MVP probability"] = predictions["MVP probability"].map(
+            "{:,.2f}%".format
+        )
         predictions["MVP rank"] = predictions["PRED_RANK"]
         show_columns = ["MVP probability", "MVP rank"] + initial_columns[:]
         predictions = predictions[show_columns]
