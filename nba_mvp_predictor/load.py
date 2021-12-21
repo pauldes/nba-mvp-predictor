@@ -14,6 +14,7 @@ def load_model():
     """
     return joblib.load(conf.data.model.path)
 
+
 def load_player_stats(nrows: int = None):
     return pandas.read_csv(
         conf.data.player_stats.path,
@@ -46,6 +47,7 @@ def load_team_standings(nrows: int = None):
         nrows=nrows,
     )
 
+
 def load_bronze_data(nrows: int = None):
     return pandas.read_csv(
         conf.data.bronze.path,
@@ -56,6 +58,7 @@ def load_bronze_data(nrows: int = None):
         nrows=nrows,
     )
 
+
 def load_silver_data(nrows: int = None):
     return pandas.read_csv(
         conf.data.silver.path,
@@ -65,6 +68,7 @@ def load_silver_data(nrows: int = None):
         index_col=0,
         nrows=nrows,
     )
+
 
 def load_gold_data(nrows: int = None):
     return pandas.read_csv(
