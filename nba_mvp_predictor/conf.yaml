@@ -36,9 +36,10 @@ data:
     sep: ;
     encoding: utf-8
   history:
-    path: data/history.csv
+    path: data/history.csv.zip
     sep: ;
     encoding: utf-8
+    compression: zip
   features:
     path: data/features.json
     indent: 4
