@@ -45,8 +45,8 @@ data:
     encoding: utf-8
 
 web:
-  tab-title: Predicting the MVP
-  page-title: "🏀 Predicting the MVP"
+  tab-title: "The MVP Predict🏀r"
+  page-title: "The MVP Predict🏀r"
   github-repo: pauldes/nba-mvp-predictor
   sidebar-top-text: >
     **How does it work ?**
