@@ -4,7 +4,7 @@ import streamlit as st
 import pandas
 
 from nba_mvp_predictor import conf
-from nba_mvp_predictor import load, evaluate
+from nba_mvp_predictor import load, evaluate, artifacts
 
 # Constants
 PAGE_PREDICTIONS = "Current year predictions"
@@ -14,6 +14,8 @@ CONFIDENCE_MODE_SHARE = "Share-based"
 
 
 def build_history():
+    artifact = artifacts.get_last_artifact("history.csv.zip")
+    print(artifact)
     history = load.load_history()
     history = history.rename(
         columns={"DATE": "date", "PLAYER": "player", "PRED": "prediction"}

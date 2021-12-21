@@ -1,5 +1,7 @@
 from typing import List
 
+import requests
+
 from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import scrappers
 
@@ -66,3 +68,28 @@ def download_team_standings(seasons: List[int], scrapper: scrappers.Scrapper):
         compression=conf.data.team_standings.compression,
         index=True,
     )
+
+def download_data_from_url_to_file(
+    url: str, path: str, stream: bool = True, auth=None, headers=None
+):
+    """Télécharge un fichier de données depuis une URL.
+
+    Args:
+        url (str): URL du fichier à télécharger
+        path (str): Chemin vers un fichier local
+        stream (bool, optional): Si la donnée doit être streamée (recommandé pour les fichiers volumineux). Defaults to True.
+    """
+    response = requests.get(
+        url,
+        allow_redirects=True,
+        verify=True,
+        stream=stream,
+        auth=auth,
+        headers=headers,
+    )
+    with open(path, "wb") as file_writer:
+        if stream:
+            for chunk in response.iter_content(chunk_size=4096):
+                file_writer.write(chunk)
+        else:
+            file_writer.write(response.content)

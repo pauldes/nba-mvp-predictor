@@ -63,8 +63,8 @@ def load_model_make_predictions(max_n=50):
 
 def make_predictions():
     try:
-        # train.make_bronze_data()
-        # train.make_silver_data()
+        train.make_bronze_data()
+        train.make_silver_data()
         load_model_make_predictions()
     except Exception as e:
         logger.error(f"Predicting failed : {e}")
