@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup timezone to Europe/Paris
-        uses: actions/download-artifact@v2
+        uses: blablacar/action-download-last-artifact@master
         with:
           name: features.json
           path: features.json
@@ -15,3 +15,5 @@ jobs:
           ls
           cat features.json
           ls -R
+      - name: Display structure of downloaded files
+        run: ls -R
