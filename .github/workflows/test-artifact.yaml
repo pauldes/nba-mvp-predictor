@@ -1,0 +1,16 @@
+name: test-artifact
+on:
+  workflow_dispatch: # Allow for manual trigger from github.com
+jobs:
+  download-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup timezone to Europe/Paris
+        uses: actions/download-artifact@v2
+        with:
+          name: features.json
+          path: features.json
+      - name: Run the CLI command to train model
+        run: |
+          ls
+          cat features.json

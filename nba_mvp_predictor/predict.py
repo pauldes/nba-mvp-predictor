@@ -15,7 +15,7 @@ def load_model_make_predictions(top_n=50):
     )
     logger.debug(f"Current season : {current_season}")
     data = data[data.SEASON == current_season]
-
+    #TODO get features from artifact
     with open("data/features.json") as json_file:
         features_dict = json.load(json_file)
     # TODO get automatically from training step.. or keep all
