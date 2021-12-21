@@ -6,6 +6,7 @@ from nba_mvp_predictor import load, preprocess, train
 
 
 def load_model_make_predictions(top_n=50):
+    #TODO load model from artifact
     model = load.load_model()
     data = load.load_silver_data()
     data = data.fillna(0.0)
