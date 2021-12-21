@@ -1,4 +1,4 @@
-name: run
+name: predict
 on:
   schedule:
     - cron:  '0 10 * * *' # Everyday at 10

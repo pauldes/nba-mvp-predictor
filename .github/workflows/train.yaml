@@ -1,4 +1,4 @@
-name: run
+name: train
 on:
   schedule:
     - cron:  '0 8 1 * *' # Every 1st day of the month at 8
