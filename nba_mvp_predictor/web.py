@@ -129,8 +129,7 @@ def run():
             title_level = "###" + n * "#"
             col1.markdown(
                 f"""
-            #### {emojis[n]} **{player_name}**
-
+            ##### {emojis[n]} **{player_name}**
             *{top_3[player_name]} chance to win MVP*
             """
             )

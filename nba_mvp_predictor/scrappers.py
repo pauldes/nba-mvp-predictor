@@ -153,7 +153,8 @@ class BasketballReferenceScrapper(Scrapper):
             data.columns = [str(col).upper() for col in data.columns]
             data.loc[:, "SEASON"] = season
             data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
-                "[^A-Za-z]", "", regex=True
+                #"[^-'a-zA-ZÀ-ÿ]", "", regex=True
+                "[ _'.]", "", regex=True
             )
             data = data.rename(columns={"TM": "TEAM"})
             data = data.drop("RK", axis="columns")
