@@ -26,9 +26,9 @@ There is only 1 MVP per year, among hundreds of players.
 Solutions :
 - Use MVP share instead of MVP award as the target variable (regression model). A dozen of players receive votes each season.
 - Use generally accepted tresholds to filter non-MVP players and reduce the imbalance : 
-  - More than 40% of the season games played
-  - More than 20 minutes played per game
-  - Team ranked in the conference top-8 (playoff qualifier)
+  - More than 50% of the season games played
+  - More than 24 minutes played per game
+  - Team ranked in the conference top-10 (play-in qualifier)
 
 #### Label consistency
 
@@ -47,7 +47,7 @@ Solutions :
 - Add top performances or statement games as a feature
 - The current model output may be a negative number. This is impossible in real life, since the prediction is an MVP share. Could we leverage on this information to force the model to output non-negative numbers ?
 - Feature impacts (SHAP values) may not be reliable for categorical variables (as demonstrated [here](https://arxiv.org/pdf/2103.13342.pdf) and [here](https://arxiv.org/pdf/1909.08128.pdf)).
-- Work on that off-the-dribble mid-range pull-up jumper
+- Work on that off-the-dribble pull-up jumper
 
 ## Tools and main libraries
 
