@@ -74,7 +74,8 @@ class BasketballReferenceScrapper(Scrapper):
             data = data.rename(columns={"TM": "TEAM"})
             data = data[["PLAYER", "TEAM", "SEASON", "MVP_VOTES_SHARE", "RANK"]]
             data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
-                "[^A-Za-z]", "", regex=True
+                #"[^A-Za-z]", "", regex=True
+                "[a-zA-Z\u00C0-\u00FF]", "", regex=True
             )
             data.loc[:, "MVP_WINNER"] = False
             data["RANK"] = (
@@ -154,7 +155,7 @@ class BasketballReferenceScrapper(Scrapper):
             data.loc[:, "SEASON"] = season
             data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
                 #"[^-'a-zA-ZÀ-ÿ]", "", regex=True
-                "[ _'.]", "", regex=True
+                "[ _'.*]", "", regex=True
             )
             data = data.rename(columns={"TM": "TEAM"})
             data = data.drop("RK", axis="columns")
