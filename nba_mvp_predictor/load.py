@@ -92,10 +92,16 @@ def load_predictions(nrows: int = None):
         dtype={}
     )
 
-def load_history():
-    with open(conf.data.history.path, encoding=conf.data.history.encoding) as json_file:
-        history_dict = json.load(json_file)
-    return history_dict
+def load_history(nrows: int = None):
+    return pandas.read_csv(
+        conf.data.history.path,
+        sep=conf.data.history.sep,
+        encoding=conf.data.history.encoding,
+        compression=conf.data.history.compression,
+        index_col=False,
+        nrows=nrows,
+        dtype={}
+    )
 
 def load_features():
     with open(conf.data.features.path, encoding=conf.data.features.encoding) as json_file:

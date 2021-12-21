@@ -1,6 +1,8 @@
 from datetime import datetime
 import json
 
+import pandas
+
 from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import load, preprocess, train
 
@@ -38,15 +40,25 @@ def load_model_make_predictions(max_n=50):
     )
     try:
         history = load.load_history()
-        logger.debug(f"History found - {len(history)} entries")
+        logger.debug(f"History found - {history.DATE.nunique()} entries")
     except FileNotFoundError as e:
-        history = {}
+        history = pandas.DataFrame(columns=["DATE", "PLAYER", "PRED"])
         logger.warning(f"No history found")
-    history_entry = data["PRED"].to_dict()
     today = datetime.now().date().strftime("%d-%m-%Y")
-    history[today] = history_entry
-    with open(conf.data.history.path, "w", encoding=conf.data.history.encoding) as outfile:
-        json.dump(history, outfile, indent=conf.data.history.indent)
+    #if today in history
+    data["DATE"] = today
+    data = data[["DATE", "PLAYER", "PRED"]]
+    if today in history.DATE.unique():
+        logger.warning("Predictions already made for today")
+    else:
+        history = history.append(data, ignore_index=True)
+        history.to_csv(
+            conf.data.history.path,
+            sep=conf.data.history.sep,
+            encoding=conf.data.history.encoding,
+            compression=conf.data.history.compression,
+            index=False,
+        )
 
 
 def make_predictions():
