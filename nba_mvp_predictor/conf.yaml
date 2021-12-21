@@ -27,9 +27,10 @@ data:
     encoding: utf-8
     compression: zip
   gold:
-    path: data/gold.csv
+    path: data/gold.csv.zip
     sep: ;
     encoding: utf-8
+    compression: zip
   predictions:
     path: data/predictions.csv
     sep: ;
