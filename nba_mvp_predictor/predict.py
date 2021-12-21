@@ -6,7 +6,6 @@ from nba_mvp_predictor import load, preprocess, train
 
 
 def load_model_make_predictions(top_n=50):
-    #TODO load model from artifact
     model = load.load_model()
     data = load.load_silver_data()
     data = data.fillna(0.0)
@@ -15,14 +14,10 @@ def load_model_make_predictions(top_n=50):
     )
     logger.debug(f"Current season : {current_season}")
     data = data[data.SEASON == current_season]
-    #TODO get features from artifact
     with open("data/features.json") as json_file:
         features_dict = json.load(json_file)
-    # TODO get automatically from training step.. or keep all
     cat = features_dict["cat"]
-    # TODO get automatically from training step.. or keep all
     num = features_dict["num"]
-    # TODO get automatically from training step
     features = features_dict["model"]
     min_max_scaling = False
     data_processed_features_only, _ = preprocess.scale_per_value_of(
