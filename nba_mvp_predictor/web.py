@@ -220,11 +220,17 @@ def run():
                     },
                     "y": {
                         "field": "player",
-                        "type": "ordinal",
+                        "type": "nominal",
                         "title": None,
                         "sort": "-x"
                     },
-                    #"color": {"field": "player", "type": "nominal"},
+                    "color": {
+                        "field": "chance",
+                        "type": "quantitative",
+                        "title":None,
+                        "legend":None,
+                        "scale": {"scheme": "purplebluegreen"},
+                    },
                 },
             },
             height=350,
@@ -262,7 +268,11 @@ def run():
                     "tooltip": True,
                 },
                 "encoding": {
-                    "x": {"timeUnit": "yearmonthdate", "field": "date"},
+                    "x": {
+                        "timeUnit": "yearmonthdate",
+                        "field": "date",
+                        "title":"Date"
+                    },
                     "y": {
                         "field": variable_to_draw_dict[variable_to_draw],
                         "type": "quantitative",
