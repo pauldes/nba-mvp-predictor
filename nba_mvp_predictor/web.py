@@ -12,9 +12,9 @@ PAGE_PERFORMANCE = "Model performance analysis"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
 
-
+@st.cache(ttl=3600) #1h cache
 def build_predictions():
-    date, url = cached__get_last_artifact("predictions.csv")
+    date, url = artifacts.get_last_artifact("predictions.csv")
     logger.debug(f"Downloading history from {url}")
     download.download_data_from_url_to_file(url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth())
     predictions = pandas.read_csv(
@@ -32,8 +32,9 @@ def build_predictions():
 def cached__get_last_artifact(artifact_name):
     return artifacts.get_last_artifact(artifact_name)
 
+@st.cache(ttl=3600) #1h cache
 def build_history():
-    date, url = cached__get_last_artifact("history.csv")
+    date, url = artifacts.get_last_artifact("history.csv")
     logger.debug(f"Downloading history from {url}")
     download.download_data_from_url_to_file(url, "./data/history-artifact.csv.zip", auth=artifacts.get_github_auth())
     history = pandas.read_csv(
