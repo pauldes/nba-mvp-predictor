@@ -39,3 +39,9 @@ jobs:
           name: features.json
           path: ./data/features.json
           retention-days: 90
+      - name: Upload model performances as artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: performances.csv
+          path: ./data/performances.csv
+          retention-days: 90

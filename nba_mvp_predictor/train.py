@@ -237,7 +237,7 @@ def make_gold_data_and_train_model():
         + selected_features_spearman
     )
     selected_features = list(set(selected_features))
-    print("Selected features :", len(selected_features))
+    logger.debug(f"Selected features : {len(selected_features)}")
 
     selected_features = [
         f for f in selected_features if data_trainval[f].isna().sum() == 0
@@ -251,8 +251,6 @@ def make_gold_data_and_train_model():
 
     X_all = data_all[selected_features + selected_cat_features_numerized]
     y_all = data_all[target]
-
-    print("'" + "', '".join(selected_features + selected_cat_features_numerized) + "'")
 
     features_dict = {
         "cat": selected_cat_features,
@@ -275,6 +273,8 @@ def make_gold_data_and_train_model():
     splitter = model_selection.RepeatedKFold(
         n_splits=splits, n_repeats=repeats, random_state=666
     )
+
+    logger.debug("Fitting model...")
 
     for step, regressor in enumerate(regressors):
         regressor_name = str(regressor.__class__.__name__)
@@ -354,13 +354,9 @@ def make_gold_data_and_train_model():
 
         # mlflow.end_run()
 
-    results = y_val.rename("TRUTH").to_frame()
-    results.loc[:, "PRED"] = y_pred
-    results.loc[:, "AE"] = (results["TRUTH"] - results["PRED"]).abs()
-    # results = results.merge(X_trainval, left_index=True, right_index=True)
-    results = results.sort_values(by=["AE", "TRUTH"], ascending=False)
-    print(results.head(10))
+    logger.debug("Performing test seasons analysis...")
 
+    """
     regressor.fit(X_trainval, y_trainval)
     y_pred_test = regressor.predict(X_test)
     results = y_test.rename("TRUTH").to_frame()
@@ -389,6 +385,55 @@ def make_gold_data_and_train_model():
     print((winners["Pred. MVP"] == winners["True MVP"]).sum() / len(winners))
     print("Rang réel moyen du MVP prédit:")
     print((winners["REAL_RANK"]).mean())
+    """
+
+    logger.debug("Performing all season analysis...")
+    all_winners = pandas.DataFrame()
+    for season in data_all.SEASON.unique():
+        logger.debug(f"Season {season}")
+        data_all_train = data_all[data_all.SEASON != season]
+        data_all_test = data_all[data_all.SEASON == season]
+        X_all_train = data_all_train[selected_features + selected_cat_features_numerized]
+        y_all_train = data_all_train[target]
+        X_all_test = data_all_test[selected_features + selected_cat_features_numerized]
+        y_all_test = data_all_test[target]
+        regressor.fit(X_all_train, y_all_train)
+        y_pred_all_test = regressor.predict(X_all_test)
+
+        results = y_all_test.rename("TRUTH").to_frame()
+        results.loc[:, "PRED"] = y_pred_all_test
+        results.loc[:, "AE"] = (results["TRUTH"] - results["PRED"]).abs()
+        results = results.merge(data_all_test[["SEASON"]], left_index=True, right_index=True)
+        real_winners = data_all_test.sort_values(by=target, ascending=False).drop_duplicates(
+            subset=["SEASON"], keep="first"
+        )[["SEASON"]]
+        real_winners["True MVP"] = real_winners.index
+        real_winners = real_winners.set_index("SEASON", drop=True)
+        winners = results.sort_values(by="PRED", ascending=False).drop_duplicates(
+            subset=["SEASON"], keep="first"
+        )
+        winners["Pred. MVP"] = winners.index
+        winners = winners.set_index("SEASON", drop=True)
+        winners = winners.merge(real_winners, left_index=True, right_index=True)
+        winners.loc[:, "REAL_RANK"] = winners["Pred. MVP"].map(ranks_reference)
+        winners = winners.sort_index(ascending=True)
+        all_winners = all_winners.append(winners)
+    print(numpy.mean(results.AE))
+    print(results.AE.max())
+    print(numpy.mean(results.AE ** 2))
+    all_winners["Real MVP rank"] = 1
+    print("Pourcentage de MVP bien trouvé sur le jeu de test :")
+    print((all_winners["Pred. MVP"] == all_winners["True MVP"]).sum() / len(all_winners))
+    print("Rang réel moyen du MVP prédit:")
+    print((all_winners["REAL_RANK"]).mean())
+    all_winners.to_csv(
+        conf.data.performances.path,
+        sep=conf.data.performances.sep,
+        encoding=conf.data.performances.encoding,
+        compression=conf.data.performances.compression,
+        index=True,
+    )
+
     regressor.fit(X_all, y_all)
     joblib.dump(regressor, conf.data.model.path)
 
