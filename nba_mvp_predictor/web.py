@@ -12,6 +12,8 @@ PAGE_PERFORMANCE = "Model performance analysis"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
 
+pandas.set_option("display.precision", 2)
+
 def build_predictions():
     predictions = pandas.read_csv(
         "./data/predictions-artifact.csv.zip",
