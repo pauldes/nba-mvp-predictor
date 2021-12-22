@@ -164,7 +164,7 @@ def run():
 
         st.subheader(f"Predicted top {show_top_n}")
 
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([2,3])
         col2.markdown("**Player statistics**")
         col2.dataframe(
             data=predictions.head(show_top_n), width=None, height=300,
