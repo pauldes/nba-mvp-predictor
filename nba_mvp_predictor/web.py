@@ -192,7 +192,7 @@ def run():
                     "y": {
                         "field": "player",
                         "type": "ordinal",
-                        "title": "Player",
+                        "title": None,
                         "sort": "-x"
                     },
                     #"color": {"field": "player", "type": "nominal"},
