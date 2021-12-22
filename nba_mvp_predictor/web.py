@@ -192,9 +192,10 @@ def run():
         st.subheader(f"Predicted top {show_top_n}")
 
         col1, col2 = st.columns([2,3])
-        col2.markdown("Player statistics")
+        #col2.markdown("Player statistics")
+        cols = [col for col in predictions.columns if "MVP" not in col and "PRED" not in col]
         col2.dataframe(
-            data=predictions.head(show_top_n), width=None, height=300,
+            data=predictions.head(show_top_n)[cols], width=None, height=300,
         )
         
         barchart_data = predictions.head(show_top_n).copy()
@@ -202,7 +203,7 @@ def run():
         barchart_data["chance"] = barchart_data["MVP probability"].str[:-1]
         barchart_data["chance"] = pandas.to_numeric(barchart_data["chance"])
 
-        col1.markdown("Chart")
+        #col1.markdown("Chart")
         col1.vega_lite_chart(
             barchart_data,
             {
@@ -226,7 +227,7 @@ def run():
                     #"color": {"field": "player", "type": "nominal"},
                 },
             },
-            height=300,
+            height=350,
             use_container_width=True,
         )
 
