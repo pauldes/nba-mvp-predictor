@@ -31,12 +31,6 @@ jobs:
         with:
           name: features.json
           path: ./data/
-      - name: Download testfile from artifact
-        uses: blablacar/action-download-last-artifact@master
-        continue-on-error: true
-        with:
-          name: testfile_notexisting.csv
-          path: ./data/
       - name: Download history from artifact
         uses: blablacar/action-download-last-artifact@master
         continue-on-error: true
