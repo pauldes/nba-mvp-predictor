@@ -191,7 +191,7 @@ def run():
 
         st.subheader(f"Predicted top {show_top_n}")
 
-        col1, col2 = st.columns([2,3])
+        col1, col2 = st.columns()
         #col2.markdown("Player statistics")
         cols = [col for col in predictions.columns if "MVP" not in col and "PRED" not in col]
         col2.dataframe(
