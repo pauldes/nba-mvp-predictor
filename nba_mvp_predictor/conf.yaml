@@ -45,7 +45,7 @@ data:
     encoding: utf-8
 
 web:
-  tab-title: "The MVP Predict🏀r"
+  tab-title: "The MVP Predictor"
   page-title: "The MVP Predict🏀r"
   github-repo: pauldes/nba-mvp-predictor
   sidebar-top-text: >
