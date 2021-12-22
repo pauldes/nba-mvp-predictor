@@ -1,10 +1,12 @@
 from datetime import datetime
+import os
+import re
 
 import streamlit as st
 import pandas
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, evaluate, artifacts, download
+from nba_mvp_predictor import load, evaluate, artifacts, download, analytics
 
 # Constants
 PAGE_PREDICTIONS = "Current year predictions"
@@ -77,6 +79,17 @@ def prepare_history(stats, keep_top_n, confidence_mode, compute_probs_based_on_t
     stats = stats.fillna(0.0)
     return stats
 
+#@st.cache
+def inject_google_analytics_tag():
+    index_path = os.path.dirname(st.__file__)+'/static/index.html'
+    code = analytics.get_google_analytic_code()
+    with open(index_path, 'r') as f:
+        data = f.read()
+        if len(re.findall('G-', data))==0:
+            with open(index_path, 'w') as ff:
+                newdata = re.sub('<head>','<head>' + code, data)
+                ff.write(newdata)
+
 
 def run():
     st.set_page_config(
@@ -86,6 +99,7 @@ def run():
         initial_sidebar_state="auto",
     )
     st.title(conf.web.page_title)
+    inject_google_analytics_tag()
     current_season = (
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
