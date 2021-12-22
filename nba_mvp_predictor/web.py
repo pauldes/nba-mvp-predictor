@@ -109,8 +109,8 @@ def run():
         )
         compute_probs_based_on_top_n = col2.slider(
             "Number of players used to estimate probability",
-            min_value=5,
-            max_value=50,
+            min_value=3,
+            max_value=20,
             value=10,
             step=5,
         )
