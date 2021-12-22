@@ -79,6 +79,10 @@ def prepare_history(stats, keep_top_n, confidence_mode, compute_probs_based_on_t
     stats = stats.fillna(0.0)
     return stats
 
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
+
 #@st.cache
 def inject_google_analytics_tag():
     index_path = os.path.dirname(st.__file__)+'/static/index.html'
@@ -100,6 +104,7 @@ def run():
     )
     st.title(conf.web.page_title)
     inject_google_analytics_tag()
+    local_css("./nba_mvp_predictor/custom.css")
     current_season = (
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
@@ -187,7 +192,7 @@ def run():
         st.subheader(f"Predicted top {show_top_n}")
 
         col1, col2 = st.columns([2,3])
-        col2.markdown("**Player statistics**")
+        col2.markdown("Player statistics")
         col2.dataframe(
             data=predictions.head(show_top_n), width=None, height=300,
         )
@@ -197,6 +202,7 @@ def run():
         barchart_data["chance"] = barchart_data["MVP probability"].str[:-1]
         barchart_data["chance"] = pandas.to_numeric(barchart_data["chance"])
 
+        col1.markdown("Chart")
         col1.vega_lite_chart(
             barchart_data,
             {
@@ -220,7 +226,7 @@ def run():
                     #"color": {"field": "player", "type": "nominal"},
                 },
             },
-            height=400,
+            height=300,
             use_container_width=True,
         )
 
