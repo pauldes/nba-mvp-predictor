@@ -31,6 +31,16 @@ jobs:
         with:
           name: features.json
           path: ./data/
+      - name: Download testfile from artifact
+        uses: blablacar/action-download-last-artifact@master
+        with:
+          name: testfile_notexisting.csv
+          path: ./data/
+      - name: Download history from artifact
+        uses: blablacar/action-download-last-artifact@master
+        with:
+          name: history.csv
+          path: ./data/
       - name: Run the CLI command to download data for season 2022
         run: |
           pipenv run python . download --season 2021 2022
