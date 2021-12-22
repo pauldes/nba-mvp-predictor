@@ -158,9 +158,48 @@ def run():
             """
             )
 
-        st.subheader(f"Predicted top {compute_probs_based_on_top_n}")
-        st.dataframe(
-            data=predictions.head(compute_probs_based_on_top_n), width=None, height=None
+
+        #show_top_n = compute_probs_based_on_top_n
+        show_top_n = 10
+
+        st.subheader(f"Predicted top {show_top_n}")
+
+        col1, col2 = st.columns(2)
+        col2.markdown("**Player statistics**")
+        col2.dataframe(
+            data=predictions.head(show_top_n), width=None, height=300,
+        )
+        
+        barchart_data = predictions.head(show_top_n).copy()
+        barchart_data["player"] = barchart_data.index
+        barchart_data["chance"] = barchart_data["MVP probability"].str[:-1]
+        barchart_data["chance"] = pandas.to_numeric(barchart_data["chance"])
+
+        col1.vega_lite_chart(
+            barchart_data,
+            {
+                "mark": {
+                    "type": "bar",
+                    "point": True,
+                    "tooltip": True,
+                },
+                "encoding": {
+                    "x": {
+                        "field": "chance",
+                        "type": "quantitative",
+                        "title":" MVP chance (%)",
+                    },
+                    "y": {
+                        "field": "player",
+                        "type": "ordinal",
+                        "title": "Player",
+                        "sort": "-x"
+                    },
+                    #"color": {"field": "player", "type": "nominal"},
+                },
+            },
+            height=400,
+            use_container_width=True,
         )
 
         st.subheader("Predictions history")
