@@ -66,8 +66,10 @@ def build_performances():
             "TRUTH": "True award share"
         }
     )
-    performances = performances[["True MVP", "Predicted MVP", "True rank of predicted MVP", "Predicted rank of true MVP"]]
     performances = performances.sort_index(ascending=False)
+    performances.loc[performances["True MVP"]==performances["Predicted MVP"], "Model is right"] = "✔️" #"☑️"
+    performances.loc[performances["True MVP"]!=performances["Predicted MVP"], "Model is right"] = "❌"
+    performances = performances[["True MVP", "Model is right", "Predicted MVP", "True rank of predicted MVP", "Predicted rank of true MVP"]]
     return performances
 
 @st.cache(ttl=3600) #1h cache
