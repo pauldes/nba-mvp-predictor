@@ -132,7 +132,7 @@ def make_gold_data_and_train_model():
     for season in data.SEASON.unique():
         data.loc[data.SEASON == season, "MVP_RANK"] = data[data.SEASON == season][
             "MVP_VOTES_SHARE"
-        ].rank(ascending=False, method="average")
+        ].rank(ascending=False, method="min")
     ranks_reference = data.MVP_RANK.copy()
     not_features.append("MVP_RANK")
 
@@ -412,12 +412,15 @@ def make_gold_data_and_train_model():
         winners = results.sort_values(by="PRED", ascending=False).drop_duplicates(
             subset=["SEASON"], keep="first"
         )
+        predicted_ranks_reference = results.PRED.rank(ascending=False, method="min")
         winners["Pred. MVP"] = winners.index
         winners = winners.set_index("SEASON", drop=True)
         winners = winners.merge(real_winners, left_index=True, right_index=True)
         winners.loc[:, "REAL_RANK"] = winners["Pred. MVP"].map(ranks_reference)
+        winners.loc[:, "PRED_RANK"] = winners["True MVP"].map(predicted_ranks_reference)
         winners = winners.sort_index(ascending=True)
         all_winners = all_winners.append(winners)
+    
     print(numpy.mean(results.AE))
     print(results.AE.max())
     print(numpy.mean(results.AE ** 2))
