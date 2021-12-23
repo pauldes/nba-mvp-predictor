@@ -278,7 +278,11 @@ def run():
                         "type": "quantitative",
                         "title": variable_to_draw,
                     },
-                    "color": {"field": "player", "type": "nominal"},
+                    "color": {
+                        "field": "player",
+                        "type": "nominal",
+                        "scale": {"scheme": "category20"},
+                        },
                 },
             },
             height=400,
