@@ -105,12 +105,16 @@ def run():
     st.title(conf.web.page_title)
     inject_google_analytics_tag()
     local_css("./nba_mvp_predictor/custom.css")
+    predictions = build_predictions()
+    history = build_history()
     current_season = (
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
+    last_update = history.date.max().date()
     st.markdown(
         f"""
     *Predicting the NBA Most Valuable Player for the {current_season-1}-{str(current_season)[-2:]} season using machine learning.*
+    *Last update : {last_update}.*
     """
     )
 
@@ -120,7 +124,7 @@ def run():
     st.sidebar.markdown(conf.web.sidebar_top_text)
     st.sidebar.markdown(conf.web.sidebar_bottom_text)
 
-    predictions = build_predictions()
+    
     initial_columns = list(predictions.columns)
 
     if navigation_page == PAGE_PREDICTIONS:
@@ -253,7 +257,7 @@ def run():
         variable_to_draw = col1.radio(
             "Variable to draw", list(variable_to_draw_dict.keys())
         )
-        history = build_history()
+        
         prepared_history = prepare_history(
             history, keep_top_n, confidence_mode, compute_probs_based_on_top_n
         )
