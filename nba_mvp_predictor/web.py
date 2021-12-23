@@ -37,7 +37,11 @@ def mvp_found_pct(performances):
     return str(metrics) + " %"
 
 def avg_real_mvp_rank(performances):
-    metrics = (performances["Real rank of predicted MVP"]).mean()
+    metrics = (performances["True rank of predicted MVP"]).mean()
+    return "%.1f" % metrics
+
+def avg_pred_mvp_rank(performances):
+    metrics = (performances["Predicted rank of true MVP"]).mean()
     return "%.1f" % metrics
 
 def build_performances():
@@ -52,15 +56,17 @@ def build_performances():
     )
     performances.index = performances.index.rename("Season")
     performances.REAL_RANK = performances.REAL_RANK.astype("Int32")
+    performances.PRED_RANK = performances.PRED_RANK.astype("Int32")
     performances = performances.rename(
         columns={
             "Pred. MVP": "Predicted MVP",
-            "REAL_RANK": "Real rank of predicted MVP",
+            "REAL_RANK": "True rank of predicted MVP",
+            "PRED_RANK": "Predicted rank of true MVP",
             "PRED": "Predicted award share",
             "TRUTH": "True award share"
         }
     )
-    performances = performances[["True MVP", "Predicted MVP", "Real rank of predicted MVP"]]
+    performances = performances[["True MVP", "Predicted MVP", "True rank of predicted MVP", "Predicted rank of true MVP"]]
     performances = performances.sort_index(ascending=False)
     return performances
 
@@ -344,11 +350,14 @@ def run():
         percentage = mvp_found_pct(performances)
         num_test_seasons = len(performances)
         avg_real_rank = avg_real_mvp_rank(performances)
+        avg_pred_rank = avg_pred_mvp_rank(performances)
+
         col1.markdown(f"##### All {num_test_seasons} seasons ({performances.index.min()}-{performances.index.max()})")
         col1.markdown(
             f"""
         - **{percentage}** of MVPs correctly found
-        - Real MVP is ranked in average **{avg_real_rank}**
+        - True MVP average predicted rank is **{avg_real_rank}**
+        - Predicted MVP average true rank is **{avg_pred_rank}**
         """
         )
         #col2
@@ -356,11 +365,13 @@ def run():
         percentage = mvp_found_pct(performances_last10)
         num_test_seasons = len(performances_last10)
         avg_real_rank = avg_real_mvp_rank(performances_last10)
+        avg_pred_rank = avg_pred_mvp_rank(performances_last10)
         col2.markdown(f"##### Last {num_test_seasons} seasons ({performances_last10.index.min()}-{performances_last10.index.max()})")
         col2.markdown(
             f"""
         - **{percentage}** of MVPs correctly found
-        - Real MVP is ranked in average **{avg_real_rank}**
+        - True MVP average predicted rank is **{avg_real_rank}**
+        - Predicted MVP average true rank is **{avg_pred_rank}**
         """
         )
         # dataframe
