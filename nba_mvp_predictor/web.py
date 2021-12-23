@@ -17,6 +17,7 @@ CONFIDENCE_MODE_SHARE = "Share-based"
 pandas.set_option("display.precision", 2)
 
 def build_predictions():
+    download_predictions()
     predictions = pandas.read_csv(
         "./data/predictions-artifact.csv.zip",
         sep=conf.data.predictions.sep,
@@ -27,6 +28,48 @@ def build_predictions():
     )
     predictions = predictions.set_index("PLAYER", drop=True)
     return predictions
+
+def mvp_found_pct(performances):
+    metrics = (
+        performances["Predicted MVP"] == performances["True MVP"]
+    ).sum() / len(performances)
+    metrics = int(metrics * 100)
+    return str(metrics) + " %"
+
+def avg_real_mvp_rank(performances):
+    metrics = (performances["Real rank of predicted MVP"]).mean()
+    return "%.1f" % metrics
+
+def build_performances():
+    download_performances()
+    performances = pandas.read_csv(
+        "./data/performances-artifact.csv.zip",
+        sep=conf.data.performances.sep,
+        encoding=conf.data.performances.encoding,
+        compression="zip",
+        index_col=0,
+        dtype={},
+    )
+    performances.index = performances.index.rename("Season")
+    performances.REAL_RANK = performances.REAL_RANK.astype("Int32")
+    performances = performances.rename(
+        columns={
+            "Pred. MVP": "Predicted MVP",
+            "REAL_RANK": "Real rank of predicted MVP",
+            "PRED": "Predicted award share",
+            "TRUTH": "True award share"
+        }
+    )
+    performances = performances[["True MVP", "Predicted MVP", "Real rank of predicted MVP"]]
+    performances = performances.sort_index(ascending=False)
+    return performances
+
+@st.cache(ttl=3600) #1h cache
+def download_performances():
+    date, url = artifacts.get_last_artifact("performances.csv")
+    logger.debug(f"Downloading performances from {url}")
+    download.download_data_from_url_to_file(url, "./data/performances-artifact.csv.zip", auth=artifacts.get_github_auth())
+
 
 @st.cache(ttl=3600) #1h cache
 def download_predictions():
@@ -107,6 +150,7 @@ def run():
     local_css("./nba_mvp_predictor/custom.css")
     predictions = build_predictions()
     history = build_history()
+    performances = build_performances()
     current_season = (
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
@@ -295,4 +339,38 @@ def run():
 
     elif navigation_page == PAGE_PERFORMANCE:
         st.header("Model performance analysis")
-        st.warning("Work in progress")
+        col1, col2 = st.columns(2)
+        #col1
+        percentage = mvp_found_pct(performances)
+        num_test_seasons = len(performances)
+        avg_real_rank = avg_real_mvp_rank(performances)
+        col1.markdown(f"##### All {num_test_seasons} seasons ({performances.index.min()}-{performances.index.max()})")
+        col1.markdown(
+            f"""
+        - **{percentage}** of MVPs correctly found
+        - Real MVP is ranked in average **{avg_real_rank}**
+        """
+        )
+        #col2
+        performances_last10 = performances.head(10)
+        percentage = mvp_found_pct(performances_last10)
+        num_test_seasons = len(performances_last10)
+        avg_real_rank = avg_real_mvp_rank(performances_last10)
+        col2.markdown(f"##### Last {num_test_seasons} seasons ({performances_last10.index.min()}-{performances_last10.index.max()})")
+        col2.markdown(
+            f"""
+        - **{percentage}** of MVPs correctly found
+        - Real MVP is ranked in average **{avg_real_rank}**
+        """
+        )
+        # dataframe
+        #st.markdown(f"##### Details")
+        st.dataframe(data=performances, width=None, height=None)
+        st.markdown(
+        """
+        Predictions of the model are made on the unseen season using holdout.
+        """
+        )
+
+    else:
+        st.error("Unknown page selected.")
