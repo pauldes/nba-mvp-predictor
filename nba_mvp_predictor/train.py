@@ -426,6 +426,8 @@ def make_gold_data_and_train_model():
     print((all_winners["Pred. MVP"] == all_winners["True MVP"]).sum() / len(all_winners))
     print("Rang réel moyen du MVP prédit:")
     print((all_winners["REAL_RANK"]).mean())
+    all_winners["Pred. MVP"] = all_winners["Pred. MVP"].map(data_all["PLAYER"])
+    all_winners["True MVP"] = all_winners["True MVP"].map(data_all["PLAYER"])
     all_winners.to_csv(
         conf.data.performances.path,
         sep=conf.data.performances.sep,
