@@ -187,7 +187,7 @@ def run():
         col1.subheader("Predicted top 3")
         col2.subheader("Prediction parameters")
         confidence_mode = col2.radio(
-            "MVP probability estimation method",
+            "Method used to estimate MVP probability",
             [CONFIDENCE_MODE_SHARE, CONFIDENCE_MODE_SOFTMAX],
         )
         compute_probs_based_on_top_n = col2.slider(
@@ -237,7 +237,7 @@ def run():
             col1.markdown(
                 f"""
             ##### {emojis[n]} **{player_name}**
-            *{top_3[player_name]} chance to win MVP*
+            *{top_3[player_name]} probability to win MVP*
             """
             )
 
@@ -272,7 +272,7 @@ def run():
                     "x": {
                         "field": "chance",
                         "type": "quantitative",
-                        "title":" MVP chance (%)",
+                        "title":" MVP probability (%)",
                     },
                     "y": {
                         "field": "player",
@@ -303,7 +303,7 @@ def run():
             step=1,
         )
         variable_to_draw_dict = {
-            "MVP chance (%)": "chance",
+            "MVP probability (%)": "chance",
             "Predicted MVP share": "prediction",
         }
         variable_to_draw = col1.radio(
