@@ -1,7 +1,7 @@
 name: predict
 on:
   schedule:
-    - cron:  '0 7 * * *' # Everyday at 8UTC
+    - cron:  '0 7 * * *' # Everyday at 7UTC
     - cron:  '0 8 * * *' # Everyday at 8UTC
     - cron:  '0 9 * * *' # Everyday at 9UTC
     # For some reason blablacar/action-download-last-artifact may fail so we run at multiple times
