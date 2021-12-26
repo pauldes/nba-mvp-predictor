@@ -318,10 +318,10 @@ def run():
         )
         
         num_past_days = col3.slider(
-            "Number of days to show predictions for",
+            "Show history for last",
             min_value=max(int(history.days_ago.min()), 1),
             max_value=int(history.days_ago.max()),
-            value=min(int(history.days_ago.max()), 10),
+            value=min(int(history.days_ago.max()), 30),
             step=1,
             format="%d days"
         )
