@@ -338,6 +338,9 @@ def run():
                         "field": "player",
                         "type": "nominal",
                         "scale": {"scheme": "category20"},
+                        "legend":{
+                            "orient":"bottom-left",
+                        }
                         },
                 },
             },
