@@ -247,8 +247,8 @@ def run():
             )
 
 
-        #show_top_n = compute_probs_based_on_top_n
-        show_top_n = min([compute_probs_based_on_top_n, 10])
+        show_top_n = compute_probs_based_on_top_n
+        #show_top_n = min([compute_probs_based_on_top_n, 10])
 
         st.subheader(f"Predicted top {show_top_n}")
 
