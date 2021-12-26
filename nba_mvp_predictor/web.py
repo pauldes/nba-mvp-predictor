@@ -319,7 +319,7 @@ def run():
         
         num_past_days = col3.slider(
             "Show history for last",
-            min_value=max(int(history.days_ago.min()), 1),
+            min_value=max(int(history.days_ago.min()), 3),
             max_value=int(history.days_ago.max()),
             value=min(int(history.days_ago.max()), 30),
             step=1,
