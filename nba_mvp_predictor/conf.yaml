@@ -61,4 +61,4 @@ web:
     It is then used to predict this season MVP based on current data.
     The model predicts the *award share* (the number of points a player received for MVP award over the total points of all first-place votes).
     This share can then be converted to a probability using various methods (see *Predictions parameters*).
-  sidebar-bottom-text: "*Made by [pauldes](https://github.com/pauldes). Code on [GitHub](https://github.com/pauldes/nba-mvp-prediction).*"
+  sidebar-bottom-text: "*Made by [pauldes](https://github.com/pauldes). Code on [GitHub](https://github.com/pauldes/nba-mvp-predictor).*"
