@@ -376,7 +376,7 @@ def run():
         col1.markdown(
             f"""
         - **{percentage}** of MVPs correctly found
-        - The true MVP is ranked **{avg_real_rank} by the model in average**
+        - The true MVP is ranked **{avg_real_rank}** by the model in average
         - The true rank of the predicted MVP is **{avg_pred_rank}** in average
         """
         )
