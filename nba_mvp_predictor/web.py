@@ -259,14 +259,13 @@ def run():
             data=predictions.head(show_top_n)[cols], width=None, height=300,
         )
         
-        barchart_data = predictions.head(show_top_n) #.copy()
-        barchart_data["player"] = barchart_data.index
-        barchart_data["chance"] = barchart_data["MVP probability"].str[:-1]
-        barchart_data["chance"] = pandas.to_numeric(barchart_data["chance"])
+        predictions["player"] = predictions.index
+        predictions["chance"] = predictions["MVP probability"].str[:-1]
+        predictions["chance"] = pandas.to_numeric(predictions["chance"])
 
         #col1.markdown("Chart")
         col1.vega_lite_chart(
-            barchart_data,
+            predictions.head(show_top_n),
             {
                 "mark": {
                     "type": "bar",
