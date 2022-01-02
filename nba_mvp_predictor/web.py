@@ -259,7 +259,7 @@ def run():
             data=predictions.head(show_top_n)[cols], width=None, height=300,
         )
         
-        barchart_data = predictions.head(show_top_n).copy()
+        barchart_data = predictions.head(show_top_n) #.copy()
         barchart_data["player"] = barchart_data.index
         barchart_data["chance"] = barchart_data["MVP probability"].str[:-1]
         barchart_data["chance"] = pandas.to_numeric(barchart_data["chance"])
@@ -399,7 +399,7 @@ def run():
         st.dataframe(data=performances, width=None, height=None)
         st.markdown(
         """
-        Predictions of the model are made on the unseen season using holdout.
+        Predictions of the model are made on the unseen season using holdout method.
         """
         )
 
