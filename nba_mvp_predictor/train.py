@@ -11,6 +11,7 @@ from sklearn import (
     linear_model,
     ensemble,
     neural_network,
+    base,
 )
 import pandas
 import numpy
@@ -390,6 +391,7 @@ def make_gold_data_and_train_model():
     logger.debug("Performing all season analysis...")
     all_winners = pandas.DataFrame()
     for season in data_all.SEASON.unique():
+        season_regressor = base.clone(regressor)
         logger.debug(f"Season {season}")
         data_all_train = data_all[data_all.SEASON != season]
         data_all_test = data_all[data_all.SEASON == season]
@@ -397,8 +399,8 @@ def make_gold_data_and_train_model():
         y_all_train = data_all_train[target]
         X_all_test = data_all_test[selected_features + selected_cat_features_numerized]
         y_all_test = data_all_test[target]
-        regressor.fit(X_all_train, y_all_train)
-        y_pred_all_test = regressor.predict(X_all_test)
+        season_regressor.fit(X_all_train, y_all_train)
+        y_pred_all_test = season_regressor.predict(X_all_test)
 
         results = y_all_test.rename("TRUTH").to_frame()
         results.loc[:, "PRED"] = y_pred_all_test
@@ -439,8 +441,9 @@ def make_gold_data_and_train_model():
         index=True,
     )
 
-    regressor.fit(X_all, y_all)
-    joblib.dump(regressor, conf.data.model.path)
+    final_regressor = base.clone(regressor)
+    final_regressor.fit(X_all, y_all)
+    joblib.dump(final_regressor, conf.data.model.path)
 
 
 def filter_by_correlation_with_target(
