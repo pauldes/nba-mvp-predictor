@@ -1,6 +1,6 @@
-![Actions badge](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/tests.yaml/badge.svg)
-![Actions badge](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/train.yaml/badge.svg)
-![Actions badge](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/predict.yaml/badge.svg)
+[![tests](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/tests.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/tests.yaml)
+[![train](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/train.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/train.yaml)
+[![predict](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/predict.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/predict.yaml)
 
 # **The MVP Predict🏀r** : Predicting the NBA Most Valuable Player
 
