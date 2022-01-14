@@ -47,7 +47,7 @@ Solutions :
 - Add top performances or statement games as a feature
 - The current model output may be a negative number. This is impossible in real life, since the prediction is an MVP share. Could we leverage on this information to force the model to output non-negative numbers ?
 - Feature impacts (SHAP values) may not be reliable for categorical variables (as demonstrated [here](https://arxiv.org/pdf/2103.13342.pdf) and [here](https://arxiv.org/pdf/1909.08128.pdf)).
-- Work on that off-the-dribble pull-up jumper
+- Work on my pull-up jumper
 
 ## Tools and main libraries
 
