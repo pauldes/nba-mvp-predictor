@@ -44,20 +44,21 @@ jobs:
       - name: Run the CLI command to predict model
         run: |
           pipenv run python . predict
-      - name: Upload predictions as artifact
-        uses: actions/upload-artifact@v2
-        with: 
-          name: predictions.csv
-          path: ./data/predictions.csv
-          retention-days: 90
-      - name: Upload history as artifact
-        uses: actions/upload-artifact@v2
-        with: 
-          name: history.csv
-          path: ./data/history.csv
-          retention-days: 90
+      # Deactivated uploads because handled by new workflow
+      # - name: Upload predictions as artifact
+      #   uses: actions/upload-artifact@v2
+      #   with: 
+      #     name: predictions.csv
+      #     path: ./data/predictions.csv
+      #     retention-days: 90
+      # - name: Upload history as artifact
+      #   uses: actions/upload-artifact@v2
+      #   with: 
+      #     name: history.csv
+      #     path: ./data/history.csv
+      #     retention-days: 90
 
-  make-predictions-wip:
+  make-predictions-fixed:
     runs-on: ubuntu-latest
     steps:
       - name: Setup timezone to Europe/Paris
@@ -88,25 +89,25 @@ jobs:
           name: history.csv
           latest: true
           path: ./data/
-      # - name: Install dependencies from Pipfile
-      #   run: |
-      #     python -m pip install --upgrade pipenv
-      #     pipenv install --deploy
-      # - name: Run the CLI command to download data for season 2022
-      #   run: |
-      #     pipenv run python . download --season 2021 2022
-      # - name: Run the CLI command to predict model
-      #   run: |
-      #     pipenv run python . predict
-      # - name: Upload predictions as artifact
-      #   uses: actions/upload-artifact@v2
-      #   with: 
-      #     name: predictions.csv
-      #     path: ./data/predictions.csv
-      #     retention-days: 90
-      # - name: Upload history as artifact
-      #   uses: actions/upload-artifact@v2
-      #   with: 
-      #     name: history.csv
-      #     path: ./data/history.csv
-      #     retention-days: 90
+      - name: Install dependencies from Pipfile
+        run: |
+          python -m pip install --upgrade pipenv
+          pipenv install --deploy
+      - name: Run the CLI command to download data for season 2022
+        run: |
+          pipenv run python . download --season 2021 2022
+      - name: Run the CLI command to predict model
+        run: |
+          pipenv run python . predict
+      - name: Upload predictions as artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: predictions.csv
+          path: ./data/predictions.csv
+          retention-days: 90
+      - name: Upload history as artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: history.csv
+          path: ./data/history.csv
+          retention-days: 90
