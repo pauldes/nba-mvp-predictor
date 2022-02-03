@@ -5,7 +5,7 @@ on:
     # For some reason blablacar/action-download-last-artifact may fail so we run manually :
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
-  download-data-and-make-predictions:
+  make-predictions-buggy:
     runs-on: ubuntu-latest
     steps:
       - name: Setup timezone to Europe/Paris
@@ -56,3 +56,57 @@ jobs:
           name: history.csv
           path: ./data/history.csv
           retention-days: 90
+
+  make-predictions-wip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup timezone to Europe/Paris
+        uses: zcong1993/setup-timezone@master
+        with:
+          timezone: Europe/Paris
+      - name: Check out to repo
+        uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Download features from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: features.json
+          latest: true
+          path: ./data/
+      - name: Download model from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model.joblib
+          latest: true
+          path: ./data/
+      - name: Download history from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: history.csv
+          latest: true
+          path: ./data/
+      # - name: Install dependencies from Pipfile
+      #   run: |
+      #     python -m pip install --upgrade pipenv
+      #     pipenv install --deploy
+      # - name: Run the CLI command to download data for season 2022
+      #   run: |
+      #     pipenv run python . download --season 2021 2022
+      # - name: Run the CLI command to predict model
+      #   run: |
+      #     pipenv run python . predict
+      # - name: Upload predictions as artifact
+      #   uses: actions/upload-artifact@v2
+      #   with: 
+      #     name: predictions.csv
+      #     path: ./data/predictions.csv
+      #     retention-days: 90
+      # - name: Upload history as artifact
+      #   uses: actions/upload-artifact@v2
+      #   with: 
+      #     name: history.csv
+      #     path: ./data/history.csv
+      #     retention-days: 90
