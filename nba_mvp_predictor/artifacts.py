@@ -17,7 +17,7 @@ def get_artifacts():
         dict: Dictionnaire d'artifacts
     """
     github_repo = conf.web.github_repo
-    url = f"https://api.github.com/repos/{github_repo}/actions/artifacts"
+    url = f"https://api.github.com/repos/{github_repo}/actions/artifacts?per_page=100"
     artifacts = load_json_from_url(url)
     return artifacts
 
@@ -60,6 +60,8 @@ def get_last_artifact(artifact_name: str):
     artifacts = get_artifacts()
     num_artifacts = artifacts.get("total_count")
     logger.debug(f"{num_artifacts} artifacts disponibles sur le projet")
+    if num_artifacts > 100:
+        logger.warning("Some artifacts were not retrieved due to GitHub artifact pagination")
     artifacts = [
         a
         for a in artifacts.get("artifacts")
