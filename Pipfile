@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 pandas = "*"
 requests = "*"
-sklearn = "*"
 beautifulsoup4 = "*"
 streamlit = "*"
 pyyaml = "*"
@@ -14,6 +13,7 @@ seaborn = "*"
 python-box = "*"
 nba-mvp-predictor = {editable = true, path = "./nba_mvp_predictor"}
 basketball-reference-scraper = "*"
+scikit-learn = "*"
 
 [dev-packages]
 black = "*"
