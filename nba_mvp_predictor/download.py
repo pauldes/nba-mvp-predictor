@@ -69,6 +69,7 @@ def download_team_standings(seasons: List[int], scrapper: scrappers.Scrapper):
         index=True,
     )
 
+
 def download_data_from_url_to_file(
     url: str, path: str, stream: bool = True, auth=None, headers=None
 ):

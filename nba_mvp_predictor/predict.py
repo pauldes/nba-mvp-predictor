@@ -67,4 +67,4 @@ def make_predictions():
         train.make_silver_data()
         load_model_make_predictions()
     except Exception as e:
-        logger.error(f"Predicting failed : {e}")
+        logger.error(f"Predicting failed : {e}", exc_info=True)

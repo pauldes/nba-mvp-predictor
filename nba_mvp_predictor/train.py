@@ -395,7 +395,9 @@ def make_gold_data_and_train_model():
         logger.debug(f"Season {season}")
         data_all_train = data_all[data_all.SEASON != season]
         data_all_test = data_all[data_all.SEASON == season]
-        X_all_train = data_all_train[selected_features + selected_cat_features_numerized]
+        X_all_train = data_all_train[
+            selected_features + selected_cat_features_numerized
+        ]
         y_all_train = data_all_train[target]
         X_all_test = data_all_test[selected_features + selected_cat_features_numerized]
         y_all_test = data_all_test[target]
@@ -405,10 +407,12 @@ def make_gold_data_and_train_model():
         results = y_all_test.rename("TRUTH").to_frame()
         results.loc[:, "PRED"] = y_pred_all_test
         results.loc[:, "AE"] = (results["TRUTH"] - results["PRED"]).abs()
-        results = results.merge(data_all_test[["SEASON"]], left_index=True, right_index=True)
-        real_winners = data_all_test.sort_values(by=target, ascending=False).drop_duplicates(
-            subset=["SEASON"], keep="first"
-        )[["SEASON"]]
+        results = results.merge(
+            data_all_test[["SEASON"]], left_index=True, right_index=True
+        )
+        real_winners = data_all_test.sort_values(
+            by=target, ascending=False
+        ).drop_duplicates(subset=["SEASON"], keep="first")[["SEASON"]]
         real_winners["True MVP"] = real_winners.index
         real_winners = real_winners.set_index("SEASON", drop=True)
         winners = results.sort_values(by="PRED", ascending=False).drop_duplicates(
@@ -422,13 +426,15 @@ def make_gold_data_and_train_model():
         winners.loc[:, "PRED_RANK"] = winners["True MVP"].map(predicted_ranks_reference)
         winners = winners.sort_index(ascending=True)
         all_winners = all_winners.append(winners)
-    
+
     print(numpy.mean(results.AE))
     print(results.AE.max())
     print(numpy.mean(results.AE ** 2))
     all_winners["Real MVP rank"] = 1
     print("Pourcentage de MVP bien trouvé sur le jeu de test :")
-    print((all_winners["Pred. MVP"] == all_winners["True MVP"]).sum() / len(all_winners))
+    print(
+        (all_winners["Pred. MVP"] == all_winners["True MVP"]).sum() / len(all_winners)
+    )
     print("Rang réel moyen du MVP prédit:")
     print((all_winners["REAL_RANK"]).mean())
     all_winners["Pred. MVP"] = all_winners["Pred. MVP"].map(data_all["PLAYER"])

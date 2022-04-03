@@ -74,8 +74,10 @@ class BasketballReferenceScrapper(Scrapper):
             data = data.rename(columns={"TM": "TEAM"})
             data = data[["PLAYER", "TEAM", "SEASON", "MVP_VOTES_SHARE", "RANK"]]
             data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
-                #"[^A-Za-z]", "", regex=True
-                "[ _'.*]", "", regex=True
+                # "[^A-Za-z]", "", regex=True
+                "[ _'.*]",
+                "",
+                regex=True,
             )
             data.loc[:, "MVP_WINNER"] = False
             data["RANK"] = (
@@ -154,8 +156,10 @@ class BasketballReferenceScrapper(Scrapper):
             data.columns = [str(col).upper() for col in data.columns]
             data.loc[:, "SEASON"] = season
             data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
-                #"[^-'a-zA-ZÀ-ÿ]", "", regex=True
-                "[ _'.*]", "", regex=True
+                # "[^-'a-zA-ZÀ-ÿ]", "", regex=True
+                "[ _'.*]",
+                "",
+                regex=True,
             )
             data = data.rename(columns={"TM": "TEAM"})
             data = data.drop("RK", axis="columns")
@@ -191,7 +195,12 @@ class BasketballReferenceScrapper(Scrapper):
             dfs = []
             results = get_standings(date=date)
             for conference, data in results.items():
+                logger.debug(f"Standings data columns: {', '.join(data.columns)}")
                 data = data.dropna(axis="index", how="any")
+                logger.debug(
+                    f"First column name before renaming: {data.columns.values[0]}"
+                )
+                data = data.rename(columns={data.columns[0]: "TEAM"})
                 data.loc[:, "TEAM"] = (
                     data["TEAM"].str.upper().str.replace("[^A-Z]", "", regex=True)
                 )
@@ -202,7 +211,10 @@ class BasketballReferenceScrapper(Scrapper):
                 data = data[~data["TEAM"].str.contains("DIVISION")]
                 data = data.sort_values(by="W/L%", ascending=False)
                 data = data.reset_index(drop=True)
-                data.loc[:, "CONF"] = conference
+                logger.debug(f"Conference : {conference}")
+                data.loc[:, "CONF"] = (
+                    conference.replace(" ", "_").upper().replace("CONFERENCE", "CONF")
+                )
                 data.loc[:, "CONF_RANK"] = data.index + 1
                 unmapped_teams = [
                     team

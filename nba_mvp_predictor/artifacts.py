@@ -61,7 +61,9 @@ def get_last_artifact(artifact_name: str):
     num_artifacts = artifacts.get("total_count")
     logger.debug(f"{num_artifacts} artifacts disponibles sur le projet")
     if num_artifacts > 100:
-        logger.warning("Some artifacts were not retrieved due to GitHub artifact pagination")
+        logger.warning(
+            "Some artifacts were not retrieved due to GitHub artifact pagination"
+        )
     artifacts = [
         a
         for a in artifacts.get("artifacts")
