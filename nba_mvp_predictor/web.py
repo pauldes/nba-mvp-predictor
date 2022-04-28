@@ -194,7 +194,15 @@ def run():
     st.title(conf.web.page_title)
     inject_google_analytics_tag()
     local_css("./nba_mvp_predictor/custom.css")
-    predictions = build_predictions()
+    try:
+        predictions = build_predictions()
+    except Exception as e:
+        logger.error(f"Failed to build predictions {e}", exc_info=True)
+        predictions = pandas.DataFrame(
+            columns = [
+                "PLAYER", "POS", "AGE", "TEAM", "G", "GS", "MP", "FG_per_game", "FGA_per_game", "FG%", "3P_per_game", "3PA_per_game", "3P%", "2P_per_game", "2PA_per_game", "2P%", "EFG%_per_game", "FT_per_game", "FTA_per_game", "FT%", "ORB_per_game", "DRB_per_game", "TRB_per_game", "AST_per_game", "STL_per_game", "BLK_per_game", "TOV_per_game", "PF_per_game", "PTS_per_game", "SEASON", "FG_per_36min", "FGA_per_36min", "3P_per_36min", "3PA_per_36min", "2P_per_36min", "2PA_per_36min", "FT_per_36min", "FTA_per_36min", "ORB_per_36min", "DRB_per_36min", "TRB_per_36min", "AST_per_36min", "STL_per_36min", "BLK_per_36min", "TOV_per_36min", "PF_per_36min", "PTS_per_36min", "FG_per_100poss", "FGA_per_100poss", "3P_per_100poss", "3PA_per_100poss", "2P_per_100poss", "2PA_per_100poss", "FT_per_100poss", "FTA_per_100poss", "ORB_per_100poss", "DRB_per_100poss", "TRB_per_100poss", "AST_per_100poss", "STL_per_100poss", "BLK_per_100poss", "TOV_per_100poss", "PF_per_100poss", "PTS_per_100poss", "ORTG_per_100poss", "DRTG_per_100poss", "PER_advanced", "TS%_advanced", "3PAR_advanced", "FTR_advanced", "ORB%_advanced", "DRB%_advanced", "TRB%_advanced", "AST%_advanced", "STL%_advanced", "BLK%_advanced", "TOV%_advanced", "USG%_advanced", "OWS_advanced", "DWS_advanced", "WS_advanced", "WS/48_advanced", "OBPM_advanced", "DBPM_advanced", "BPM_advanced", "VORP_advanced", "MVP_VOTES_SHARE", "MVP_WINNER", "MVP_PODIUM", "MVP_CANDIDATE", "W", "L", "W/L%", "GB", "PW", "PL", "PS/G", "PA/G", "CONF", "CONF_RANK", "PRED", "PRED_RANK"
+            ]
+        )
     history = build_history()
     performances = build_performances()
     current_season = (
