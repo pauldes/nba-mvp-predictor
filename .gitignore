@@ -5,6 +5,7 @@ pyproject.toml
 *.csv
 *.zip
 data/
+!temp-data/predictions-artifact.csv.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
