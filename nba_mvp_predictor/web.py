@@ -18,12 +18,9 @@ pandas.set_option("display.precision", 2)
 
 
 def build_predictions():
-    # Temporary fix. TODO
     download_predictions()
     predictions = pandas.read_csv(
         "./data/predictions-artifact.csv.zip",
-        # Temporary fix. TODO
-        #"./temp-data/predictions-artifact.csv.zip",
         sep=conf.data.predictions.sep,
         encoding=conf.data.predictions.encoding,
         compression="zip",
@@ -77,7 +74,7 @@ def build_performances():
     performances = performances.sort_index(ascending=False)
     performances.loc[
         performances["True MVP"] == performances["Predicted MVP"], "Model is right"
-    ] = "✔️"  # "☑️"
+    ] = "✔️"
     performances.loc[
         performances["True MVP"] != performances["Predicted MVP"], "Model is right"
     ] = "❌"
