@@ -47,7 +47,7 @@ jobs:
         run: |
           pipenv run python . download --season 2021 2022
       - name: Run the CLI command to predict model
-        if: ${{ false }} #season is over
+        if: ${{ false }} #season is over. TODO : add a "renew" action to avoid retraining every 90 days
         run: |
           pipenv run python . predict
       - name: Upload predictions as artifact
