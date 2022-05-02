@@ -1,7 +1,7 @@
 name: train
 on:
   schedule:
-    - cron:  '0 6 1 * *' # Every 1st day of the month at 6UTC
+    - cron:  '0 6 1 9 *' # At 06:00 on day-of-month 1 in September (once a year).
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO
@@ -35,16 +35,16 @@ jobs:
         with: 
           name: model.joblib
           path: ./data/model.joblib
-          retention-days: 90
+          retention-days: 10
       - name: Upload features as artifact
         uses: actions/upload-artifact@v2
         with: 
           name: features.json
           path: ./data/features.json
-          retention-days: 90
+          retention-days: 10
       - name: Upload model performances as artifact
         uses: actions/upload-artifact@v2
         with: 
           name: performances.csv
           path: ./data/performances.csv
-          retention-days: 90
+          retention-days: 10

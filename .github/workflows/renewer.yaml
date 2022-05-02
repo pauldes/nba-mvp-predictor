@@ -1,7 +1,7 @@
 name: renewer
 on:
   schedule:
-    - cron:  '0 8 * * *' # Everyday at 8UTC
+    - cron:  '0 12 * * MON,THU' # At 12:00 on Monday and Thursday.
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO
@@ -16,6 +16,68 @@ jobs:
           latest: true
           path: ./
       - name: Upload model as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: model.joblib
+          path: ./model.joblib
+          retention-days: 10
+  renew-model-performances:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download model performances from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model.joblib
+          latest: true
+          path: ./
+      - name: Upload model performances as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: model.joblib
+          path: ./model.joblib
+          retention-days: 10
+  renew-model-features:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download features from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model.joblib
+          latest: true
+          path: ./
+      - name: Upload features as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: model.joblib
+          path: ./model.joblib
+          retention-days: 10
+
+  # TODO : only if season is over
+  renew-predictions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download predictions from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model.joblib
+          latest: true
+          path: ./
+      - name: Upload predictions as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: model.joblib
+          path: ./model.joblib
+          retention-days: 10
+  renew-predictions-history:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download predictions history from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model.joblib
+          latest: true
+          path: ./
+      - name: Upload history as artifact for 10 more days
         uses: actions/upload-artifact@v2
         with: 
           name: model.joblib
