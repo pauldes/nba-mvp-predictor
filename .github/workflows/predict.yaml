@@ -43,11 +43,11 @@ jobs:
           python -m pip install --upgrade pipenv
           pipenv install --deploy
       - name: Run the CLI command to download data for season 2022
-        if: ${{ false }} #season is over
+        if: ${{ true }} #season is over
         run: |
           pipenv run python . download --season 2021 2022
       - name: Run the CLI command to predict model
-        if: ${{ false }} #season is over
+        if: ${{ true }} #season is over
         run: |
           pipenv run python . predict
       - name: Upload predictions as artifact
