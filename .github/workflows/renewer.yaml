@@ -1,4 +1,4 @@
-name: artifacts-renewer
+name: renewer
 on:
   schedule:
     - cron:  '0 8 * * *' # Everyday at 8UTC
