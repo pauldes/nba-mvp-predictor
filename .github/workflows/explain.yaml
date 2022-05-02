@@ -26,6 +26,12 @@ jobs:
           name: model_input.csv
           latest: true
           path: ./data/
+      - name: Download predictions from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: predictions.csv
+          latest: true
+          path: ./data/
       - name: Download model from artifact
         uses: aochmann/actions-download-artifact@master
         with:
