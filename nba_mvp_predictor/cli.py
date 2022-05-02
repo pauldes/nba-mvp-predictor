@@ -5,7 +5,7 @@ from typing import List
 import streamlit.cli
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import download, train, predict
+from nba_mvp_predictor import download, train, predict, explain
 
 
 def download_data(args=None):
@@ -21,6 +21,10 @@ def train_model(args=None):
 def make_predictions(args=None):
     """Make predictions with the trained model"""
     predict.make_predictions()
+
+def explain_model(args=None):
+    """Explain model decisions"""
+    explain.explain_model()
 
 
 def run_webapp(args=None):
@@ -46,6 +50,7 @@ def get_parser():
     )
     subparser.add_parser("train", help="Train a model on dowloaded data")
     subparser.add_parser("predict", help="Make predictions with the trained model")
+    subparser.add_parser("explain", help="Explain the predictions made by the model")
     return parser
 
 
@@ -65,3 +70,5 @@ def run(args=None):
         train_model(args)
     elif args.command == "predict":
         make_predictions(args)
+    elif args.command == "explain":
+        explain_model(args)

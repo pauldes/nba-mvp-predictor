@@ -6,7 +6,7 @@ import streamlit as st
 import pandas
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, evaluate, artifacts, download, analytics, explain
+from nba_mvp_predictor import load, evaluate, artifacts, download, analytics
 
 # Constants
 PAGE_PREDICTIONS = "Current year predictions"
