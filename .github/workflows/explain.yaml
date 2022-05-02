@@ -7,7 +7,7 @@ on:
 env:
   LOG_LEVEL: INFO
 jobs:
-  make-predictions:
+  explain-predictions:
     runs-on: ubuntu-latest
     steps:
       - name: Setup timezone to Europe/Paris
