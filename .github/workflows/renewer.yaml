@@ -8,6 +8,7 @@ env:
 jobs:
   renew-model:
     runs-on: ubuntu-latest
+    steps:
       - name: Download model from artifact
         uses: aochmann/actions-download-artifact@master
         with:
