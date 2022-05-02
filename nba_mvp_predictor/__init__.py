@@ -6,7 +6,7 @@ import numpy
 
 from nba_mvp_predictor import utils
 
-SEED = 666
+SEED = 0
 
 
 def get_conf():
