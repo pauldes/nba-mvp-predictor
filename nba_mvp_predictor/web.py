@@ -18,11 +18,11 @@ pandas.set_option("display.precision", 2)
 
 
 def build_predictions():
-    # Tempory fix. TODO
+    # Temporary fix. TODO
     #download_predictions()
     predictions = pandas.read_csv(
         #"./data/predictions-artifact.csv.zip",
-        # Tempory fix. TODO
+        # Temporary fix. TODO
         "./temp-data/predictions-artifact.csv.zip",
         sep=conf.data.predictions.sep,
         encoding=conf.data.predictions.encoding,

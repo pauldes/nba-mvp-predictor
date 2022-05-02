@@ -265,14 +265,14 @@ def make_gold_data_and_train_model():
         hidden_layer_sizes=9,
         learning_rate="adaptive",
         learning_rate_init=0.065,
-        random_state=666,
+        random_state=0,
     )
     regressors = [regressor]
 
     splits = 3
     repeats = 2
     splitter = model_selection.RepeatedKFold(
-        n_splits=splits, n_repeats=repeats, random_state=666
+        n_splits=splits, n_repeats=repeats, random_state=0
     )
 
     logger.debug("Fitting model...")
