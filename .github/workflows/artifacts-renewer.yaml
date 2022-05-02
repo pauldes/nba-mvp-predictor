@@ -1,0 +1,16 @@
+name: artifacts-renewer
+on:
+  schedule:
+    - cron:  '0 8 * * *' # Everyday at 8UTC
+  workflow_dispatch: # Allow for manual trigger from github.com
+env:
+  LOG_LEVEL: INFO
+jobs:
+  renew-model:
+    runs-on: ubuntu-latest
+      - name: Download model from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model.joblib
+          latest: true
+          path: ./
