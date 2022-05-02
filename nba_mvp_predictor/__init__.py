@@ -44,3 +44,4 @@ def get_logger():
 
 logger = get_logger()
 conf = get_conf()
+seed = seed_packages()
