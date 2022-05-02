@@ -51,6 +51,21 @@ jobs:
           name: model.joblib
           path: ./model.joblib
           retention-days: 10
+  renew-model-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download model input from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model_input.csv
+          latest: true
+          path: ./
+      - name: Upload model input as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: model_input.csv
+          path: ./model_input.csv
+          retention-days: 10
 
   # TODO : only if season is over
   renew-predictions:

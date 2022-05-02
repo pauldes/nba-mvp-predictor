@@ -64,3 +64,11 @@ jobs:
           name: history.csv
           path: ./data/history.csv
           retention-days: 10
+      - name: Upload model input dataset as artifact
+        if: ${{ false }} # season is over. TODO : merge with the renewer flow, with a condition ?
+        uses: actions/upload-artifact@v2
+        with: 
+          name: model_input.csv
+          path: ./data/model_input.csv
+          retention-days: 10
+      

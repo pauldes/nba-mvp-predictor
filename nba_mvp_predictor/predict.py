@@ -26,6 +26,13 @@ def load_model_make_predictions(max_n=50):
         data, cat, num, data["SEASON"], min_max_scaler=min_max_scaling
     )
     X = data_processed_features_only[features]
+    X.to_csv(
+        conf.data.model_input.path,
+        sep=conf.data.model_input.sep,
+        encoding=conf.data.model_input.encoding,
+        compression=conf.data.model_input.compression,
+        index=True,
+    )
     predictions = model.predict(X)
     data.loc[:, "PRED"] = predictions
     data.loc[:, "PRED_RANK"] = data["PRED"].rank(ascending=False)
