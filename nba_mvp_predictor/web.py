@@ -6,11 +6,12 @@ import streamlit as st
 import pandas
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, evaluate, artifacts, download, analytics
+from nba_mvp_predictor import load, evaluate, artifacts, download, analytics, explain
 
 # Constants
 PAGE_PREDICTIONS = "Current year predictions"
 PAGE_PERFORMANCE = "Model performance analysis"
+PAGE_EXPLICABILITY = "Model explicability"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
 
@@ -217,16 +218,16 @@ def run():
     )
 
     navigation_page = st.sidebar.radio(
-        "Navigate to", [PAGE_PREDICTIONS, PAGE_PERFORMANCE]
+        "Navigate to", [PAGE_PREDICTIONS, PAGE_PERFORMANCE, PAGE_EXPLICABILITY]
     )
     st.sidebar.markdown(conf.web.sidebar_top_text)
     st.sidebar.markdown(conf.web.sidebar_bottom_text)
 
     initial_columns = list(predictions.columns)
 
-    if navigation_page == PAGE_PREDICTIONS:
+    st.header(str(navigation_page))
 
-        st.header("Current year predictions")
+    if navigation_page == PAGE_PREDICTIONS:
 
         col1, col2 = st.columns(2)
         col1.subheader("Predicted top 3")
@@ -411,7 +412,6 @@ def run():
         )
 
     elif navigation_page == PAGE_PERFORMANCE:
-        st.header("Model performance analysis")
         col1, col2 = st.columns(2)
         # col1
         percentage = mvp_found_pct(performances)
@@ -454,6 +454,9 @@ def run():
         Players with no MVP vote are considered as ranked 10th for simplification.
         """
         )
+
+    elif navigation_page == PAGE_EXPLICABILITY:
+        st.warning("This page is under development.")
 
     else:
         st.error("Unknown page selected.")
