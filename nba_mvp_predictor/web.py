@@ -482,19 +482,19 @@ def run():
         shap_values = shap_values[[f for f in shap_values.columns if "ERN_CONF" not in f and "POS_" not in f]]
 
         st.subheader("Local explanation")
-        selected_player = st.selectbox("Player", predictions.index.to_list())
+        selected_player = st.selectbox("Select a player", predictions.index.to_list())
         a = shap_values.loc[selected_player, :]
         features_positive_impact = a[a>.0]
         features_negative_impact = a[a<.0]
         top_features_positive_impact = features_positive_impact.sort_values(ascending=False).index[:3].to_list()
         top_features_negative_impact = features_negative_impact.sort_values(ascending=True).index[:3].to_list()
         
-        st.markdown("👍 Stats with the strongest positive impact on the model prediction:")
+        st.markdown("👍 Stats with the strongest positive impact on the model prediction for this player:")
         col1, col2, col3 = st.columns(3)
         col1.info(f"{top_features_positive_impact[0]}")
         col2.info(f"{top_features_positive_impact[1]}")
         col3.info(f"{top_features_positive_impact[2]}")
-        st.markdown("👎 Stats with the strongest negative impact on the model prediction:")
+        st.markdown("👎 Stats with the strongest negative impact on the model prediction for this player:")
         col1, col2, col3 = st.columns(3)
         col1.info(f"{top_features_negative_impact[0]}")
         col2.info(f"{top_features_negative_impact[1]}")
