@@ -3,6 +3,8 @@ on:
   schedule:
     - cron:  '0 6 1 * *' # Every 1st day of the month at 6UTC
   workflow_dispatch: # Allow for manual trigger from github.com
+env:
+  LOG_LEVEL: INFO
 jobs:
   download-data-and-train-model:
     runs-on: ubuntu-latest

@@ -3,6 +3,8 @@ on:
   schedule:
     - cron:  '0 8 * * *' # Everyday at 8UTC
   workflow_dispatch: # Allow for manual trigger from github.com
+env:
+  LOG_LEVEL: INFO
 jobs:
   make-predictions:
     runs-on: ubuntu-latest
