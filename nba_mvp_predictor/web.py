@@ -4,6 +4,8 @@ import re
 
 import streamlit as st
 import pandas
+import numpy
+from matplotlib import pyplot
 
 from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import load, evaluate, artifacts, download, analytics
@@ -108,6 +110,26 @@ def download_predictions():
         url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth()
     )
 
+@st.cache(ttl=3600)  # 1h cache
+def download_shap_values():
+    date, url = artifacts.get_last_artifact("shap_values.csv")
+    logger.debug(f"Downloading history from {url}")
+    download.download_data_from_url_to_file(
+        url, "./data/shap_values.csv.zip", auth=artifacts.get_github_auth()
+    )
+
+def build_shap_values():
+    download_shap_values()
+    shap_values = pandas.read_csv(
+        "./data/shap_values.csv.zip",
+        sep=conf.data.shap_values.sep,
+        encoding=conf.data.shap_values.encoding,
+        compression="zip",
+        index_col=0,
+        dtype={},
+    )
+    return shap_values
+
 
 @st.cache(ttl=3600)  # 1h cache
 def download_history():
@@ -206,6 +228,7 @@ def run():
         )
     history = build_history()
     performances = build_performances()
+    shap_values = build_shap_values()
     current_season = (
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
@@ -445,8 +468,7 @@ def run():
         - The true rank of the predicted MVP is **{avg_pred_rank}** in average
         """
         )
-        # dataframe
-        # st.markdown(f"##### Details")
+        
         st.dataframe(data=performances, width=None, height=None)
         st.markdown(
             """
@@ -456,8 +478,114 @@ def run():
         )
 
     elif navigation_page == PAGE_EXPLICABILITY:
-        st.warning("This page is under development.")
-        shap_values = load.load_shap_values()
+        # Remove binary features - should no be trusted for SHAP
+        shap_values = shap_values[[f for f in shap_values.columns if "ERN_CONF" not in f and "POS_" not in f]]
+
+        st.subheader("Local explanation")
+        selected_player = st.selectbox("Player", predictions.index.to_list())
+        a = shap_values.loc[selected_player, :]
+        features_positive_impact = a[a>.0]
+        features_negative_impact = a[a<.0]
+        top_features_positive_impact = features_positive_impact.sort_values(ascending=False).index[:3].to_list()
+        top_features_negative_impact = features_negative_impact.sort_values(ascending=True).index[:3].to_list()
+        
+        st.markdown("👍 Stats with the strongest positive impact on the model prediction:")
+        col1, col2, col3 = st.columns(3)
+        col1.info(f"{top_features_positive_impact[0]}")
+        col2.info(f"{top_features_positive_impact[1]}")
+        col3.info(f"{top_features_positive_impact[2]}")
+        st.markdown("👎 Stats with the strongest negative impact on the model prediction:")
+        col1, col2, col3 = st.columns(3)
+        col1.info(f"{top_features_negative_impact[0]}")
+        col2.info(f"{top_features_negative_impact[1]}")
+        col3.info(f"{top_features_negative_impact[2]}")
+
+        st.subheader("Global explanation")
+        #vals = numpy.abs(shap_values.values).mean(0)
+        vals = numpy.array(shap_values.values).mean(0)
+        vals_abs = numpy.abs(shap_values.values).mean(0)
+        shap_importance = pandas.DataFrame(list(zip(shap_values.columns, vals, vals_abs)), columns=['col_name', 'feature_importance_vals', 'abs_feature_importance_vals'])
+
+
+        st.markdown(f"Most impactful stats for top-{len(shap_values)} players :")
+        col1, col2 = st.columns([10, 9])
+
+        shap_importance = shap_importance.sort_values(by=['feature_importance_vals'], ascending=True)
+        col1.vega_lite_chart(
+            shap_importance,
+            {
+                "mark": {
+                    "type": "bar",
+                    "point": True,
+                    "tooltip": True,
+                },
+                "title": {
+                    "text":"Average impact on the prediction"
+                },
+                "encoding": {
+                    "x": {
+                        "field": "feature_importance_vals",
+                        "type": "quantitative",
+                        "title": None,
+                    },
+                    "y": {
+                        "field": "col_name",
+                        "type": "nominal",
+                        "title": "Statistics",
+                        "sort": "-x",
+                    },
+                    "color": {
+                        "field": "feature_importance_vals",
+                        "type": "quantitative",
+                        "title": None,
+                        "legend": None,
+                        "scale": {"scheme": "greenblue"},
+                    },
+                },
+            },
+            height=700,
+            use_container_width=True,
+        )
+
+        shap_importance = shap_importance.sort_values(by=['abs_feature_importance_vals'], ascending=True)
+        col2.vega_lite_chart(
+            shap_importance,
+            {
+                "mark": {
+                    "type": "bar",
+                    "point": True,
+                    "tooltip": True,
+                },
+                "title": {
+                    "text":"Average absolute impact"
+                },
+                "encoding": {
+                    "x": {
+                        "field": "abs_feature_importance_vals",
+                        "type": "quantitative",
+                        "title": None,
+                    },
+                    "y": {
+                        "field": "col_name",
+                        "type": "nominal",
+                        "title": None,
+                        "sort": "-x",
+                    },
+                    "color": {
+                        "field": "abs_feature_importance_vals",
+                        "type": "quantitative",
+                        "title": None,
+                        "legend": None,
+                        "scale": {"scheme": "lighttealblue"},
+                    },
+                },
+            },
+            height=700,
+            use_container_width=True,
+        )
+
+
+
 
     else:
         st.error("Unknown page selected.")
