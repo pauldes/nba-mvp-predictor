@@ -51,6 +51,10 @@ data:
     path: data/performances.csv
     sep: ;
     encoding: utf-8
+  shap-values:
+    path: data/shap_values.csv
+    sep: ;
+    encoding: utf-8
 
 web:
   tab-title: "The MVP Predictor"

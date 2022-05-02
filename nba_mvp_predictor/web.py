@@ -457,6 +457,7 @@ def run():
 
     elif navigation_page == PAGE_EXPLICABILITY:
         st.warning("This page is under development.")
+        shap_values = load.load_shap_values()
 
     else:
         st.error("Unknown page selected.")
