@@ -43,22 +43,24 @@ jobs:
           python -m pip install --upgrade pipenv
           pipenv install --deploy
       - name: Run the CLI command to download data for season 2022
-        if: ${{ false }} #season is over. TODO : use env variable and reupload last predictions/hitory
+        if: ${{ false }} # season is over. TODO : merge with the renewer flow, with a condition ?
         run: |
           pipenv run python . download --season 2021 2022
       - name: Run the CLI command to predict model
-        if: ${{ false }} #season is over. TODO : add a "renew" action to avoid retraining every 90 days
+        if: ${{ false }} # season is over. TODO : merge with the renewer flow, with a condition ?
         run: |
           pipenv run python . predict
       - name: Upload predictions as artifact
+        if: ${{ false }} # season is over. TODO : merge with the renewer flow, with a condition ?
         uses: actions/upload-artifact@v2
         with: 
           name: predictions.csv
-          path: ./temp-data/predictions.csv #./data/predictions.csv
+          path: ./data/predictions.csv
           retention-days: 10
       - name: Upload history as artifact
+        if: ${{ false }} # season is over. TODO : merge with the renewer flow, with a condition ?
         uses: actions/upload-artifact@v2
         with: 
           name: history.csv
-          path: ./temp-data/history.csv #./data/history.csv
+          path: ./data/history.csv
           retention-days: 10
