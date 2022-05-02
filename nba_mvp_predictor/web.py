@@ -454,7 +454,6 @@ def run():
         st.markdown(
             """
         Predictions of the model are made on the unseen season using holdout method.
-
         Note that players with no MVP vote are considered as ranked 10th for simplification.
         """
         )
