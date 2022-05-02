@@ -25,7 +25,12 @@ def seed_packages(seed: int = SEED):
     numpy.random.seed(seed)
     return seed
 
-def get_logger():
+def build_logger() -> logging.Logger:
+    """Configure logger for the project
+
+    Returns:
+        logging.Logger: Logger to use for the project
+    """
     log_level = os.environ.get("LOG_LEVEL", "DEBUG")
     if log_level == "DEBUG":
         level = logging.DEBUG
@@ -39,9 +44,16 @@ def get_logger():
         level = logging.CRITICAL
     logger = logging.getLogger(__name__)
     logger.setLevel(level)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(level)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
     return logger
 
 
-logger = get_logger()
+logger = build_logger()
 conf = get_conf()
 seed = seed_packages()
