@@ -55,10 +55,10 @@ jobs:
         with: 
           name: predictions.csv
           path: ./data/predictions.csv
-          retention-days: 10
+          retention-days: 90
       - name: Upload history as artifact
         uses: actions/upload-artifact@v2
         with: 
           name: history.csv
           path: ./data/history.csv
-          retention-days: 10
+          retention-days: 90
