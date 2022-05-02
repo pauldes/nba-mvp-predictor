@@ -1,6 +1,10 @@
 data:
   model:
     path: data/model.joblib
+  model-input:
+    path: data/model_input.csv
+    sep: ;
+    encoding: utf-8
   player-stats:
     path: data/player_stats.csv.zip
     sep: ;
@@ -45,6 +49,10 @@ data:
     encoding: utf-8
   performances:
     path: data/performances.csv
+    sep: ;
+    encoding: utf-8
+  shap-values:
+    path: data/shap_values.csv
     sep: ;
     encoding: utf-8
 
