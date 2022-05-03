@@ -504,10 +504,10 @@ def run():
         top_features_negative_impact = features_negative_impact.sort_values(ascending=True).index[:num_stats].to_list()
         top_features_negative_impact_values = features_negative_impact.sort_values(ascending=True).values[:num_stats]
         
-        st.markdown("👍 Stats with the strongest positive impact on the model prediction for this player:")
+        st.markdown("👍 Stats with the strongest **positive impact** on the model prediction for this player:")
         for i, col in enumerate(st.columns(num_stats)):
             col.success(f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*")
-        st.markdown("👎 Stats with the strongest negative impact on the model prediction for this player:")
+        st.markdown("👎 Stats with the strongest **negative impact** on the model prediction for this player:")
         for i, col in enumerate(st.columns(num_stats)):
             col.error(f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*")
 
