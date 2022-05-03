@@ -12,6 +12,7 @@ SEED = 0
 def get_conf():
     return utils.get_dict_from_yaml("nba_mvp_predictor/conf.yaml")
 
+
 def seed_packages(seed: int = SEED):
     """Set seed for all packages using pseudorandom generation.
 
@@ -24,6 +25,7 @@ def seed_packages(seed: int = SEED):
     random.seed(seed)
     numpy.random.seed(seed)
     return seed
+
 
 def build_logger() -> logging.Logger:
     """Configure logger for the project

@@ -22,6 +22,7 @@ def make_predictions(args=None):
     """Make predictions with the trained model"""
     predict.make_predictions()
 
+
 def explain_model(args=None):
     """Explain model decisions"""
     explain.explain_model()

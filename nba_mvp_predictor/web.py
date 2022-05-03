@@ -110,6 +110,7 @@ def download_predictions():
         url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth()
     )
 
+
 @st.cache(ttl=3600)  # 1h cache
 def download_shap_values():
     date, url = artifacts.get_last_artifact("shap_values.csv")
@@ -117,6 +118,7 @@ def download_shap_values():
     download.download_data_from_url_to_file(
         url, "./data/shap_values.csv.zip", auth=artifacts.get_github_auth()
     )
+
 
 def build_shap_values():
     download_shap_values()
@@ -206,9 +208,10 @@ def inject_google_analytics_tag():
                 newdata = re.sub("<head>", "<head>" + code, data)
                 ff.write(newdata)
 
+
 def remove_trailing_sequence(string, sequence):
     if string.endswith(sequence):
-        return string[:-len(sequence)]
+        return string[: -len(sequence)]
     else:
         return string
 
@@ -228,8 +231,109 @@ def run():
     except Exception as e:
         logger.error(f"Failed to build predictions {e}", exc_info=True)
         predictions = pandas.DataFrame(
-            columns = [
-                "PLAYER", "POS", "AGE", "TEAM", "G", "GS", "MP", "FG_per_game", "FGA_per_game", "FG%", "3P_per_game", "3PA_per_game", "3P%", "2P_per_game", "2PA_per_game", "2P%", "EFG%_per_game", "FT_per_game", "FTA_per_game", "FT%", "ORB_per_game", "DRB_per_game", "TRB_per_game", "AST_per_game", "STL_per_game", "BLK_per_game", "TOV_per_game", "PF_per_game", "PTS_per_game", "SEASON", "FG_per_36min", "FGA_per_36min", "3P_per_36min", "3PA_per_36min", "2P_per_36min", "2PA_per_36min", "FT_per_36min", "FTA_per_36min", "ORB_per_36min", "DRB_per_36min", "TRB_per_36min", "AST_per_36min", "STL_per_36min", "BLK_per_36min", "TOV_per_36min", "PF_per_36min", "PTS_per_36min", "FG_per_100poss", "FGA_per_100poss", "3P_per_100poss", "3PA_per_100poss", "2P_per_100poss", "2PA_per_100poss", "FT_per_100poss", "FTA_per_100poss", "ORB_per_100poss", "DRB_per_100poss", "TRB_per_100poss", "AST_per_100poss", "STL_per_100poss", "BLK_per_100poss", "TOV_per_100poss", "PF_per_100poss", "PTS_per_100poss", "ORTG_per_100poss", "DRTG_per_100poss", "PER_advanced", "TS%_advanced", "3PAR_advanced", "FTR_advanced", "ORB%_advanced", "DRB%_advanced", "TRB%_advanced", "AST%_advanced", "STL%_advanced", "BLK%_advanced", "TOV%_advanced", "USG%_advanced", "OWS_advanced", "DWS_advanced", "WS_advanced", "WS/48_advanced", "OBPM_advanced", "DBPM_advanced", "BPM_advanced", "VORP_advanced", "MVP_VOTES_SHARE", "MVP_WINNER", "MVP_PODIUM", "MVP_CANDIDATE", "W", "L", "W/L%", "GB", "PW", "PL", "PS/G", "PA/G", "CONF", "CONF_RANK", "PRED", "PRED_RANK"
+            columns=[
+                "PLAYER",
+                "POS",
+                "AGE",
+                "TEAM",
+                "G",
+                "GS",
+                "MP",
+                "FG_per_game",
+                "FGA_per_game",
+                "FG%",
+                "3P_per_game",
+                "3PA_per_game",
+                "3P%",
+                "2P_per_game",
+                "2PA_per_game",
+                "2P%",
+                "EFG%_per_game",
+                "FT_per_game",
+                "FTA_per_game",
+                "FT%",
+                "ORB_per_game",
+                "DRB_per_game",
+                "TRB_per_game",
+                "AST_per_game",
+                "STL_per_game",
+                "BLK_per_game",
+                "TOV_per_game",
+                "PF_per_game",
+                "PTS_per_game",
+                "SEASON",
+                "FG_per_36min",
+                "FGA_per_36min",
+                "3P_per_36min",
+                "3PA_per_36min",
+                "2P_per_36min",
+                "2PA_per_36min",
+                "FT_per_36min",
+                "FTA_per_36min",
+                "ORB_per_36min",
+                "DRB_per_36min",
+                "TRB_per_36min",
+                "AST_per_36min",
+                "STL_per_36min",
+                "BLK_per_36min",
+                "TOV_per_36min",
+                "PF_per_36min",
+                "PTS_per_36min",
+                "FG_per_100poss",
+                "FGA_per_100poss",
+                "3P_per_100poss",
+                "3PA_per_100poss",
+                "2P_per_100poss",
+                "2PA_per_100poss",
+                "FT_per_100poss",
+                "FTA_per_100poss",
+                "ORB_per_100poss",
+                "DRB_per_100poss",
+                "TRB_per_100poss",
+                "AST_per_100poss",
+                "STL_per_100poss",
+                "BLK_per_100poss",
+                "TOV_per_100poss",
+                "PF_per_100poss",
+                "PTS_per_100poss",
+                "ORTG_per_100poss",
+                "DRTG_per_100poss",
+                "PER_advanced",
+                "TS%_advanced",
+                "3PAR_advanced",
+                "FTR_advanced",
+                "ORB%_advanced",
+                "DRB%_advanced",
+                "TRB%_advanced",
+                "AST%_advanced",
+                "STL%_advanced",
+                "BLK%_advanced",
+                "TOV%_advanced",
+                "USG%_advanced",
+                "OWS_advanced",
+                "DWS_advanced",
+                "WS_advanced",
+                "WS/48_advanced",
+                "OBPM_advanced",
+                "DBPM_advanced",
+                "BPM_advanced",
+                "VORP_advanced",
+                "MVP_VOTES_SHARE",
+                "MVP_WINNER",
+                "MVP_PODIUM",
+                "MVP_CANDIDATE",
+                "W",
+                "L",
+                "W/L%",
+                "GB",
+                "PW",
+                "PL",
+                "PS/G",
+                "PA/G",
+                "CONF",
+                "CONF_RANK",
+                "PRED",
+                "PRED_RANK",
             ]
         )
     history = build_history()
@@ -474,7 +578,7 @@ def run():
         - The true rank of the predicted MVP is **{avg_pred_rank}** in average
         """
         )
-        
+
         st.dataframe(data=performances, width=None, height=None)
         st.markdown(
             """
@@ -484,43 +588,82 @@ def run():
         )
 
     elif navigation_page == PAGE_EXPLICABILITY:
-        
+
         # Remove binary features - should no be trusted for SHAP
-        shap_values = shap_values[[f for f in shap_values.columns if "ERN_CONF" not in f and "POS_" not in f]]
+        shap_values = shap_values[
+            [f for f in shap_values.columns if "ERN_CONF" not in f and "POS_" not in f]
+        ]
         # Rename _advanced features - they are unique anyway
-        mapping = {f:remove_trailing_sequence(f, "_advanced") for f in shap_values.columns}
+        mapping = {
+            f: remove_trailing_sequence(f, "_advanced") for f in shap_values.columns
+        }
         shap_values = shap_values.rename(columns=mapping)
 
         st.subheader("Local explanation")
-        st.markdown("To understand which stats have the strongest impact on the model prediction for the MVP share one player.")
-        selected_player = st.selectbox("Select a player", predictions.index.to_list()[:10])
+        st.markdown(
+            "To understand which stats have the strongest impact on the model prediction for the MVP share one player."
+        )
+        selected_player = st.selectbox(
+            "Select a player", predictions.index.to_list()[:10]
+        )
         a = shap_values.loc[selected_player, :]
-        features_positive_impact = a[a>.0]
-        features_negative_impact = a[a<.0]
+        features_positive_impact = a[a > 0.0]
+        features_negative_impact = a[a < 0.0]
 
         num_stats = 3
-        top_features_positive_impact = features_positive_impact.sort_values(ascending=False).index[:num_stats].to_list()
-        top_features_positive_impact_values = features_positive_impact.sort_values(ascending=False).values[:num_stats]
-        top_features_negative_impact = features_negative_impact.sort_values(ascending=True).index[:num_stats].to_list()
-        top_features_negative_impact_values = features_negative_impact.sort_values(ascending=True).values[:num_stats]
-        
-        st.markdown("👍 Stats with the strongest **positive impact** on the model prediction for this player:")
+        top_features_positive_impact = (
+            features_positive_impact.sort_values(ascending=False)
+            .index[:num_stats]
+            .to_list()
+        )
+        top_features_positive_impact_values = features_positive_impact.sort_values(
+            ascending=False
+        ).values[:num_stats]
+        top_features_negative_impact = (
+            features_negative_impact.sort_values(ascending=True)
+            .index[:num_stats]
+            .to_list()
+        )
+        top_features_negative_impact_values = features_negative_impact.sort_values(
+            ascending=True
+        ).values[:num_stats]
+
+        st.markdown(
+            "👍 Stats with the strongest **positive impact** on the model prediction for this player:"
+        )
         for i, col in enumerate(st.columns(num_stats)):
-            col.success(f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*")
-        st.markdown("👎 Stats with the strongest **negative impact** on the model prediction for this player:")
+            col.success(
+                f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*"
+            )
+        st.markdown(
+            "👎 Stats with the strongest **negative impact** on the model prediction for this player:"
+        )
         for i, col in enumerate(st.columns(num_stats)):
-            col.error(f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*")
+            col.error(
+                f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*"
+            )
 
         st.subheader("Global explanation")
-        st.markdown("To understand which stats have an impact on the model prediction for the MVP share of the top-10 players.")
-        #vals = numpy.abs(shap_values.values).mean(0)
+        st.markdown(
+            "To understand which stats have an impact on the model prediction for the MVP share of the top-10 players."
+        )
+        # vals = numpy.abs(shap_values.values).mean(0)
         vals = numpy.array(shap_values.values).mean(0)
         vals_abs = numpy.abs(shap_values.values).mean(0)
-        shap_importance = pandas.DataFrame(list(zip(shap_values.columns, vals, vals_abs)), columns=['col_name', 'feature_importance_vals', 'abs_feature_importance_vals'])
+        shap_importance = pandas.DataFrame(
+            list(zip(shap_values.columns, vals, vals_abs)),
+            columns=[
+                "col_name",
+                "feature_importance_vals",
+                "abs_feature_importance_vals",
+            ],
+        )
 
         col1, col2 = st.columns([10, 9])
 
-        shap_importance = shap_importance.sort_values(by=['feature_importance_vals'], ascending=True)
+        shap_importance = shap_importance.sort_values(
+            by=["feature_importance_vals"], ascending=True
+        )
         col1.markdown("**Average impact on the predicted MVP share**")
         col1.vega_lite_chart(
             shap_importance,
@@ -530,9 +673,7 @@ def run():
                     "point": True,
                     "tooltip": True,
                 },
-                "title": {
-                    "text":None #"Average impact on the prediction"
-                },
+                "title": {"text": None},  # "Average impact on the prediction"
                 "encoding": {
                     "x": {
                         "field": "feature_importance_vals",
@@ -558,7 +699,9 @@ def run():
             use_container_width=True,
         )
 
-        shap_importance = shap_importance.sort_values(by=['abs_feature_importance_vals'], ascending=True)
+        shap_importance = shap_importance.sort_values(
+            by=["abs_feature_importance_vals"], ascending=True
+        )
         col2.markdown("**Average absolute impact (positive or negative)**")
         col2.vega_lite_chart(
             shap_importance,
@@ -568,9 +711,7 @@ def run():
                     "point": True,
                     "tooltip": True,
                 },
-                "title": {
-                    "text":None #"Average absolute impact"
-                },
+                "title": {"text": None},  # "Average absolute impact"
                 "encoding": {
                     "x": {
                         "field": "abs_feature_importance_vals",
@@ -595,9 +736,6 @@ def run():
             height=700,
             use_container_width=True,
         )
-
-
-
 
     else:
         st.error("Unknown page selected.")

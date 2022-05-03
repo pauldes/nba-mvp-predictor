@@ -125,6 +125,7 @@ def load_model_input(nrows: int = None):
         dtype={},
     )
 
+
 def load_shap_values(nrows: int = None):
     return pandas.read_csv(
         conf.data.shap_values.path,
@@ -135,4 +136,3 @@ def load_shap_values(nrows: int = None):
         nrows=nrows,
         dtype={},
     )
-

@@ -429,7 +429,7 @@ def make_gold_data_and_train_model():
 
     print(numpy.mean(results.AE))
     print(results.AE.max())
-    print(numpy.mean(results.AE ** 2))
+    print(numpy.mean(results.AE**2))
     all_winners["Real MVP rank"] = 1
     # To avoid extremely high values and skewed means, limit rank to 10
     all_winners["PRED_RANK"] = all_winners["PRED_RANK"].clip(upper=10)
