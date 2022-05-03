@@ -13,7 +13,7 @@ from nba_mvp_predictor import load, evaluate, artifacts, download, analytics
 # Constants
 PAGE_PREDICTIONS = "Current year predictions"
 PAGE_PERFORMANCE = "Model performance analysis"
-PAGE_EXPLICABILITY = "Model explicability"
+PAGE_EXPLICABILITY = "Model explainability"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
 
