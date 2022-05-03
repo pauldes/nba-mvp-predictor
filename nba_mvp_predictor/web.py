@@ -506,7 +506,7 @@ def run():
         
         st.markdown("👍 Stats with the strongest positive impact on the model prediction for this player:")
         for i, col in enumerate(st.columns(num_stats)):
-            col.info(f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*")
+            col.success(f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*")
         st.markdown("👎 Stats with the strongest negative impact on the model prediction for this player:")
         for i, col in enumerate(st.columns(num_stats)):
             col.error(f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*")
@@ -550,7 +550,7 @@ def run():
                         "type": "quantitative",
                         "title": None,
                         "legend": None,
-                        "scale": {"scheme": "redblue"},
+                        "scale": {"scheme": "redyellowgreen"},
                     },
                 },
             },
