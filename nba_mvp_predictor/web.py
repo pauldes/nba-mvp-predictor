@@ -492,6 +492,7 @@ def run():
         shap_values = shap_values.rename(columns=mapping)
 
         st.subheader("Local explanation")
+        st.markdown("To understand which stats have the strongest impact on the model prediction for the MVP share one player.")
         selected_player = st.selectbox("Select a player", predictions.index.to_list()[:10])
         a = shap_values.loc[selected_player, :]
         features_positive_impact = a[a>.0]
@@ -505,22 +506,22 @@ def run():
         
         st.markdown("👍 Stats with the strongest positive impact on the model prediction for this player:")
         for i, col in enumerate(st.columns(num_stats)):
-            col.info(f"**{(top_features_positive_impact[i])}** | *+{round(top_features_positive_impact_values[i], 2)}*")
+            col.info(f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*")
         st.markdown("👎 Stats with the strongest negative impact on the model prediction for this player:")
         for i, col in enumerate(st.columns(num_stats)):
-            col.error(f"**{top_features_negative_impact[i]}** | *{round(top_features_negative_impact_values[i], 2)}*")
+            col.error(f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*")
 
         st.subheader("Global explanation")
+        st.markdown("To understand which stats have an impact on the model prediction for the MVP share of the top-10 players.")
         #vals = numpy.abs(shap_values.values).mean(0)
         vals = numpy.array(shap_values.values).mean(0)
         vals_abs = numpy.abs(shap_values.values).mean(0)
         shap_importance = pandas.DataFrame(list(zip(shap_values.columns, vals, vals_abs)), columns=['col_name', 'feature_importance_vals', 'abs_feature_importance_vals'])
 
-
-        st.markdown(f"Most impactful stats for top-{len(shap_values)} players :")
         col1, col2 = st.columns([10, 9])
 
         shap_importance = shap_importance.sort_values(by=['feature_importance_vals'], ascending=True)
+        col1.markdown("**Average impact on the predicted MVP share**")
         col1.vega_lite_chart(
             shap_importance,
             {
@@ -530,13 +531,13 @@ def run():
                     "tooltip": True,
                 },
                 "title": {
-                    "text":"Average impact on the prediction"
+                    "text":None #"Average impact on the prediction"
                 },
                 "encoding": {
                     "x": {
                         "field": "feature_importance_vals",
                         "type": "quantitative",
-                        "title": None,
+                        "title": "Average impact (MVP share)",
                     },
                     "y": {
                         "field": "col_name",
@@ -558,6 +559,7 @@ def run():
         )
 
         shap_importance = shap_importance.sort_values(by=['abs_feature_importance_vals'], ascending=True)
+        col2.markdown("**Average absolute impact (positive or negative)**")
         col2.vega_lite_chart(
             shap_importance,
             {
@@ -567,13 +569,13 @@ def run():
                     "tooltip": True,
                 },
                 "title": {
-                    "text":"Average absolute impact"
+                    "text":None #"Average absolute impact"
                 },
                 "encoding": {
                     "x": {
                         "field": "abs_feature_importance_vals",
                         "type": "quantitative",
-                        "title": None,
+                        "title": "Average absolute impact (MVP share)",
                     },
                     "y": {
                         "field": "col_name",
