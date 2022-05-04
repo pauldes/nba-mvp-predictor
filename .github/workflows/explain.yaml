@@ -43,6 +43,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade pipenv
           pipenv install --deploy
+      - name: Run the CLI command to download data
+        run: |
+          pipenv run python . download --seasons 1980 1990 2000 2010 2020
       - name: Run the CLI command to explain predictions
         run: |
           pipenv run python . explain

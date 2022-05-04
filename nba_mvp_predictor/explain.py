@@ -6,13 +6,29 @@ import numpy
 from matplotlib import pyplot
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, download
+from nba_mvp_predictor import load, download, predict, train
 
+def get_model_input_alternative():
+    # Data needs to be downloaded prior
+    train.make_bronze_data()
+    train.make_silver_data()
+    Xs = []
+    for season in [1980, 1990, 2000, 2010, 2020]:
+        X = predict.prepare_data_for_prediction_from_silver(season)
+        logger.debug(f"Season {season} - {X.shape} entries")
+        Xs.append(X)
+    X = pandas.concat(Xs, sort=False)
+    logger.debug(f"All seasons - {X.shape} entries")
+    return X
 
 def explain_model():
     """Explain model predictions."""
     model = load.load_model()
-    model_input = load.load_model_input()
+    model_input_old_seasons = get_model_input_alternative()
+    model_input_current_season = load.load_model_input()
+    model_input = pandas.concat(
+        [model_input_old_seasons, model_input_current_season], sort=False
+    )
     predictions = load.load_predictions()
     predictions = predictions.sort_values(by="PRED_RANK", ascending=True)
     player_season_team_list = predictions.index.to_list()
@@ -22,8 +38,8 @@ def explain_model():
     sample = model_input[
         model_input.index.isin(player_season_team_list[:sample_size])
     ]
-    # Compare to a population of 100 players
-    population_size = 100
+    # Compare to a population of 500 players
+    population_size = 500
     logger.debug(f"Number of players in predictions : {len(player_season_team_list)}")
     # Old method : not ideal because only players with positive shares are kept
     population = model_input[
