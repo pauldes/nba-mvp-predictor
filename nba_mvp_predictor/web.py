@@ -1,4 +1,5 @@
 from datetime import datetime
+from distutils.command.sdist import sdist
 import os
 import re
 
@@ -121,15 +122,26 @@ def download_shap_values():
 
 
 def build_shap_values():
-    download_shap_values()
-    shap_values = pandas.read_csv(
-        "./data/shap_values.csv.zip",
-        sep=conf.data.shap_values.sep,
-        encoding=conf.data.shap_values.encoding,
-        compression="zip",
-        index_col=0,
-        dtype={},
-    )
+    use_local_file = False
+    if use_local_file:
+        shap_values = pandas.read_csv(
+            "./data/shap_values.csv",
+            sep=conf.data.shap_values.sep,
+            encoding=conf.data.shap_values.encoding,
+            compression=None,
+            index_col=0,
+            dtype={},
+        )
+    else:
+        download_shap_values()
+        shap_values = pandas.read_csv(
+            "./data/shap_values.csv.zip",
+            sep=conf.data.shap_values.sep,
+            encoding=conf.data.shap_values.encoding,
+            compression="zip",
+            index_col=0,
+            dtype={},
+        )
     return shap_values
 
 
