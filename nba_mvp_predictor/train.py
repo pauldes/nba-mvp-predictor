@@ -410,6 +410,8 @@ def make_gold_data_and_train_model():
         results = results.merge(
             data_all_test[["SEASON"]], left_index=True, right_index=True
         )
+        # Export detailed results
+        # results.sort_values(by="PRED", ascending=False).head(10).to_csv("./data/temp/"+str(season)+"_results.csv")
         real_winners = data_all_test.sort_values(
             by=target, ascending=False
         ).drop_duplicates(subset=["SEASON"], keep="first")[["SEASON"]]
