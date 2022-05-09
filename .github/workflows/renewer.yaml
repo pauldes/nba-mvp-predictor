@@ -1,4 +1,4 @@
-name: renewer
+name: renew
 on:
   schedule:
     - cron:  '0 12 * * MON,THU' # At 12:00 on Monday and Thursday.
