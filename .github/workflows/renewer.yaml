@@ -27,14 +27,14 @@ jobs:
       - name: Download model performances from artifact
         uses: aochmann/actions-download-artifact@master
         with:
-          name: model.joblib
+          name: performances.csv
           latest: true
           path: ./
       - name: Upload model performances as artifact for 10 more days
         uses: actions/upload-artifact@v2
         with: 
-          name: model.joblib
-          path: ./model.joblib
+          name: performances.csv
+          path: ./performances.csv
           retention-days: 10
   renew-model-features:
     runs-on: ubuntu-latest
@@ -42,14 +42,14 @@ jobs:
       - name: Download features from artifact
         uses: aochmann/actions-download-artifact@master
         with:
-          name: model.joblib
+          name: features.json
           latest: true
           path: ./
       - name: Upload features as artifact for 10 more days
         uses: actions/upload-artifact@v2
         with: 
-          name: model.joblib
-          path: ./model.joblib
+          name: features.json
+          path: ./features.json
           retention-days: 10
   renew-model-input:
     runs-on: ubuntu-latest
@@ -74,14 +74,14 @@ jobs:
       - name: Download predictions from artifact
         uses: aochmann/actions-download-artifact@master
         with:
-          name: model.joblib
+          name: predictions.csv
           latest: true
           path: ./
       - name: Upload predictions as artifact for 10 more days
         uses: actions/upload-artifact@v2
         with: 
-          name: model.joblib
-          path: ./model.joblib
+          name: predictions.csv
+          path: ./predictions.csv
           retention-days: 10
   renew-predictions-history:
     runs-on: ubuntu-latest
@@ -89,12 +89,12 @@ jobs:
       - name: Download predictions history from artifact
         uses: aochmann/actions-download-artifact@master
         with:
-          name: model.joblib
+          name: history.csv
           latest: true
           path: ./
       - name: Upload history as artifact for 10 more days
         uses: actions/upload-artifact@v2
         with: 
-          name: model.joblib
-          path: ./model.joblib
+          name: history.csv
+          path: ./history.csv
           retention-days: 10
