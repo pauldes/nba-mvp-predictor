@@ -65,8 +65,8 @@ web:
     
 
     
-    A statistical regression model is fitted on historical data (player and team stats, and MVP voting results).
-    It is then used to predict this season MVP based on current data.
+    A statistical regression model was fitted on historical data (player and team stats, and MVP voting results).
+    It is used to predict this season MVP based on current data.
     The model predicts the *award share* (the number of points a player received for MVP award over the total points of all first-place votes).
     This share can then be converted to a probability using various methods (see *Predictions parameters*).
   sidebar-bottom-text: "*Made by Paul ([@wontcalltimeout](https://twitter.com/wontcalltimeout)). Code on [GitHub](https://github.com/pauldes/nba-mvp-predictor).*"
