@@ -542,25 +542,28 @@ def run():
             st.warning("This section is unavailable because loading predictions file failed.")
 
         st.subheader("Predictions history")
-        col1, col2, col3 = st.columns([2, 3, 3])
-        keep_top_n = col2.slider(
-            "Number of players to show",
-            min_value=3,
-            max_value=compute_probs_based_on_top_n,
-            value=5,
-            step=1,
-            format="%d players",
-        )
-
-        variable_to_draw_dict = {
-            "MVP probability (%)": "chance",
-            "Predicted MVP share": "prediction",
-        }
-        variable_to_draw = col1.radio(
-            "Variable to draw", list(variable_to_draw_dict.keys())
-        )
 
         if building_history_succeeded:
+        
+            col1, col2, col3 = st.columns([2, 3, 3])
+            keep_top_n = col2.slider(
+                "Number of players to show",
+                min_value=3,
+                max_value=compute_probs_based_on_top_n,
+                value=5,
+                step=1,
+                format="%d players",
+            )
+
+            variable_to_draw_dict = {
+                "MVP probability (%)": "chance",
+                "Predicted MVP share": "prediction",
+            }
+            variable_to_draw = col1.radio(
+                "Variable to draw", list(variable_to_draw_dict.keys())
+            )
+
+            
 
             num_past_days = col3.slider(
                 "Show history for last",
