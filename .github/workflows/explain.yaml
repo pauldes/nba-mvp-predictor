@@ -1,5 +1,6 @@
 name: explain
-#TODO : merge with predict.yaml
+# TODO:
+# Merge with predict.yaml
 on:
   schedule:
     - cron:  '0 10 * * *' # Everyday at 10UTC

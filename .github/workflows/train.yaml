@@ -1,4 +1,6 @@
 name: train
+# TODO :
+# Once season has begun, renew the model artifact until the end to ensure consistency.
 on:
   # Schedules execution is deactivated for inter-season work.  
   # schedule:

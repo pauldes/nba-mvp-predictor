@@ -1,4 +1,7 @@
 name: renew
+# TODO :
+# Once season is over, renew all artifacts every week until the next season
+# Merge with predict with an env variable SEASON_IS_OVER in the CI could be a solution.
 on:
   # Schedules execution is deactivated for inter-season work.
   # schedule:
