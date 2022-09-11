@@ -1,7 +1,8 @@
 name: renew
 on:
-  schedule:
-    - cron:  '0 12 * * MON,THU' # At 12:00 on Monday and Thursday.
+  # Schedules execution is deactivated for inter-season work.
+  # schedule:
+  #   - cron:  '0 12 * * MON,THU' # At 12:00 on Monday and Thursday.
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO
