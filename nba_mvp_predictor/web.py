@@ -421,57 +421,58 @@ def run():
 
     if navigation_page == PAGE_PREDICTIONS:
 
-        col1, col2 = st.columns(2)
-        col1.subheader("Predicted top 3")
-        col2.subheader("Prediction parameters")
-        confidence_mode = col2.radio(
-            "Method used to estimate MVP probability",
-            [CONFIDENCE_MODE_SHARE, CONFIDENCE_MODE_SOFTMAX],
-        )
-        compute_probs_based_on_top_n = col2.slider(
-            "Number of players used to estimate probability",
-            min_value=5,
-            max_value=15,
-            value=10,
-            step=5,
-            format="%d players",
-        )
-        if confidence_mode == CONFIDENCE_MODE_SOFTMAX:
-            predictions.loc[
-                predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
-            ] = (
-                evaluate.softmax(
-                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
-                        "PRED"
-                    ]
-                )
-                * 100
-            )
-        else:
-            predictions.loc[
-                predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
-            ] = (
-                evaluate.share(
-                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
-                        "PRED"
-                    ]
-                )
-                * 100
-            )
-        predictions.loc[
-            predictions.PRED_RANK > compute_probs_based_on_top_n, "MVP probability"
-        ] = 0.0
-        predictions["MVP probability"] = predictions["MVP probability"].map(
-            "{:,.2f}%".format
-        )
-        predictions["MVP rank"] = predictions["PRED_RANK"]
-        show_columns = ["MVP probability", "MVP rank"] + initial_columns[:]
-        predictions = predictions[show_columns]
-
-        top_3 = predictions["MVP probability"].head(3).to_dict()
-        emojis = ["🥇", "🥈", "🥉"]
-
         if building_predictions_succeeded:
+
+            col1, col2 = st.columns(2)
+            col1.subheader("Predicted top 3")
+            col2.subheader("Prediction parameters")
+            confidence_mode = col2.radio(
+                "Method used to estimate MVP probability",
+                [CONFIDENCE_MODE_SHARE, CONFIDENCE_MODE_SOFTMAX],
+            )
+            compute_probs_based_on_top_n = col2.slider(
+                "Number of players used to estimate probability",
+                min_value=5,
+                max_value=15,
+                value=10,
+                step=5,
+                format="%d players",
+            )
+            if confidence_mode == CONFIDENCE_MODE_SOFTMAX:
+                predictions.loc[
+                    predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
+                ] = (
+                    evaluate.softmax(
+                        predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
+                            "PRED"
+                        ]
+                    )
+                    * 100
+                )
+            else:
+                predictions.loc[
+                    predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
+                ] = (
+                    evaluate.share(
+                        predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
+                            "PRED"
+                        ]
+                    )
+                    * 100
+                )
+            predictions.loc[
+                predictions.PRED_RANK > compute_probs_based_on_top_n, "MVP probability"
+            ] = 0.0
+            predictions["MVP probability"] = predictions["MVP probability"].map(
+                "{:,.2f}%".format
+            )
+            predictions["MVP rank"] = predictions["PRED_RANK"]
+            show_columns = ["MVP probability", "MVP rank"] + initial_columns[:]
+            predictions = predictions[show_columns]
+
+            top_3 = predictions["MVP probability"].head(3).to_dict()
+            emojis = ["🥇", "🥈", "🥉"]
+
 
             for n, player_name in enumerate(top_3):
                 title_level = "###" + n * "#"
@@ -481,16 +482,12 @@ def run():
                 *{top_3[player_name]} probability to win MVP*
                 """
                 )
-        
-        else:
-            col1.warning("This section is unavailable because loading predictions file failed.")
 
-        show_top_n = compute_probs_based_on_top_n
-        # show_top_n = min([compute_probs_based_on_top_n, 10])
+            show_top_n = compute_probs_based_on_top_n
+            # show_top_n = min([compute_probs_based_on_top_n, 10])
 
-        st.subheader(f"Predicted top {show_top_n}")
+            st.subheader(f"Predicted top {show_top_n}")
 
-        if building_predictions_succeeded:
 
             col1, col2 = st.columns(2)
             # col2.markdown("Player statistics")
