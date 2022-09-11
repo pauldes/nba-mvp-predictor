@@ -33,7 +33,7 @@ def load_json_from_url(url: str):
     """
     response = requests.get(url)
     if response.status_code == 403:
-        raise Exception(f"Erreur 403 en requêtant {url} : {response.content}")
+        raise Exception(f"Error 403 when requesting {url} : {response.content}")
     return response.json()
 
 
