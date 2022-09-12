@@ -1,9 +1,11 @@
 name: explain
 # TODO:
+# Once season is over, stop explaining every day.
+# Renew all artifacts every week until the next season.
 # Merge with predict.yaml
 on:
-  schedule:
-    - cron:  '0 10 * * *' # Everyday at 10UTC
+  # schedule:
+  #   - cron:  '0 10 * * *' # Everyday at 10UTC
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO

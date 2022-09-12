@@ -1,11 +1,11 @@
 name: predict
 # TODO :
 # Once season is over, stop predicting every day.
-# Renew all artifacts every week until the next season
+# Renew all artifacts every week until the next season.
 # Merge with renewer with an env variable SEASON_IS_OVER in the CI could be a solution.
 on:
-  schedule:
-    - cron:  '0 8 * * *' # Everyday at 8UTC
+  # schedule:
+  #   - cron:  '0 8 * * *' # Everyday at 8UTC
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO
@@ -58,12 +58,12 @@ jobs:
           name: predictions.csv
           path: ./data/predictions.csv
           retention-days: 10
-      # - name: Upload history as artifact
-      #   uses: actions/upload-artifact@v2
-      #   with: 
-      #     name: history.csv
-      #     path: ./data/history.csv
-      #     retention-days: 10
+      - name: Upload history as artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: history.csv
+          path: ./data/history.csv
+          retention-days: 10
       - name: Upload model input dataset as artifact
         uses: actions/upload-artifact@v2
         with: 
