@@ -4,12 +4,13 @@ name: renew
 # Merge with predict with an env variable SEASON_IS_OVER in the CI could be a solution.
 on:
   # Schedules execution is deactivated for inter-season work.
-  # schedule:
-  #   - cron:  '0 12 * * MON,THU' # At 12:00 on Monday and Thursday.
+  schedule:
+    - cron:  '0 12 * * MON' # At 12:00 on Mondays
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO
 jobs:
+  # These jobs shall run once the model has be trained.
   renew-model:
     runs-on: ubuntu-latest
     steps:
@@ -71,7 +72,7 @@ jobs:
           path: ./model_input.csv
           retention-days: 10
 
-  # TODO : only if season is over
+  # TODO : Run these jobs if season is over, use an environment variable.
   renew-predictions:
     runs-on: ubuntu-latest
     steps:
@@ -86,6 +87,21 @@ jobs:
         with: 
           name: predictions.csv
           path: ./predictions.csv
+          retention-days: 10
+  renew-shap-values:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download shap values from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: shap_values.csv
+          latest: true
+          path: ./
+      - name: Upload predictions as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: shap_values.csv
+          path: ./shap_values.csv
           retention-days: 10
   renew-predictions-history:
     runs-on: ubuntu-latest
