@@ -1,8 +1,8 @@
-[![tests](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/tests.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/tests.yaml)
+[![test](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/tests.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/test.yaml)
 [![train](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/train.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/train.yaml)
 [![predict](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/predict.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/predict.yaml)
-[![renew](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/renew.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/renew.yaml)
 [![explain](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/explain.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/explain.yaml)
+[![renew](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/renew.yaml/badge.svg)](https://github.com/pauldes/nba-mvp-predictor/actions/workflows/renew.yaml)
 
 # **The MVP Predict🏀r** : Predicting the NBA Most Valuable Player
 
