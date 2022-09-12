@@ -554,7 +554,6 @@ def run():
                 step=1,
                 format="%d players",
             )
-
             variable_to_draw_dict = {
                 "MVP probability (%)": "chance",
                 "Predicted MVP share": "prediction",
@@ -562,17 +561,21 @@ def run():
             variable_to_draw = col1.radio(
                 "Variable to draw", list(variable_to_draw_dict.keys())
             )
-
-            
-
-            num_past_days = col3.slider(
-                "Show history for last",
-                min_value=max(int(history.days_ago.min()), 3),
-                max_value=int(history.days_ago.max()),
-                value=min(int(history.days_ago.max()), 30),
-                step=1,
-                format="%d days",
-            )
+            slider_min_value = max(int(history.days_ago.min()), 3)
+            slider_max_value = int(history.days_ago.max())
+            if slider_min_value < slider_max_value:
+                num_past_days = col3.slider(
+                    "Show history for last",
+                    min_value=slider_min_value,
+                    max_value=slider_max_value,
+                    value=min(int(history.days_ago.max()), 30),
+                    step=1,
+                    format="%d days",
+                )
+            else:
+                logger.warning("Could not build history range slider")
+                num_past_days = 1
+              
             prepared_history = prepare_history(
                 history,
                 keep_top_n,
@@ -580,7 +583,6 @@ def run():
                 compute_probs_based_on_top_n,
                 keep_last_days=num_past_days,
             )
-
             st.vega_lite_chart(
                 prepared_history,
                 {
@@ -717,14 +719,20 @@ def run():
             )
             for i, col in enumerate(st.columns(num_stats)):
                 col.success(
-                    f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*"
+                    f"""
+                    **{(top_features_positive_impact[i])}**   
+                    *+{round(top_features_positive_impact_values[i], 2)} MVP share*
+                    """
                 )
             st.markdown(
                 "👎 Stats with the strongest **negative impact** on the model prediction for this player:"
             )
             for i, col in enumerate(st.columns(num_stats)):
                 col.error(
-                    f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*"
+                    f"""
+                    **{top_features_negative_impact[i]}**    
+                    *{round(top_features_negative_impact_values[i], 2)} MVP share*
+                    """
                 )
 
             st.subheader("Global explanation")
