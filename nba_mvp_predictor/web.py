@@ -432,10 +432,10 @@ def run():
             )
             compute_probs_based_on_top_n = col2.slider(
                 "Number of players used to estimate probability",
-                min_value=5,
-                max_value=15,
-                value=10,
-                step=5,
+                min_value=3,
+                max_value=10,
+                value=5,
+                step=1,
                 format="%d players",
             )
             if confidence_mode == CONFIDENCE_MODE_SOFTMAX:
