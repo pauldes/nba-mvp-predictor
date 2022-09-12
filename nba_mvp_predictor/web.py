@@ -106,7 +106,7 @@ def download_performances():
 @st.cache(ttl=3600)  # 1h cache
 def download_predictions():
     date, url = artifacts.get_last_artifact("predictions.csv")
-    logger.debug(f"Downloading history from {url}")
+    logger.debug(f"Downloading predictions from {url}")
     download.download_data_from_url_to_file(
         url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth()
     )
@@ -115,7 +115,7 @@ def download_predictions():
 @st.cache(ttl=3600)  # 1h cache
 def download_shap_values():
     date, url = artifacts.get_last_artifact("shap_values.csv")
-    logger.debug(f"Downloading history from {url}")
+    logger.debug(f"Downloading shap values from {url}")
     download.download_data_from_url_to_file(
         url, "./data/shap_values.csv.zip", auth=artifacts.get_github_auth()
     )
@@ -240,8 +240,9 @@ def run():
     local_css("./nba_mvp_predictor/custom.css")
     try:
         predictions = build_predictions()
-    except Exception as e:
-        logger.error(f"Failed to build predictions {e}", exc_info=True)
+        building_predictions_succeeded = True
+    except (OSError, Exception) as e:
+        logger.error(f"Failed to build predictions {e}", exc_info=False)
         predictions = pandas.DataFrame(
             columns=[
                 "PLAYER",
@@ -348,13 +349,59 @@ def run():
                 "PRED_RANK",
             ]
         )
-    history = build_history()
-    performances = build_performances()
-    shap_values = build_shap_values()
+        building_predictions_succeeded = False
+    try:
+        history = build_history()
+        last_update = str(history.date.max().date())
+        building_history_succeeded = True
+    except (OSError, Exception) as e:
+        logger.error(f"Failed to build history {e}", exc_info=False)
+        history = pandas.DataFrame(
+            columns=[
+                "DATE",
+                "PLAYER",
+                "PRED"
+            ]
+        )
+        last_update = "N/A"
+        building_history_succeeded = False
+    try:
+        performances = build_performances()
+        building_performances_succeeded = True
+    except (OSError, Exception) as e:
+        logger.error(f"Failed to build performances {e}", exc_info=False)
+        performances = pandas.DataFrame(
+            columns=[
+                "DATE",
+                "SEASON",
+                "TRUTH",
+                "PRED",
+                "AE",
+                "Pred. MVP",
+                "True MVP",
+                "REAL_RANK",
+                "PRED_RANK",
+                "Real MVP rank"
+                "PLAYER",
+                "PRED"
+            ]
+        )
+        building_performances_succeeded = False
+    try:
+        shap_values = build_shap_values()
+        building_shap_values_succeeded = True
+    except (OSError, Exception) as e:
+        logger.error(f"Failed to build shap values {e}", exc_info=False)
+        shap_values = pandas.DataFrame(
+            columns=[
+                "player","2P_per_game","FGA_per_100poss","TRB_per_game","FTA_per_game","FG_per_36min","PS/G","AST_per_36min","FG_per_100poss","PER_advanced","PA/G","FT_per_36min","PTS_per_36min","AST%_advanced","EFG%_per_game","2P%","AST_per_game","MP","ORB_per_36min","PL","DRTG_per_100poss","DRB_per_game","WS/48_advanced","DBPM_advanced","BLK_per_100poss","2P_per_100poss","CONF_RANK","FG_per_game","FG%","FTR_advanced","ORB_per_game","2PA_per_game","2PA_per_36min","PW","GB","OWS_advanced","FGA_per_game","BLK_per_game","STL_per_game","FTA_per_36min","G","BPM_advanced","VORP_advanced","OBPM_advanced","W","W/L%","WS_advanced","PF_per_36min","PF_per_100poss","FT_per_game","FT%","PTS_per_game","L","TRB_per_100poss","TS%_advanced","STL_per_100poss","DWS_advanced","FGA_per_36min","PTS_per_100poss","DRB_per_36min","POS_C","POS_PF","POS_PG","POS_SF","POS_SG","CONF_EASTERN_CONF","CONF_WESTERN_CONF"
+            ]
+        )
+        building_shap_values_succeeded = False
     current_season = (
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
-    last_update = history.date.max().date()
+    
     st.markdown(
         f"""
     *Predicting the NBA Most Valuable Player for the {current_season-1}-{str(current_season)[-2:]} season using machine learning.*
@@ -374,380 +421,408 @@ def run():
 
     if navigation_page == PAGE_PREDICTIONS:
 
-        col1, col2 = st.columns(2)
-        col1.subheader("Predicted top 3")
-        col2.subheader("Prediction parameters")
-        confidence_mode = col2.radio(
-            "Method used to estimate MVP probability",
-            [CONFIDENCE_MODE_SHARE, CONFIDENCE_MODE_SOFTMAX],
-        )
-        compute_probs_based_on_top_n = col2.slider(
-            "Number of players used to estimate probability",
-            min_value=5,
-            max_value=15,
-            value=10,
-            step=5,
-            format="%d players",
-        )
-        if confidence_mode == CONFIDENCE_MODE_SOFTMAX:
-            predictions.loc[
-                predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
-            ] = (
-                evaluate.softmax(
-                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
-                        "PRED"
-                    ]
+        if building_predictions_succeeded:
+
+            col1, col2 = st.columns(2)
+            col1.subheader("Predicted top 3")
+            col2.subheader("Prediction parameters")
+            confidence_mode = col2.radio(
+                "Method used to estimate MVP probability",
+                [CONFIDENCE_MODE_SHARE, CONFIDENCE_MODE_SOFTMAX],
+            )
+            compute_probs_based_on_top_n = col2.slider(
+                "Number of players used to estimate probability",
+                min_value=5,
+                max_value=15,
+                value=10,
+                step=5,
+                format="%d players",
+            )
+            if confidence_mode == CONFIDENCE_MODE_SOFTMAX:
+                predictions.loc[
+                    predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
+                ] = (
+                    evaluate.softmax(
+                        predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
+                            "PRED"
+                        ]
+                    )
+                    * 100
                 )
-                * 100
-            )
-        else:
-            predictions.loc[
-                predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
-            ] = (
-                evaluate.share(
-                    predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
-                        "PRED"
-                    ]
+            else:
+                predictions.loc[
+                    predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
+                ] = (
+                    evaluate.share(
+                        predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
+                            "PRED"
+                        ]
+                    )
+                    * 100
                 )
-                * 100
+            predictions.loc[
+                predictions.PRED_RANK > compute_probs_based_on_top_n, "MVP probability"
+            ] = 0.0
+            predictions["MVP probability"] = predictions["MVP probability"].map(
+                "{:,.2f}%".format
             )
-        predictions.loc[
-            predictions.PRED_RANK > compute_probs_based_on_top_n, "MVP probability"
-        ] = 0.0
-        predictions["MVP probability"] = predictions["MVP probability"].map(
-            "{:,.2f}%".format
-        )
-        predictions["MVP rank"] = predictions["PRED_RANK"]
-        show_columns = ["MVP probability", "MVP rank"] + initial_columns[:]
-        predictions = predictions[show_columns]
+            predictions["MVP rank"] = predictions["PRED_RANK"]
+            show_columns = ["MVP probability", "MVP rank"] + initial_columns[:]
+            predictions = predictions[show_columns]
 
-        top_3 = predictions["MVP probability"].head(3).to_dict()
-        emojis = ["🥇", "🥈", "🥉"]
+            top_3 = predictions["MVP probability"].head(3).to_dict()
+            emojis = ["🥇", "🥈", "🥉"]
 
-        for n, player_name in enumerate(top_3):
-            title_level = "###" + n * "#"
-            col1.markdown(
-                f"""
-            ##### {emojis[n]} **{player_name}**
-            *{top_3[player_name]} probability to win MVP*
-            """
+
+            for n, player_name in enumerate(top_3):
+                title_level = "###" + n * "#"
+                col1.markdown(
+                    f"""
+                ##### {emojis[n]} **{player_name}**
+                *{top_3[player_name]} probability to win MVP*
+                """
+                )
+
+            show_top_n = compute_probs_based_on_top_n
+            # show_top_n = min([compute_probs_based_on_top_n, 10])
+
+            st.subheader(f"Predicted top {show_top_n}")
+
+
+            col1, col2 = st.columns(2)
+            # col2.markdown("Player statistics")
+            cols = [
+                col for col in predictions.columns if "MVP" not in col and "PRED" not in col
+            ]
+            col2.dataframe(
+                data=predictions.head(show_top_n)[cols],
+                width=None,
+                height=300,
             )
 
-        show_top_n = compute_probs_based_on_top_n
-        # show_top_n = min([compute_probs_based_on_top_n, 10])
+            predictions["player"] = predictions.index
+            predictions["chance"] = predictions["MVP probability"].str[:-1]
+            predictions["chance"] = pandas.to_numeric(predictions["chance"])
 
-        st.subheader(f"Predicted top {show_top_n}")
-
-        col1, col2 = st.columns(2)
-        # col2.markdown("Player statistics")
-        cols = [
-            col for col in predictions.columns if "MVP" not in col and "PRED" not in col
-        ]
-        col2.dataframe(
-            data=predictions.head(show_top_n)[cols],
-            width=None,
-            height=300,
-        )
-
-        predictions["player"] = predictions.index
-        predictions["chance"] = predictions["MVP probability"].str[:-1]
-        predictions["chance"] = pandas.to_numeric(predictions["chance"])
-
-        # col1.markdown("Chart")
-        col1.vega_lite_chart(
-            predictions.head(show_top_n),
-            {
-                "mark": {
-                    "type": "bar",
-                    "point": True,
-                    "tooltip": True,
-                },
-                "encoding": {
-                    "x": {
-                        "field": "chance",
-                        "type": "quantitative",
-                        "title": " MVP probability (%)",
+            # col1.markdown("Chart")
+            col1.vega_lite_chart(
+                predictions.head(show_top_n),
+                {
+                    "mark": {
+                        "type": "bar",
+                        "point": True,
+                        "tooltip": True,
                     },
-                    "y": {
-                        "field": "player",
-                        "type": "nominal",
-                        "title": None,
-                        "sort": "-x",
-                    },
-                    "color": {
-                        "field": "chance",
-                        "type": "quantitative",
-                        "title": None,
-                        "legend": None,
-                        "scale": {"scheme": "purplebluegreen"},
-                    },
-                },
-            },
-            height=350,
-            use_container_width=True,
-        )
-
-        st.subheader("Predictions history")
-        col1, col2, col3 = st.columns([2, 3, 3])
-        keep_top_n = col2.slider(
-            "Number of players to show",
-            min_value=3,
-            max_value=compute_probs_based_on_top_n,
-            value=5,
-            step=1,
-            format="%d players",
-        )
-
-        variable_to_draw_dict = {
-            "MVP probability (%)": "chance",
-            "Predicted MVP share": "prediction",
-        }
-        variable_to_draw = col1.radio(
-            "Variable to draw", list(variable_to_draw_dict.keys())
-        )
-
-        num_past_days = col3.slider(
-            "Show history for last",
-            min_value=max(int(history.days_ago.min()), 3),
-            max_value=int(history.days_ago.max()),
-            value=min(int(history.days_ago.max()), 30),
-            step=1,
-            format="%d days",
-        )
-        prepared_history = prepare_history(
-            history,
-            keep_top_n,
-            confidence_mode,
-            compute_probs_based_on_top_n,
-            keep_last_days=num_past_days,
-        )
-
-        st.vega_lite_chart(
-            prepared_history,
-            {
-                "mark": {
-                    "type": "line",
-                    "interpolate": "monotone",
-                    "point": True,
-                    "tooltip": True,
-                },
-                "encoding": {
-                    "x": {
-                        "timeUnit": "yearmonthdate",
-                        "field": "date",
-                        "title": "Date",
-                    },
-                    "y": {
-                        "field": variable_to_draw_dict[variable_to_draw],
-                        "type": "quantitative",
-                        "title": variable_to_draw,
-                    },
-                    "color": {
-                        "field": "player",
-                        "type": "nominal",
-                        "scale": {"scheme": "category20"},
-                        "legend": {
-                            "orient": "bottom-left",
+                    "encoding": {
+                        "x": {
+                            "field": "chance",
+                            "type": "quantitative",
+                            "title": " MVP probability (%)",
+                        },
+                        "y": {
+                            "field": "player",
+                            "type": "nominal",
+                            "title": None,
+                            "sort": "-x",
+                        },
+                        "color": {
+                            "field": "chance",
+                            "type": "quantitative",
+                            "title": None,
+                            "legend": None,
+                            "scale": {"scheme": "purplebluegreen"},
                         },
                     },
                 },
-            },
-            height=400,
-            use_container_width=True,
-        )
+                height=350,
+                use_container_width=True,
+            )
+
+        else:
+            st.warning("This section is unavailable because loading predictions file failed.")
+
+        st.subheader("Predictions history")
+
+        if building_history_succeeded:
+        
+            col1, col2, col3 = st.columns([2, 3, 3])
+            keep_top_n = col2.slider(
+                "Number of players to show",
+                min_value=3,
+                max_value=compute_probs_based_on_top_n,
+                value=5,
+                step=1,
+                format="%d players",
+            )
+
+            variable_to_draw_dict = {
+                "MVP probability (%)": "chance",
+                "Predicted MVP share": "prediction",
+            }
+            variable_to_draw = col1.radio(
+                "Variable to draw", list(variable_to_draw_dict.keys())
+            )
+
+            
+
+            num_past_days = col3.slider(
+                "Show history for last",
+                min_value=max(int(history.days_ago.min()), 3),
+                max_value=int(history.days_ago.max()),
+                value=min(int(history.days_ago.max()), 30),
+                step=1,
+                format="%d days",
+            )
+            prepared_history = prepare_history(
+                history,
+                keep_top_n,
+                confidence_mode,
+                compute_probs_based_on_top_n,
+                keep_last_days=num_past_days,
+            )
+
+            st.vega_lite_chart(
+                prepared_history,
+                {
+                    "mark": {
+                        "type": "line",
+                        "interpolate": "monotone",
+                        "point": True,
+                        "tooltip": True,
+                    },
+                    "encoding": {
+                        "x": {
+                            "timeUnit": "yearmonthdate",
+                            "field": "date",
+                            "title": "Date",
+                        },
+                        "y": {
+                            "field": variable_to_draw_dict[variable_to_draw],
+                            "type": "quantitative",
+                            "title": variable_to_draw,
+                        },
+                        "color": {
+                            "field": "player",
+                            "type": "nominal",
+                            "scale": {"scheme": "category20"},
+                            "legend": {
+                                "orient": "bottom-left",
+                            },
+                        },
+                    },
+                },
+                height=400,
+                use_container_width=True,
+            )
+
+        
+        else:
+            st.warning("This section is unavailable because loading history file failed.")
+
 
     elif navigation_page == PAGE_PERFORMANCE:
-        col1, col2 = st.columns(2)
-        # col1
-        percentage = mvp_found_pct(performances)
-        num_test_seasons = len(performances)
-        avg_real_rank = avg_real_mvp_rank(performances)
-        avg_pred_rank = avg_pred_mvp_rank(performances)
 
-        col1.markdown(
-            f"##### All {num_test_seasons} seasons ({performances.index.min()}-{performances.index.max()})"
-        )
-        col1.markdown(
-            f"""
-        - **{percentage}** of MVPs correctly found
-        - The true MVP is ranked **{avg_real_rank}** by the model in average
-        - The true rank of the predicted MVP is **{avg_pred_rank}** in average
-        """
-        )
-        # col2
-        performances_last10 = performances.head(10)
-        percentage = mvp_found_pct(performances_last10)
-        num_test_seasons = len(performances_last10)
-        avg_real_rank = avg_real_mvp_rank(performances_last10)
-        avg_pred_rank = avg_pred_mvp_rank(performances_last10)
-        col2.markdown(
-            f"##### Last {num_test_seasons} seasons ({performances_last10.index.min()}-{performances_last10.index.max()})"
-        )
-        col2.markdown(
-            f"""
-        - **{percentage}** of MVPs correctly found
-        - The true MVP is ranked **{avg_real_rank}** by the model in average
-        - The true rank of the predicted MVP is **{avg_pred_rank}** in average
-        """
-        )
+        if building_performances_succeeded:
 
-        st.dataframe(data=performances, width=None, height=None)
-        st.markdown(
+            col1, col2 = st.columns(2)
+            # col1
+            percentage = mvp_found_pct(performances)
+            num_test_seasons = len(performances)
+            avg_real_rank = avg_real_mvp_rank(performances)
+            avg_pred_rank = avg_pred_mvp_rank(performances)
+
+            col1.markdown(
+                f"##### All {num_test_seasons} seasons ({performances.index.min()}-{performances.index.max()})"
+            )
+            col1.markdown(
+                f"""
+            - **{percentage}** of MVPs correctly found
+            - The true MVP is ranked **{avg_real_rank}** by the model in average
+            - The true rank of the predicted MVP is **{avg_pred_rank}** in average
             """
-        Predictions of the model are made on the unseen season using holdout method.
-        Players with no MVP vote are considered as ranked 10th for simplification.
-        """
-        )
+            )
+            # col2
+            performances_last10 = performances.head(10)
+            percentage = mvp_found_pct(performances_last10)
+            num_test_seasons = len(performances_last10)
+            avg_real_rank = avg_real_mvp_rank(performances_last10)
+            avg_pred_rank = avg_pred_mvp_rank(performances_last10)
+            col2.markdown(
+                f"##### Last {num_test_seasons} seasons ({performances_last10.index.min()}-{performances_last10.index.max()})"
+            )
+            col2.markdown(
+                f"""
+            - **{percentage}** of MVPs correctly found
+            - The true MVP is ranked **{avg_real_rank}** by the model in average
+            - The true rank of the predicted MVP is **{avg_pred_rank}** in average
+            """
+            )
+
+            st.dataframe(data=performances, width=None, height=None)
+            st.markdown(
+                """
+            Predictions of the model are made on the unseen season using holdout method.
+            Players with no MVP vote are considered as ranked 10th for simplification.
+            """
+            )
+
+        else:
+            st.warning("This page is unavailable because loading perfomances file failed.")
 
     elif navigation_page == PAGE_EXPLICABILITY:
 
-        # Remove binary features - should no be trusted for SHAP
-        shap_values = shap_values[
-            [f for f in shap_values.columns if "ERN_CONF" not in f and "POS_" not in f]
-        ]
-        # Rename _advanced features - they are unique anyway
-        mapping = {
-            f: remove_trailing_sequence(f, "_advanced") for f in shap_values.columns
-        }
-        shap_values = shap_values.rename(columns=mapping)
+        if building_shap_values_succeeded:
 
-        st.subheader("Local explanation")
-        st.markdown(
-            "To understand which stats have the strongest impact on the model prediction for the MVP share one player."
-        )
-        selected_player = st.selectbox(
-            "Select a player", predictions.index.to_list()[:10]
-        )
-        a = shap_values.loc[selected_player, :]
-        features_positive_impact = a[a > 0.0]
-        features_negative_impact = a[a < 0.0]
+            # Remove binary features - should no be trusted for SHAP
+            shap_values = shap_values[
+                [f for f in shap_values.columns if "ERN_CONF" not in f and "POS_" not in f]
+            ]
+            # Rename _advanced features - they are unique anyway
+            mapping = {
+                f: remove_trailing_sequence(f, "_advanced") for f in shap_values.columns
+            }
+            shap_values = shap_values.rename(columns=mapping)
 
-        num_stats = 3
-        top_features_positive_impact = (
-            features_positive_impact.sort_values(ascending=False)
-            .index[:num_stats]
-            .to_list()
-        )
-        top_features_positive_impact_values = features_positive_impact.sort_values(
-            ascending=False
-        ).values[:num_stats]
-        top_features_negative_impact = (
-            features_negative_impact.sort_values(ascending=True)
-            .index[:num_stats]
-            .to_list()
-        )
-        top_features_negative_impact_values = features_negative_impact.sort_values(
-            ascending=True
-        ).values[:num_stats]
-
-        st.markdown(
-            "👍 Stats with the strongest **positive impact** on the model prediction for this player:"
-        )
-        for i, col in enumerate(st.columns(num_stats)):
-            col.success(
-                f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*"
+            st.subheader("Local explanation")
+            st.markdown(
+                "To understand which stats have the strongest impact on the model prediction for the MVP share one player."
             )
-        st.markdown(
-            "👎 Stats with the strongest **negative impact** on the model prediction for this player:"
-        )
-        for i, col in enumerate(st.columns(num_stats)):
-            col.error(
-                f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*"
+            selected_player = st.selectbox(
+                "Select a player", predictions.index.to_list()[:10]
+            )
+            a = shap_values.loc[selected_player, :]
+            features_positive_impact = a[a > 0.0]
+            features_negative_impact = a[a < 0.0]
+
+            num_stats = 3
+            top_features_positive_impact = (
+                features_positive_impact.sort_values(ascending=False)
+                .index[:num_stats]
+                .to_list()
+            )
+            top_features_positive_impact_values = features_positive_impact.sort_values(
+                ascending=False
+            ).values[:num_stats]
+            top_features_negative_impact = (
+                features_negative_impact.sort_values(ascending=True)
+                .index[:num_stats]
+                .to_list()
+            )
+            top_features_negative_impact_values = features_negative_impact.sort_values(
+                ascending=True
+            ).values[:num_stats]
+
+            st.markdown(
+                "👍 Stats with the strongest **positive impact** on the model prediction for this player:"
+            )
+            for i, col in enumerate(st.columns(num_stats)):
+                col.success(
+                    f"**{(top_features_positive_impact[i])}**  *+{round(top_features_positive_impact_values[i], 2)} MVP share*"
+                )
+            st.markdown(
+                "👎 Stats with the strongest **negative impact** on the model prediction for this player:"
+            )
+            for i, col in enumerate(st.columns(num_stats)):
+                col.error(
+                    f"**{top_features_negative_impact[i]}**  *{round(top_features_negative_impact_values[i], 2)} MVP share*"
+                )
+
+            st.subheader("Global explanation")
+            st.markdown(
+                "To understand which stats have an impact on the model prediction for the MVP share of the top-10 players."
+            )
+            # vals = numpy.abs(shap_values.values).mean(0)
+            vals = numpy.array(shap_values.values).mean(0)
+            vals_abs = numpy.abs(shap_values.values).mean(0)
+            shap_importance = pandas.DataFrame(
+                list(zip(shap_values.columns, vals, vals_abs)),
+                columns=[
+                    "col_name",
+                    "feature_importance_vals",
+                    "abs_feature_importance_vals",
+                ],
             )
 
-        st.subheader("Global explanation")
-        st.markdown(
-            "To understand which stats have an impact on the model prediction for the MVP share of the top-10 players."
-        )
-        # vals = numpy.abs(shap_values.values).mean(0)
-        vals = numpy.array(shap_values.values).mean(0)
-        vals_abs = numpy.abs(shap_values.values).mean(0)
-        shap_importance = pandas.DataFrame(
-            list(zip(shap_values.columns, vals, vals_abs)),
-            columns=[
-                "col_name",
-                "feature_importance_vals",
-                "abs_feature_importance_vals",
-            ],
-        )
+            col1, col2 = st.columns([10, 9])
 
-        col1, col2 = st.columns([10, 9])
+            shap_importance = shap_importance.sort_values(
+                by=["feature_importance_vals"], ascending=True
+            )
+            col1.markdown("**Average impact on the predicted MVP share**")
+            col1.vega_lite_chart(
+                shap_importance,
+                {
+                    "mark": {
+                        "type": "bar",
+                        "point": True,
+                        "tooltip": True,
+                    },
+                    "title": {"text": None},  # "Average impact on the prediction"
+                    "encoding": {
+                        "x": {
+                            "field": "feature_importance_vals",
+                            "type": "quantitative",
+                            "title": "Average impact (MVP share)",
+                        },
+                        "y": {
+                            "field": "col_name",
+                            "type": "nominal",
+                            "title": "Statistics",
+                            "sort": "-x",
+                        },
+                        "color": {
+                            "field": "feature_importance_vals",
+                            "type": "quantitative",
+                            "title": None,
+                            "legend": None,
+                            "scale": {"scheme": "redyellowgreen"},
+                        },
+                    },
+                },
+                height=700,
+                use_container_width=True,
+            )
 
-        shap_importance = shap_importance.sort_values(
-            by=["feature_importance_vals"], ascending=True
-        )
-        col1.markdown("**Average impact on the predicted MVP share**")
-        col1.vega_lite_chart(
-            shap_importance,
-            {
-                "mark": {
-                    "type": "bar",
-                    "point": True,
-                    "tooltip": True,
-                },
-                "title": {"text": None},  # "Average impact on the prediction"
-                "encoding": {
-                    "x": {
-                        "field": "feature_importance_vals",
-                        "type": "quantitative",
-                        "title": "Average impact (MVP share)",
+            shap_importance = shap_importance.sort_values(
+                by=["abs_feature_importance_vals"], ascending=True
+            )
+            col2.markdown("**Average absolute impact (positive or negative)**")
+            col2.vega_lite_chart(
+                shap_importance,
+                {
+                    "mark": {
+                        "type": "bar",
+                        "point": True,
+                        "tooltip": True,
                     },
-                    "y": {
-                        "field": "col_name",
-                        "type": "nominal",
-                        "title": "Statistics",
-                        "sort": "-x",
-                    },
-                    "color": {
-                        "field": "feature_importance_vals",
-                        "type": "quantitative",
-                        "title": None,
-                        "legend": None,
-                        "scale": {"scheme": "redyellowgreen"},
-                    },
-                },
-            },
-            height=700,
-            use_container_width=True,
-        )
-
-        shap_importance = shap_importance.sort_values(
-            by=["abs_feature_importance_vals"], ascending=True
-        )
-        col2.markdown("**Average absolute impact (positive or negative)**")
-        col2.vega_lite_chart(
-            shap_importance,
-            {
-                "mark": {
-                    "type": "bar",
-                    "point": True,
-                    "tooltip": True,
-                },
-                "title": {"text": None},  # "Average absolute impact"
-                "encoding": {
-                    "x": {
-                        "field": "abs_feature_importance_vals",
-                        "type": "quantitative",
-                        "title": "Average absolute impact (MVP share)",
-                    },
-                    "y": {
-                        "field": "col_name",
-                        "type": "nominal",
-                        "title": None,
-                        "sort": "-x",
-                    },
-                    "color": {
-                        "field": "abs_feature_importance_vals",
-                        "type": "quantitative",
-                        "title": None,
-                        "legend": None,
-                        "scale": {"scheme": "purplebluegreen"},
+                    "title": {"text": None},  # "Average absolute impact"
+                    "encoding": {
+                        "x": {
+                            "field": "abs_feature_importance_vals",
+                            "type": "quantitative",
+                            "title": "Average absolute impact (MVP share)",
+                        },
+                        "y": {
+                            "field": "col_name",
+                            "type": "nominal",
+                            "title": None,
+                            "sort": "-x",
+                        },
+                        "color": {
+                            "field": "abs_feature_importance_vals",
+                            "type": "quantitative",
+                            "title": None,
+                            "legend": None,
+                            "scale": {"scheme": "purplebluegreen"},
+                        },
                     },
                 },
-            },
-            height=700,
-            use_container_width=True,
-        )
+                height=700,
+                use_container_width=True,
+            )
+            
+        else:
+            st.warning("This page is unavailable because loading explainability file failed.")
 
     else:
         st.error("Unknown page selected.")

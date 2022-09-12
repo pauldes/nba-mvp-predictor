@@ -18,11 +18,12 @@ def get_artifacts():
     """
     github_repo = conf.web.github_repo
     url = f"https://api.github.com/repos/{github_repo}/actions/artifacts?per_page=100"
-    artifacts = load_json_from_url(url)
+    auth = get_github_auth()
+    artifacts = load_json_from_url(url, auth=auth)
     return artifacts
 
 
-def load_json_from_url(url: str):
+def load_json_from_url(url: str, auth=None):
     """Charge un fichier JSON en mémoire depuis une URL
 
     Args:
@@ -31,9 +32,9 @@ def load_json_from_url(url: str):
     Returns:
         dict: Dictionnaire issu du fichier JSON
     """
-    response = requests.get(url)
+    response = requests.get(url, auth=auth)
     if response.status_code == 403:
-        raise Exception(f"Erreur 403 en requêtant {url} : {response.content}")
+        raise Exception(f"Error 403 when requesting {url} : {response.content}")
     return response.json()
 
 

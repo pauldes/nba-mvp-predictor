@@ -1,7 +1,10 @@
 name: train
+# TODO :
+# Once season has begun, renew the model artifact until the end to ensure consistency.
 on:
-  schedule:
-    - cron:  '0 6 1 9 *' # At 06:00 on day-of-month 1 in September (once a year).
+  # Schedules execution is deactivated for inter-season work.  
+  # schedule:
+  #   - cron:  '0 6 1 9 *' # At 06:00 on day-of-month 1 in September (once a year).
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO
