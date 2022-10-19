@@ -94,14 +94,14 @@ jobs:
   #     - name: Download shap values from artifact
   #       uses: aochmann/actions-download-artifact@master
   #       with:
-  #         name: shap_values.csv
+  #         name: shap_values-2023.csv
   #         latest: true
   #         path: ./
   #     - name: Upload predictions as artifact for 10 more days
   #       uses: actions/upload-artifact@v2
   #       with: 
-  #         name: shap_values.csv
-  #         path: ./shap_values.csv
+  #         name: shap_values-2023.csv
+  #         path: ./shap_values-2023.csv
   #         retention-days: 10
   # renew-predictions-history:
   #   runs-on: ubuntu-latest

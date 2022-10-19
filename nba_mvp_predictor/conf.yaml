@@ -52,7 +52,7 @@ data:
     sep: ;
     encoding: utf-8
   shap-values:
-    path: data/shap_values.csv
+    path: data/shap_values-2023.csv
     sep: ;
     encoding: utf-8
 

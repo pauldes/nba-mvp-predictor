@@ -52,6 +52,6 @@ jobs:
       - name: Upload SHAP values dataset as artifact
         uses: actions/upload-artifact@v2
         with: 
-          name: shap_values.csv
-          path: ./data/shap_values.csv
+          name: shap_values-2023.csv
+          path: ./data/shap_values-2023.csv
           retention-days: 10
