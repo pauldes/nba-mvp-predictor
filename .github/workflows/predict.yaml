@@ -3,14 +3,17 @@ name: predict
 # Once season is over, stop predicting every day.
 # Renew all artifacts every week until the next season.
 # Merge with renewer with an env variable SEASON_IS_OVER in the CI could be a solution.
+env:
+  SEASON_IS_OVER: true
 on:
-  # schedule:
-  #   - cron:  '0 8 * * *' # Everyday at 8UTC
+  schedule:
+    - cron:  '0 8 * * *' # Everyday at 8UTC
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
   LOG_LEVEL: INFO
 jobs:
   make-predictions:
+    if: ${{ env.SEASON_IS_OVER == false }}
     runs-on: ubuntu-latest
     steps:
       - name: Setup timezone to Europe/Paris
