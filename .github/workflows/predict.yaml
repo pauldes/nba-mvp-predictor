@@ -12,7 +12,7 @@ on:
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
   make-predictions:
-    if: ${{ env.SEASON_IS_OVER == false }}
+    if: $SEASON_IS_OVER == false
     runs-on: ubuntu-latest
     steps:
       - name: Setup timezone to Europe/Paris
