@@ -38,7 +38,7 @@ jobs:
       - name: Download history from artifact
         uses: aochmann/actions-download-artifact@master
         with:
-          name: history.csv
+          name: history-2023.csv
           latest: true
           path: ./data/
       - name: Install dependencies from Pipfile
@@ -55,14 +55,14 @@ jobs:
       - name: Upload predictions as artifact
         uses: actions/upload-artifact@v2
         with: 
-          name: predictions.csv
-          path: ./data/predictions.csv
+          name: predictions-2023.csv
+          path: ./data/predictions-2023.csv
           retention-days: 10
       - name: Upload history as artifact
         uses: actions/upload-artifact@v2
         with: 
-          name: history.csv
-          path: ./data/history.csv
+          name: history-2023.csv
+          path: ./data/history-2023.csv
           retention-days: 10
       - name: Upload model input dataset as artifact
         uses: actions/upload-artifact@v2

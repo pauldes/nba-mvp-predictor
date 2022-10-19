@@ -32,7 +32,7 @@ jobs:
       - name: Download predictions from artifact
         uses: aochmann/actions-download-artifact@master
         with:
-          name: predictions.csv
+          name: predictions-2023.csv
           latest: true
           path: ./data/
       - name: Download model from artifact

@@ -79,14 +79,14 @@ jobs:
   #     - name: Download predictions from artifact
   #       uses: aochmann/actions-download-artifact@master
   #       with:
-  #         name: predictions.csv
+  #         name: predictions-2023.csv
   #         latest: true
   #         path: ./
   #     - name: Upload predictions as artifact for 10 more days
   #       uses: actions/upload-artifact@v2
   #       with: 
-  #         name: predictions.csv
-  #         path: ./predictions.csv
+  #         name: predictions-2023.csv
+  #         path: ./predictions-2023.csv
   #         retention-days: 10
   # renew-shap-values:
   #   runs-on: ubuntu-latest
@@ -109,12 +109,12 @@ jobs:
   #     - name: Download predictions history from artifact
   #       uses: aochmann/actions-download-artifact@master
   #       with:
-  #         name: history.csv
+  #         name: history-2023.csv
   #         latest: true
   #         path: ./
   #     - name: Upload history as artifact for 10 more days
   #       uses: actions/upload-artifact@v2
   #       with: 
-  #         name: history.csv
-  #         path: ./history.csv
+  #         name: history-2023.csv
+  #         path: ./history-2023.csv
   #         retention-days: 10

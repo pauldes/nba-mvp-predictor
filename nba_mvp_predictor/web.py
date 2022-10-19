@@ -105,7 +105,7 @@ def download_performances():
 
 @st.cache(ttl=3600)  # 1h cache
 def download_predictions():
-    date, url = artifacts.get_last_artifact("predictions.csv")
+    date, url = artifacts.get_last_artifact("predictions-2023.csv")
     logger.debug(f"Downloading predictions from {url}")
     download.download_data_from_url_to_file(
         url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth()
@@ -147,7 +147,7 @@ def build_shap_values():
 
 @st.cache(ttl=3600)  # 1h cache
 def download_history():
-    date, url = artifacts.get_last_artifact("history.csv")
+    date, url = artifacts.get_last_artifact("history-2023.csv")
     logger.debug(f"Downloading history from {url}")
     download.download_data_from_url_to_file(
         url, "./data/history-artifact.csv.zip", auth=artifacts.get_github_auth()
