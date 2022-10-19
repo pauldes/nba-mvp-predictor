@@ -19,6 +19,9 @@ import numpy
 from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import load, preprocess, analyze
 
+_MIN_TARGET_CORRELATION = 0.05
+_MAX_FEATURES_CORRELATION = 0.98
+
 
 def make_bronze_data():
     """Make bronze training data from raw downloaded data."""
@@ -122,7 +125,7 @@ def make_gold_data_and_train_model():
     # Maximum two players per team ?
     # Include team ? Include already_won, won_last_year..? Include won_over_other_contenders.. ? Include has_top_performance ?
 
-    corr_treshold = 0.98
+    corr_treshold = _MAX_FEATURES_CORRELATION
     num_features = list(
         analyze.get_columns_with_inter_correlations_under(
             data[num_features], corr_treshold
@@ -197,7 +200,7 @@ def make_gold_data_and_train_model():
     # n_features = 50
     # treshold = None
     n_features = None
-    treshold = 0.05
+    treshold = _MIN_TARGET_CORRELATION
 
     data_for_corr_analysis = data_trainval[
         selected_num_features
