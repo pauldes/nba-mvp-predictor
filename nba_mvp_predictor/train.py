@@ -20,7 +20,7 @@ from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import load, preprocess, analyze
 
 _MIN_TARGET_CORRELATION = 0.05
-_MAX_FEATURES_CORRELATION = 0.98
+_MAX_FEATURES_CORRELATION = 0.95
 
 
 def make_bronze_data():
