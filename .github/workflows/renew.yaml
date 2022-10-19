@@ -3,14 +3,13 @@ name: renew
 # Once season is over, renew all artifacts every week until the next season
 # Merge with predict with an env variable SEASON_IS_OVER in the CI could be a solution.
 env:
+  LOG_LEVEL: INFO
   SEASON_IS_OVER: true
 on:
   # Schedules execution is deactivated for inter-season work.
   schedule:
     - cron:  '0 12 * * MON' # At 12:00 on Mondays
   workflow_dispatch: # Allow for manual trigger from github.com
-env:
-  LOG_LEVEL: INFO
 jobs:
   # These jobs shall run once the model has be trained.
   renew-model:
