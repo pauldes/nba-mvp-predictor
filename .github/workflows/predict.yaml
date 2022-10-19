@@ -6,8 +6,8 @@ name: predict
 env:
   LOG_LEVEL: INFO
 on:
-  # schedule:
-  #   - cron:  '0 8 * * *' # Everyday at 8UTC
+  schedule:
+    - cron:  '0 8 * * *' # Everyday at 8UTC
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
   make-predictions:
