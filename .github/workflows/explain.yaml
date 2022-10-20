@@ -7,7 +7,7 @@ env:
   LOG_LEVEL: INFO
 on:
   schedule:
-    - cron:  '0 13 * * *' # Everyday at 13UTC - 1h after predictions
+    - cron:  '0 19 * * *' # Everyday at 13UTC - 1h after predictions
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
   explain-predictions:
