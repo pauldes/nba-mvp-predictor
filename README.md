@@ -8,7 +8,7 @@
 
 This project aims at predicting the player who will win the NBA MVP award, by modelling the voting panel. The NBA MVP is given since the 1955–56 season to the best performing player of the regular season. Until the 1979–80 season, the MVP was selected by a vote of NBA players. Since the 1980–81 season, the award is decided by a panel of sportswriters and broadcasters - more info [here](https://en.wikipedia.org/wiki/NBA_Most_Valuable_Player_Award).
 
-Have a look at the last model predictions at [streamlit.io/pauldes/nba-mvp-predictor/main](https://share.streamlit.io/pauldes/nba-mvp-predictor/main) !
+Have a look at the last model predictions at [nba-mvp-predictor.streamlitapp.com/](https://nba-mvp-predictor.streamlitapp.com/ ) !
 
 ## Development
 
