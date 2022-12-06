@@ -2,7 +2,7 @@ import argparse
 import sys
 from typing import List
 
-import streamlit.cli
+import streamlit.web.cli
 
 from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import download, train, predict, explain
@@ -31,7 +31,7 @@ def explain_model(args=None):
 def run_webapp(args=None):
     """Run the web application"""
     sys.argv = ["0", "run", "./streamlit_app.py"]
-    streamlit.cli.main()
+    streamlit.web.cli.main()
 
 
 def get_parser():
