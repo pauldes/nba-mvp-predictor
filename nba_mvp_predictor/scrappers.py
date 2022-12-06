@@ -5,7 +5,7 @@ import requests
 import yaml
 import pandas
 from bs4 import BeautifulSoup
-from basketball_reference_scraper.seasons import get_standings
+from basketball_reference_scrapper.seasons import get_standings
 
 from nba_mvp_predictor import utils
 from nba_mvp_predictor import conf, logger
