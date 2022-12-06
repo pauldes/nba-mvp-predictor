@@ -19,9 +19,7 @@ def explain_model():
     # Analyze SHAP values on 10 top players
     sample_size = 10
     logger.debug(f"SHAP values will be computed for : {sample_size} top players")
-    sample = model_input[
-        model_input.index.isin(player_season_team_list[:sample_size])
-    ]
+    sample = model_input[model_input.index.isin(player_season_team_list[:sample_size])]
     # Compare to a population of 100 players
     population_size = 100
     logger.debug(f"Number of players in predictions : {len(player_season_team_list)}")

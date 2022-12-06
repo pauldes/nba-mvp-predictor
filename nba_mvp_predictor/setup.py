@@ -18,5 +18,6 @@ setup(
         "train",
         "utils",
         "web",
+        "basketball_reference_scrapper.seasons",
     ],
 )

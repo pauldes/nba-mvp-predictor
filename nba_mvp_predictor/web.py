@@ -356,13 +356,7 @@ def run():
         building_history_succeeded = True
     except (OSError, Exception) as e:
         logger.error(f"Failed to build history {e}", exc_info=False)
-        history = pandas.DataFrame(
-            columns=[
-                "DATE",
-                "PLAYER",
-                "PRED"
-            ]
-        )
+        history = pandas.DataFrame(columns=["DATE", "PLAYER", "PRED"])
         last_update = "N/A"
         building_history_succeeded = False
     try:
@@ -381,9 +375,8 @@ def run():
                 "True MVP",
                 "REAL_RANK",
                 "PRED_RANK",
-                "Real MVP rank"
-                "PLAYER",
-                "PRED"
+                "Real MVP rank" "PLAYER",
+                "PRED",
             ]
         )
         building_performances_succeeded = False
@@ -394,14 +387,80 @@ def run():
         logger.error(f"Failed to build shap values {e}", exc_info=False)
         shap_values = pandas.DataFrame(
             columns=[
-                "player","2P_per_game","FGA_per_100poss","TRB_per_game","FTA_per_game","FG_per_36min","PS/G","AST_per_36min","FG_per_100poss","PER_advanced","PA/G","FT_per_36min","PTS_per_36min","AST%_advanced","EFG%_per_game","2P%","AST_per_game","MP","ORB_per_36min","PL","DRTG_per_100poss","DRB_per_game","WS/48_advanced","DBPM_advanced","BLK_per_100poss","2P_per_100poss","CONF_RANK","FG_per_game","FG%","FTR_advanced","ORB_per_game","2PA_per_game","2PA_per_36min","PW","GB","OWS_advanced","FGA_per_game","BLK_per_game","STL_per_game","FTA_per_36min","G","BPM_advanced","VORP_advanced","OBPM_advanced","W","W/L%","WS_advanced","PF_per_36min","PF_per_100poss","FT_per_game","FT%","PTS_per_game","L","TRB_per_100poss","TS%_advanced","STL_per_100poss","DWS_advanced","FGA_per_36min","PTS_per_100poss","DRB_per_36min","POS_C","POS_PF","POS_PG","POS_SF","POS_SG","CONF_EASTERN_CONF","CONF_WESTERN_CONF"
+                "player",
+                "2P_per_game",
+                "FGA_per_100poss",
+                "TRB_per_game",
+                "FTA_per_game",
+                "FG_per_36min",
+                "PS/G",
+                "AST_per_36min",
+                "FG_per_100poss",
+                "PER_advanced",
+                "PA/G",
+                "FT_per_36min",
+                "PTS_per_36min",
+                "AST%_advanced",
+                "EFG%_per_game",
+                "2P%",
+                "AST_per_game",
+                "MP",
+                "ORB_per_36min",
+                "PL",
+                "DRTG_per_100poss",
+                "DRB_per_game",
+                "WS/48_advanced",
+                "DBPM_advanced",
+                "BLK_per_100poss",
+                "2P_per_100poss",
+                "CONF_RANK",
+                "FG_per_game",
+                "FG%",
+                "FTR_advanced",
+                "ORB_per_game",
+                "2PA_per_game",
+                "2PA_per_36min",
+                "PW",
+                "GB",
+                "OWS_advanced",
+                "FGA_per_game",
+                "BLK_per_game",
+                "STL_per_game",
+                "FTA_per_36min",
+                "G",
+                "BPM_advanced",
+                "VORP_advanced",
+                "OBPM_advanced",
+                "W",
+                "W/L%",
+                "WS_advanced",
+                "PF_per_36min",
+                "PF_per_100poss",
+                "FT_per_game",
+                "FT%",
+                "PTS_per_game",
+                "L",
+                "TRB_per_100poss",
+                "TS%_advanced",
+                "STL_per_100poss",
+                "DWS_advanced",
+                "FGA_per_36min",
+                "PTS_per_100poss",
+                "DRB_per_36min",
+                "POS_C",
+                "POS_PF",
+                "POS_PG",
+                "POS_SF",
+                "POS_SG",
+                "CONF_EASTERN_CONF",
+                "CONF_WESTERN_CONF",
             ]
         )
         building_shap_values_succeeded = False
     current_season = (
         datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
     )
-    
+
     st.markdown(
         f"""
     *Predicting the NBA Most Valuable Player for the {current_season-1}-{str(current_season)[-2:]} season using machine learning.*
@@ -440,23 +499,25 @@ def run():
             )
             if confidence_mode == CONFIDENCE_MODE_SOFTMAX:
                 predictions.loc[
-                    predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
+                    predictions.PRED_RANK <= compute_probs_based_on_top_n,
+                    "MVP probability",
                 ] = (
                     evaluate.softmax(
-                        predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
-                            "PRED"
-                        ]
+                        predictions[
+                            predictions.PRED_RANK <= compute_probs_based_on_top_n
+                        ]["PRED"]
                     )
                     * 100
                 )
             else:
                 predictions.loc[
-                    predictions.PRED_RANK <= compute_probs_based_on_top_n, "MVP probability"
+                    predictions.PRED_RANK <= compute_probs_based_on_top_n,
+                    "MVP probability",
                 ] = (
                     evaluate.share(
-                        predictions[predictions.PRED_RANK <= compute_probs_based_on_top_n][
-                            "PRED"
-                        ]
+                        predictions[
+                            predictions.PRED_RANK <= compute_probs_based_on_top_n
+                        ]["PRED"]
                     )
                     * 100
                 )
@@ -473,7 +534,6 @@ def run():
             top_3 = predictions["MVP probability"].head(3).to_dict()
             emojis = ["🥇", "🥈", "🥉"]
 
-
             for n, player_name in enumerate(top_3):
                 title_level = "###" + n * "#"
                 col1.markdown(
@@ -488,11 +548,12 @@ def run():
 
             st.subheader(f"Predicted top {show_top_n}")
 
-
             col1, col2 = st.columns(2)
             # col2.markdown("Player statistics")
             cols = [
-                col for col in predictions.columns if "MVP" not in col and "PRED" not in col
+                col
+                for col in predictions.columns
+                if "MVP" not in col and "PRED" not in col
             ]
             col2.dataframe(
                 data=predictions.head(show_top_n)[cols],
@@ -539,12 +600,14 @@ def run():
             )
 
         else:
-            st.warning("This section is unavailable because loading predictions file failed.")
+            st.warning(
+                "This section is unavailable because loading predictions file failed."
+            )
 
         st.subheader("Predictions history")
 
         if building_history_succeeded:
-        
+
             col1, col2, col3 = st.columns([2, 3, 3])
             keep_top_n = col2.slider(
                 "Number of players to show",
@@ -575,7 +638,7 @@ def run():
             else:
                 logger.warning("Could not build history range slider")
                 num_past_days = 1
-              
+
             prepared_history = prepare_history(
                 history,
                 keep_top_n,
@@ -617,10 +680,10 @@ def run():
                 use_container_width=True,
             )
 
-        
         else:
-            st.warning("This section is unavailable because loading history file failed.")
-
+            st.warning(
+                "This section is unavailable because loading history file failed."
+            )
 
     elif navigation_page == PAGE_PERFORMANCE:
 
@@ -669,7 +732,9 @@ def run():
             )
 
         else:
-            st.warning("This page is unavailable because loading perfomances file failed.")
+            st.warning(
+                "This page is unavailable because loading perfomances file failed."
+            )
 
     elif navigation_page == PAGE_EXPLICABILITY:
 
@@ -677,7 +742,11 @@ def run():
 
             # Remove binary features - should no be trusted for SHAP
             shap_values = shap_values[
-                [f for f in shap_values.columns if "ERN_CONF" not in f and "POS_" not in f]
+                [
+                    f
+                    for f in shap_values.columns
+                    if "ERN_CONF" not in f and "POS_" not in f
+                ]
             ]
             # Rename _advanced features - they are unique anyway
             mapping = {
@@ -828,9 +897,11 @@ def run():
                 height=700,
                 use_container_width=True,
             )
-            
+
         else:
-            st.warning("This page is unavailable because loading explainability file failed.")
+            st.warning(
+                "This page is unavailable because loading explainability file failed."
+            )
 
     else:
         st.error("Unknown page selected.")
