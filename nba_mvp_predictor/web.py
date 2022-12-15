@@ -672,6 +672,7 @@ def run():
                             "scale": {"scheme": "category20"},
                             "legend": {
                                 "orient": "bottom-left",
+                                "fillColor": "#525050"
                             },
                         },
                     },
