@@ -12,9 +12,9 @@ from nba_mvp_predictor import conf, logger
 from nba_mvp_predictor import load, evaluate, artifacts, download, analytics
 
 # Constants
-PAGE_PREDICTIONS = "Current year predictions"
-PAGE_PERFORMANCE = "Model performance analysis"
+PAGE_PREDICTIONS = "Current predictions"
 PAGE_EXPLICABILITY = "Explain predictions"
+PAGE_PERFORMANCE = "Model performance"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
 
@@ -469,7 +469,7 @@ def run():
     )
 
     navigation_page = st.sidebar.radio(
-        "Navigate to", [PAGE_PREDICTIONS, PAGE_PERFORMANCE, PAGE_EXPLICABILITY]
+        "Navigate to", [PAGE_PREDICTIONS, PAGE_EXPLICABILITY, PAGE_PERFORMANCE]
     )
     st.sidebar.markdown(conf.web.sidebar_top_text)
     st.sidebar.markdown(conf.web.sidebar_bottom_text)
