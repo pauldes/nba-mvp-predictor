@@ -1,5 +1,6 @@
 import datetime
 from abc import ABC, abstractmethod
+import time
 
 import requests
 import yaml
@@ -168,8 +169,9 @@ class BasketballReferenceScrapper(Scrapper):
                     data[col] = data[col].fillna(0.0)
             return data
         else:
+            retry_after = r.headers["Retry-After"]
             raise ConnectionError(
-                "Could not connect to BR and get data, status code : %s", r.status_code
+                f"Could not connect to BR and get data, status code : {r.status_code}  {retry_after}"
             )
 
     def get_team_standings(self, subset_by_seasons: list = None):
@@ -286,6 +288,7 @@ class BasketballReferenceScrapper(Scrapper):
 
         season_dfs = []
         for season in seasons:
+            time.sleep(5)
             do_not_suffix = [
                 "PLAYER",
                 "POS",
@@ -303,6 +306,7 @@ class BasketballReferenceScrapper(Scrapper):
             ]
             stat_type_dfs = []
             for stat_type in stat_types:
+                time.sleep(5)
                 logger.debug(f"Retrieving {stat_type} stats for season {season}...")
                 try:
                     stat_type_df = self.get_roster_stats_v2(season, stat_type)
