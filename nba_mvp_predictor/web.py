@@ -671,7 +671,7 @@ def run():
                             "type": "nominal",
                             "scale": {"scheme": "category20"},
                             "legend": {
-                                "orient": "bottom-left",
+                                "orient": "top-left",
                                 "fillColor": "#525050"
                             },
                         },
