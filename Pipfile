@@ -18,9 +18,10 @@ shap = "*"
 
 [dev-packages]
 black = "*"
+jupyter = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"
 
 [pipenv]
 allow_prereleases = true

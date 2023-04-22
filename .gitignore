@@ -1,3 +1,6 @@
+# MAC
+.DS_Store
+
 # unused package manager
 pyproject.toml
 
