@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from distutils.command.sdist import sdist
 import os
 import re
@@ -17,6 +17,7 @@ PAGE_EXPLICABILITY = "Explain predictions"
 PAGE_PERFORMANCE = "Model performance"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
+SEASON_END_DATE = datetime.date(year=2023, month=4, day=10)
 
 pandas.set_option("display.precision", 2)
 
@@ -170,6 +171,7 @@ def build_history():
     history.date = pandas.to_datetime(history.date, format="%d-%m-%Y")
     today_date = pandas.Timestamp(datetime.today().date())
     history["days_ago"] = (today_date - history.date).dt.days.astype(int)
+    history = history[history.date <= SEASON_END_DATE]
     return history
 
 
