@@ -45,6 +45,10 @@ class Scrapper(ABC):
     ):
         pass
 
+    @abstractmethod
+    def get_team_standings_on_date(self, day:int, month: int, year: int):
+        pass
+
 
 class BasketballReferenceScrapper(Scrapper):
     def __init__(self):
@@ -211,13 +215,17 @@ class BasketballReferenceScrapper(Scrapper):
                     raw = "".join(filter(str.isalpha, raw)).upper()
                     team_names[raw] = short
                 data = data[~data["TEAM"].str.contains("DIVISION")]
+                data['W/L%'] = data['W/L%'].astype('float32')
+                data['W'] = data['W'].astype('int32')
+                data['L'] = data['L'].astype('int32')
                 data = data.sort_values(by="W/L%", ascending=False)
                 data = data.reset_index(drop=True)
+                data.loc[:, "CONF_RANK"] = data.index + 1
                 logger.debug(f"Conference : {conference}")
                 data.loc[:, "CONF"] = (
                     conference.replace(" ", "_").upper().replace("CONFERENCE", "CONF")
                 )
-                data.loc[:, "CONF_RANK"] = data.index + 1
+                
                 unmapped_teams = [
                     team
                     for team in data["TEAM"].unique()
@@ -226,7 +234,7 @@ class BasketballReferenceScrapper(Scrapper):
                 data.loc[:, "TEAM"] = data["TEAM"].map(team_names)
                 if data["TEAM"].isna().sum() > 0:
                     raise ValueError("Unknown/unmapped teams : %s", unmapped_teams)
-                data.loc[:, "GB"] = (
+                data["GB"] = (
                     data["GB"].str.replace("—", "0.0").astype(float, errors="raise")
                 )
                 data.loc[:, "TEAM_SEASON"] = data["TEAM"] + "_" + str(season)
@@ -346,3 +354,71 @@ class BasketballReferenceScrapper(Scrapper):
             full_df = full_df[full_df.TEAM.isin(subset_by_teams)]
 
         return full_df
+
+    def get_team_standings_on_date(self, day:int, month: int, year: int):
+        root_url = "https://www.basketball-reference.com/"
+        url = f"{root_url}friv/standings.fcgi?month={month}&day={day}&year={year}&lg_id=NBA"
+        logger.debug(url)
+        r = requests.get(url)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.content, "html.parser")
+            table_east = soup.find("table", {"id": "standings_e"})
+            data_east = pandas.read_html(str(table_east))[0]
+            table_west = soup.find("table", {"id": "standings_w"})
+            data_west = pandas.read_html(str(table_west))[0]
+
+            results = {
+                'West':data_west,
+                'East':data_east,
+            }
+
+            dfs = []
+
+            for conference, data in results.items():
+                logger.debug(f"Standings data columns: {', '.join(data.columns)}")
+                data = data.dropna(axis="index", how="any")
+                logger.debug(
+                    f"First column name before renaming: {data.columns.values[0]}"
+                )
+                data = data.rename(columns={data.columns[0]: "TEAM"})
+                data.loc[:, "TEAM"] = (
+                    data["TEAM"].str.upper().str.replace("[^A-Z]", "", regex=True)
+                )
+                team_names = {}
+                for raw, short in self.team_names.items():
+                    raw = "".join(filter(str.isalpha, raw)).upper()
+                    team_names[raw] = short
+                data = data[~data["TEAM"].str.contains("DIVISION")]
+
+                data = data.sort_values(by="W/L%", ascending=False)
+                data = data.reset_index(drop=True)
+                data.loc[:, "CONF_RANK"] = data.index + 1
+                #data.loc[:, "CONF_RANK"] = data["W/L%"].rank(ascending=False, method='max')
+
+                logger.debug(f"Conference : {conference}")
+                data.loc[:, "CONF"] = (
+                    conference.replace(" ", "_").upper().replace("CONFERENCE", "CONF")
+                )
+                unmapped_teams = [
+                    team
+                    for team in data["TEAM"].unique()
+                    if team not in team_names.keys()
+                ]
+                data.loc[:, "TEAM"] = data["TEAM"].map(team_names)
+                if data["TEAM"].isna().sum() > 0:
+                    raise ValueError("Unknown/unmapped teams : %s", unmapped_teams)
+                data["GB"] = (
+                    data["GB"].str.replace("—", "0.0").astype(float, errors="raise")
+                )
+                data = data.astype({'W': 'int32', 'L': 'int32', 'CONF_RANK':'int32', 'W/L%':'float64'})
+                data = data.set_index("TEAM", drop=True)
+                dfs.append(data)
+            all_conf_df = pandas.concat(
+                dfs, join="outer", axis="index", ignore_index=False
+            )
+            return all_conf_df
+        else:
+            retry_after = r.headers["Retry-After"]
+            raise ConnectionError(
+                f"Could not connect to BR and get data, status code : {r.status_code}  {retry_after}"
+            )
