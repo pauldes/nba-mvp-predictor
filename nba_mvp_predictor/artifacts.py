@@ -60,7 +60,7 @@ def get_last_artifact(artifact_name: str):
     """
     artifacts = get_artifacts()
     num_artifacts = artifacts.get("total_count")
-    logger.debug(f"{num_artifacts} artifacts disponibles sur le projet")
+    logger.debug(f"{num_artifacts} artifacts available")
     if num_artifacts > 100:
         logger.warning(
             "Some artifacts were not retrieved due to GitHub artifact pagination"
@@ -70,7 +70,7 @@ def get_last_artifact(artifact_name: str):
         for a in artifacts.get("artifacts")
         if a.get("name") == artifact_name and a.get("expired") == False
     ]
-    logger.debug(f"{len(artifacts)} artifacts ayant pour nom {artifact_name}")
+    logger.debug(f"{len(artifacts)} artifacts named {artifact_name}")
     results = dict()
     for artifact in artifacts:
         artifact_datetime = artifact.get("created_at")
@@ -81,5 +81,5 @@ def get_last_artifact(artifact_name: str):
         last_result = sorted(results.items(), reverse=True)[0]
     except IndexError:
         raise IOError(f"No artifact found with name {artifact_name}")
-    logger.debug(f"Dernier artifact disponible : {last_result}")
+    logger.debug(f"Last artifact : {last_result}")
     return last_result
