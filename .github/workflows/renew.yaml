@@ -71,49 +71,49 @@ jobs:
           path: ./model_input.csv
           retention-days: 10
 
-  # TODO : Run these jobs if season is over, use an environment variable.
-  # renew-predictions:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download predictions from artifact
-  #       uses: aochmann/actions-download-artifact@master
-  #       with:
-  #         name: predictions-2023.csv
-  #         latest: true
-  #         path: ./
-  #     - name: Upload predictions as artifact for 10 more days
-  #       uses: actions/upload-artifact@v2
-  #       with: 
-  #         name: predictions-2023.csv
-  #         path: ./predictions-2023.csv
-  #         retention-days: 10
-  # renew-shap-values:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download shap values from artifact
-  #       uses: aochmann/actions-download-artifact@master
-  #       with:
-  #         name: shap_values-2023.csv
-  #         latest: true
-  #         path: ./
-  #     - name: Upload predictions as artifact for 10 more days
-  #       uses: actions/upload-artifact@v2
-  #       with: 
-  #         name: shap_values-2023.csv
-  #         path: ./shap_values-2023.csv
-  #         retention-days: 10
-  # renew-predictions-history:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download predictions history from artifact
-  #       uses: aochmann/actions-download-artifact@master
-  #       with:
-  #         name: history-2023.csv
-  #         latest: true
-  #         path: ./
-  #     - name: Upload history as artifact for 10 more days
-  #       uses: actions/upload-artifact@v2
-  #       with: 
-  #         name: history-2023.csv
-  #         path: ./history-2023.csv
-  #         retention-days: 10
+  # TODO : Run these jobs if season is over, use an environment variable ?
+  renew-predictions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download predictions from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: predictions-2023.csv
+          latest: true
+          path: ./
+      - name: Upload predictions as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: predictions-2023.csv
+          path: ./predictions-2023.csv
+          retention-days: 10
+  renew-shap-values:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download shap values from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: shap_values-2023.csv
+          latest: true
+          path: ./
+      - name: Upload predictions as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: shap_values-2023.csv
+          path: ./shap_values-2023.csv
+          retention-days: 10
+  renew-predictions-history:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download predictions history from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: history-2023.csv
+          latest: true
+          path: ./
+      - name: Upload history as artifact for 10 more days
+        uses: actions/upload-artifact@v2
+        with: 
+          name: history-2023.csv
+          path: ./history-2023.csv
+          retention-days: 10
