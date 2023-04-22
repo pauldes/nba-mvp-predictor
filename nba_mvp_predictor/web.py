@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 from distutils.command.sdist import sdist
 import os
 import re
@@ -17,7 +17,7 @@ PAGE_EXPLICABILITY = "Explain predictions"
 PAGE_PERFORMANCE = "Model performance"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
-SEASON_END_DATE = datetime.date(year=2023, month=4, day=10)
+SEASON_END_DATE = date(year=2023, month=4, day=10)
 
 pandas.set_option("display.precision", 2)
 
