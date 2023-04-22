@@ -662,11 +662,18 @@ def run():
                             "timeUnit": "yearmonthdate",
                             "field": "date",
                             "title": "Date",
+                            "axis": {
+                                "format": "%b %d",
+                                "labelAngle": 0,
+                            },
                         },
                         "y": {
                             "field": variable_to_draw_dict[variable_to_draw],
                             "type": "quantitative",
                             "title": variable_to_draw,
+                            "axis": {
+                                "format": ".0f",
+                            },
                         },
                         "color": {
                             "field": "player",
