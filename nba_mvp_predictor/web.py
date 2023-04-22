@@ -673,7 +673,7 @@ def run():
                             "type": "nominal",
                             "scale": {"scheme": "category20"},
                             "legend": {
-                                "orient": "top-left",
+                                "orient": "top", #"top-left",
                                 "fillColor": "#525050"
                             },
                         },
