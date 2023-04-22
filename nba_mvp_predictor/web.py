@@ -169,8 +169,8 @@ def build_history():
         columns={"DATE": "date", "PLAYER": "player", "PRED": "prediction"}
     )
     history.date = pandas.to_datetime(history.date, format="%d-%m-%Y")
-    today_date = pandas.Timestamp(datetime.today().date())
-    history["days_ago"] = (today_date - history.date).dt.days.astype(int)
+    last_date_in_season = pandas.Timestamp(min([datetime.today().date(), SEASON_END_DATE]))
+    history["days_ago"] = (last_date_in_season - history.date).dt.days.astype(int)
     history = history[history.date <= SEASON_END_DATE]
     return history
 
