@@ -57,6 +57,13 @@ data:
     encoding: utf-8
 
 web:
+  enable-web: False
+  disabled-web-text: >
+    🌴  
+
+    The MVP Predictor is stopped during summer.  
+    
+    See you at the beginning of next season! 
   tab-title: "The MVP Predictor"
   page-title: "The MVP Predict🏀r"
   github-repo: pauldes/nba-mvp-predictor
@@ -70,3 +77,4 @@ web:
     The model predicts the *award share* (the number of points a player received for MVP award over the total points of all first-place votes).
     This share can be turned into a probability using various methods (see *Predictions parameters*).
   sidebar-bottom-text: "*Made by Paul ([@wontcalltimeout](https://twitter.com/wontcalltimeout)). Code on [GitHub](https://github.com/pauldes/nba-mvp-predictor).*"
+  enable-google-analytics: False
