@@ -2,6 +2,8 @@ import numpy
 import seaborn
 from matplotlib import pyplot
 
+from nba_mvp_predictor import logger
+
 
 def get_columns_with_inter_correlations_under(dataframe, treshold):
     data_curr = dataframe.copy()
@@ -10,14 +12,16 @@ def get_columns_with_inter_correlations_under(dataframe, treshold):
     corr = corr[corr > treshold]
     while len(corr) > 0:
         col_to_drop = corr.index.values[0][1]
-        print(
-            "Dropping", col_to_drop, "which is correlated with", corr.index.values[0][0]
+        logger.info(
+            "Dropping %s which is correlated with %s",
+            col_to_drop,
+            corr.index.values[0][0],
         )
         data_curr = data_curr.drop(col_to_drop, axis="columns")
         corr = get_column_pairs_correlation(data_curr)
         corr = corr[corr > treshold]
     res = data_curr.columns
-    print("Reduced number of columns from", initial_num_cols, "to", len(res))
+    logger.info("Reduced number of columns from %d to %d", initial_num_cols, len(res))
     return res
 
 

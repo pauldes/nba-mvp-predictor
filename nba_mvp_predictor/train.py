@@ -82,7 +82,9 @@ def make_silver_data():
     removed_mvp_candidates = removed_players[removed_players.MVP_CANDIDATE]
     logger.debug(f"{len(removed_mvp_candidates)} MVP candidates removed due to filters")
     if len(removed_mvp_candidates) > 0:
-        print(removed_mvp_candidates.head()[cols])
+        logger.info(
+            "Removed candidates: %s", ", ".join(removed_mvp_candidates.index.unique())
+        )
     logger.debug(
         f"After filters: {len(data)} players - {len(data[data.MVP_CANDIDATE])} MVP candidates - {len(data[data.MVP_WINNER])} winners"
     )
@@ -321,7 +323,7 @@ def make_gold_data_and_train_model():
         for step, (train_index, val_index) in enumerate(
             splitter.split(X_trainval, y_trainval)
         ):
-            print(" Step", step + 1, "of", splits * repeats)
+            logger.debug(f"Step {step + 1} of {splits * repeats}")
             X_train = X_trainval.iloc[train_index, :]
             X_val = X_trainval.iloc[val_index, :]
             y_train = y_trainval.iloc[train_index]
@@ -347,14 +349,13 @@ def make_gold_data_and_train_model():
             # Add a metrics on MVP or MVP top 3
             # Clip predictions between 0.0 and 1.0 !
 
-        print("  Training MAE:", numpy.mean(train_MAEs))
-        print("  Training MSE:", numpy.mean(train_MSEs))
-        print("  Training MaxAE:", numpy.mean(train_MAXs))
-        print("  Validation MAE:", numpy.mean(val_MAEs))
-        print("  Validation MSE:", numpy.mean(val_MSEs))
-        # print("  Validation MSLE:", numpy.mean(val_MSLEs))
-        print("  Validation MAPE:", numpy.mean(val_MAPEs))
-        print("  Validation MaxAE:", numpy.mean(val_MAXs))
+        logger.debug("Training MAE: %f", numpy.mean(train_MAEs))
+        logger.debug("Training MSE: %f", numpy.mean(train_MSEs))
+        logger.debug("Training MaxAE: %f", numpy.mean(train_MAXs))
+        logger.debug("Validation MAE: %f", numpy.mean(val_MAEs))
+        logger.debug("Validation MSE: %f", numpy.mean(val_MSEs))
+        logger.debug("Validation MAPE: %f", numpy.mean(val_MAPEs))
+        logger.debug("Validation MaxAE: %f", numpy.mean(val_MAXs))
 
         # mlflow.end_run()
 
@@ -432,19 +433,18 @@ def make_gold_data_and_train_model():
         winners = winners.sort_index(ascending=True)
         all_winners = all_winners.append(winners)
 
-    print(numpy.mean(results.AE))
-    print(results.AE.max())
-    print(numpy.mean(results.AE**2))
+    logger.debug(numpy.mean(results.AE))
+    logger.debug(results.AE.max())
+    logger.debug(numpy.mean(results.AE**2))
     all_winners["Real MVP rank"] = 1
     # To avoid extremely high values and skewed means, limit rank to 10
     all_winners["PRED_RANK"] = all_winners["PRED_RANK"].clip(upper=10)
     all_winners["REAL_RANK"] = all_winners["REAL_RANK"].clip(upper=10)
-    print("Pourcentage de MVP bien trouvé sur le jeu de test :")
-    print(
-        (all_winners["Pred. MVP"] == all_winners["True MVP"]).sum() / len(all_winners)
+    logger.info(
+        "Pourcentage de MVP bien trouvé sur le jeu de test : %f",
+        (all_winners["Pred. MVP"] == all_winners["True MVP"]).sum() / len(all_winners),
     )
-    print("Rang réel moyen du MVP prédit:")
-    print((all_winners["REAL_RANK"]).mean())
+    logger.info("Rang réel moyen du MVP prédit: %f", (all_winners["REAL_RANK"]).mean())
     all_winners["Pred. MVP"] = all_winners["Pred. MVP"].map(data_all["PLAYER"])
     all_winners["True MVP"] = all_winners["True MVP"].map(data_all["PLAYER"])
     all_winners.to_csv(
@@ -463,7 +463,7 @@ def make_gold_data_and_train_model():
 def filter_by_correlation_with_target(
     data, target, method="pearson", n_features=None, treshold=None
 ):
-    print("Method :", method)
+    logger.info("Method : %s", method)
     if n_features is not None and treshold is None:
         top_corr = analyze.get_columns_correlation_with_target(
             data, target, method=method
