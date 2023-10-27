@@ -17,7 +17,7 @@ PAGE_EXPLICABILITY = "Explain predictions"
 PAGE_PERFORMANCE = "Model performance"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
-SEASON_END_DATE = date(year=2023, month=4, day=10)
+SEASON_END_DATE = date(year=2024, month=4, day=10)
 
 pandas.set_option("display.precision", 2)
 
@@ -106,7 +106,7 @@ def download_performances():
 
 @st.cache(ttl=3600)  # 1h cache
 def download_predictions():
-    date, url = artifacts.get_last_artifact("predictions-2023.csv")
+    date, url = artifacts.get_last_artifact("predictions-2024.csv")
     logger.debug(f"Downloading predictions from {url}")
     download.download_data_from_url_to_file(
         url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth()
@@ -115,10 +115,10 @@ def download_predictions():
 
 @st.cache(ttl=3600)  # 1h cache
 def download_shap_values():
-    date, url = artifacts.get_last_artifact("shap_values-2023.csv")
+    date, url = artifacts.get_last_artifact("shap_values-2024.csv")
     logger.debug(f"Downloading shap values from {url}")
     download.download_data_from_url_to_file(
-        url, "./data/shap_values-2023.csv.zip", auth=artifacts.get_github_auth()
+        url, "./data/shap_values-2024.csv.zip", auth=artifacts.get_github_auth()
     )
 
 
@@ -126,7 +126,7 @@ def build_shap_values():
     use_local_file = False
     if use_local_file:
         shap_values = pandas.read_csv(
-            "./data/shap_values-2023.csv",
+            "./data/shap_values-2024.csv",
             sep=conf.data.shap_values.sep,
             encoding=conf.data.shap_values.encoding,
             compression=None,
@@ -136,7 +136,7 @@ def build_shap_values():
     else:
         download_shap_values()
         shap_values = pandas.read_csv(
-            "./data/shap_values-2023.csv.zip",
+            "./data/shap_values-2024.csv.zip",
             sep=conf.data.shap_values.sep,
             encoding=conf.data.shap_values.encoding,
             compression="zip",
@@ -148,7 +148,7 @@ def build_shap_values():
 
 @st.cache(ttl=3600)  # 1h cache
 def download_history():
-    date, url = artifacts.get_last_artifact("history-2023.csv")
+    date, url = artifacts.get_last_artifact("history-2024.csv")
     logger.debug(f"Downloading history from {url}")
     download.download_data_from_url_to_file(
         url, "./data/history-artifact.csv.zip", auth=artifacts.get_github_auth()

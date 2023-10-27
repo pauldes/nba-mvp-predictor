@@ -6,8 +6,8 @@ name: predict
 env:
   LOG_LEVEL: INFO
 on:
-  #schedule:
-  #  - cron:  '0 18 * * *' # Everyday at 12UTC
+  schedule:
+    - cron:  '0 18 * * *' # Everyday at 12UTC
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
   make-predictions:
@@ -38,7 +38,7 @@ jobs:
       - name: Download history from artifact
         uses: aochmann/actions-download-artifact@master
         with:
-          name: history-2023.csv
+          name: history-2024.csv
           latest: true
           path: ./data/
       - name: Install dependencies from Pipfile
@@ -46,28 +46,74 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade pipenv
           pipenv install --deploy
-      - name: Run the CLI command to download data for season 2023
+      - name: Run the CLI command to download data for season 2024
         run: |
-          pipenv run python . download --season 2022 2023
+          pipenv run python . download --season 2023 2024
       - name: Run the CLI command to predict model
         run: |
           pipenv run python . predict
       - name: Upload predictions as artifact
         uses: actions/upload-artifact@v2
         with: 
-          name: predictions-2023.csv
-          path: ./data/predictions-2023.csv
+          name: predictions-2024.csv
+          path: ./data/predictions-2024.csv
           retention-days: 10
       - name: Upload history as artifact
         uses: actions/upload-artifact@v2
         with: 
-          name: history-2023.csv
-          path: ./data/history-2023.csv
+          name: history-2024.csv
+          path: ./data/history-2024.csv
           retention-days: 10
       - name: Upload model input dataset as artifact
         uses: actions/upload-artifact@v2
         with: 
           name: model_input.csv
           path: ./data/model_input.csv
+          retention-days: 10
+  explain-predictions:
+    needs: make-predictions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup timezone to Europe/Paris
+        uses: zcong1993/setup-timezone@master
+        with:
+          timezone: Europe/Paris
+      - name: Check out to repo
+        uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Download model input from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model_input.csv
+          latest: true
+          path: ./data/
+      - name: Download predictions from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: predictions-2024.csv
+          latest: true
+          path: ./data/
+      - name: Download model from artifact
+        uses: aochmann/actions-download-artifact@master
+        with:
+          name: model.joblib
+          latest: true
+          path: ./data/
+      - name: Install dependencies from Pipfile
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipenv
+          pipenv install --deploy
+      - name: Run the CLI command to explain predictions
+        run: |
+          pipenv run python . explain
+      - name: Upload SHAP values dataset as artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: shap_values-2024.csv
+          path: ./data/shap_values-2024.csv
           retention-days: 10
       
