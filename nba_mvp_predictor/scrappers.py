@@ -46,7 +46,7 @@ class Scrapper(ABC):
         pass
 
     @abstractmethod
-    def get_team_standings_on_date(self, day:int, month: int, year: int):
+    def get_team_standings_on_date(self, day: int, month: int, year: int):
         pass
 
 
@@ -215,9 +215,9 @@ class BasketballReferenceScrapper(Scrapper):
                     raw = "".join(filter(str.isalpha, raw)).upper()
                     team_names[raw] = short
                 data = data[~data["TEAM"].str.contains("DIVISION")]
-                data['W/L%'] = data['W/L%'].astype('float32')
-                data['W'] = data['W'].astype('int32')
-                data['L'] = data['L'].astype('int32')
+                data["W/L%"] = data["W/L%"].astype("float32")
+                data["W"] = data["W"].astype("int32")
+                data["L"] = data["L"].astype("int32")
                 data = data.sort_values(by="W/L%", ascending=False)
                 data = data.reset_index(drop=True)
                 data.loc[:, "CONF_RANK"] = data.index + 1
@@ -225,7 +225,7 @@ class BasketballReferenceScrapper(Scrapper):
                 data.loc[:, "CONF"] = (
                     conference.replace(" ", "_").upper().replace("CONFERENCE", "CONF")
                 )
-                
+
                 unmapped_teams = [
                     team
                     for team in data["TEAM"].unique()
@@ -355,7 +355,7 @@ class BasketballReferenceScrapper(Scrapper):
 
         return full_df
 
-    def get_team_standings_on_date(self, day:int, month: int, year: int):
+    def get_team_standings_on_date(self, day: int, month: int, year: int):
         root_url = "https://www.basketball-reference.com/"
         url = f"{root_url}friv/standings.fcgi?month={month}&day={day}&year={year}&lg_id=NBA"
         logger.debug(url)
@@ -368,8 +368,8 @@ class BasketballReferenceScrapper(Scrapper):
             data_west = pandas.read_html(str(table_west))[0]
 
             results = {
-                'West':data_west,
-                'East':data_east,
+                "West": data_west,
+                "East": data_east,
             }
 
             dfs = []
@@ -393,7 +393,7 @@ class BasketballReferenceScrapper(Scrapper):
                 data = data.sort_values(by="W/L%", ascending=False)
                 data = data.reset_index(drop=True)
                 data.loc[:, "CONF_RANK"] = data.index + 1
-                #data.loc[:, "CONF_RANK"] = data["W/L%"].rank(ascending=False, method='max')
+                # data.loc[:, "CONF_RANK"] = data["W/L%"].rank(ascending=False, method='max')
 
                 logger.debug(f"Conference : {conference}")
                 data.loc[:, "CONF"] = (
@@ -410,7 +410,14 @@ class BasketballReferenceScrapper(Scrapper):
                 data["GB"] = (
                     data["GB"].str.replace("—", "0.0").astype(float, errors="raise")
                 )
-                data = data.astype({'W': 'int32', 'L': 'int32', 'CONF_RANK':'int32', 'W/L%':'float64'})
+                data = data.astype(
+                    {
+                        "W": "int32",
+                        "L": "int32",
+                        "CONF_RANK": "int32",
+                        "W/L%": "float64",
+                    }
+                )
                 data = data.set_index("TEAM", drop=True)
                 dfs.append(data)
             all_conf_df = pandas.concat(

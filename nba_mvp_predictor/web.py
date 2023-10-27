@@ -169,7 +169,9 @@ def build_history():
         columns={"DATE": "date", "PLAYER": "player", "PRED": "prediction"}
     )
     history.date = pandas.to_datetime(history.date, format="%d-%m-%Y")
-    last_date_in_season = pandas.Timestamp(min([datetime.today().date(), SEASON_END_DATE]))
+    last_date_in_season = pandas.Timestamp(
+        min([datetime.today().date(), SEASON_END_DATE])
+    )
     history["days_ago"] = (last_date_in_season - history.date).dt.days.astype(int)
     history = history[history.date.dt.date <= SEASON_END_DATE]
     return history
@@ -526,7 +528,8 @@ def run():
                         * 100
                     )
                 predictions.loc[
-                    predictions.PRED_RANK > compute_probs_based_on_top_n, "MVP probability"
+                    predictions.PRED_RANK > compute_probs_based_on_top_n,
+                    "MVP probability",
                 ] = 0.0
                 predictions["MVP probability"] = predictions["MVP probability"].map(
                     "{:,.2f}%".format
@@ -682,8 +685,8 @@ def run():
                                 "type": "nominal",
                                 "scale": {"scheme": "category20"},
                                 "legend": {
-                                    "orient": "top", #"top-left",
-                                    "fillColor": "#525050"
+                                    "orient": "top",  # "top-left",
+                                    "fillColor": "#525050",
                                 },
                             },
                         },
@@ -762,7 +765,8 @@ def run():
                 ]
                 # Rename _advanced features - they are unique anyway
                 mapping = {
-                    f: remove_trailing_sequence(f, "_advanced") for f in shap_values.columns
+                    f: remove_trailing_sequence(f, "_advanced")
+                    for f in shap_values.columns
                 }
                 shap_values = shap_values.rename(columns=mapping)
 
@@ -783,17 +787,21 @@ def run():
                     .index[:num_stats]
                     .to_list()
                 )
-                top_features_positive_impact_values = features_positive_impact.sort_values(
-                    ascending=False
-                ).values[:num_stats]
+                top_features_positive_impact_values = (
+                    features_positive_impact.sort_values(ascending=False).values[
+                        :num_stats
+                    ]
+                )
                 top_features_negative_impact = (
                     features_negative_impact.sort_values(ascending=True)
                     .index[:num_stats]
                     .to_list()
                 )
-                top_features_negative_impact_values = features_negative_impact.sort_values(
-                    ascending=True
-                ).values[:num_stats]
+                top_features_negative_impact_values = (
+                    features_negative_impact.sort_values(ascending=True).values[
+                        :num_stats
+                    ]
+                )
 
                 st.markdown(
                     "👍 Stats with the strongest **positive impact** on the model prediction for this player:"

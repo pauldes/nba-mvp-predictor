@@ -1,13 +1,9 @@
 from datetime import datetime
-import logging
-import zipfile
-import json
 import os
 
 import requests
 
 from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, evaluate
 
 
 def get_artifacts():

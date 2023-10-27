@@ -33,7 +33,7 @@ def build_logger() -> logging.Logger:
     Returns:
         logging.Logger: Logger to use for the project
     """
-    log_level = os.environ.get("LOG_LEVEL", "DEBUG")
+    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
     if log_level == "DEBUG":
         level = logging.DEBUG
     elif log_level == "INFO":
