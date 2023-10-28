@@ -1,15 +1,12 @@
 import os
 import re
 from datetime import date, datetime
-from distutils.command.sdist import sdist
 
 import numpy
 import pandas
 import streamlit as st
-from matplotlib import pyplot
 
-from nba_mvp_predictor import (analytics, artifacts, conf, download, evaluate,
-                               load, logger)
+from nba_mvp_predictor import analytics, artifacts, conf, download, evaluate, logger
 
 # Constants
 PAGE_PREDICTIONS = "Current predictions"
