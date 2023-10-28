@@ -4,7 +4,7 @@ on:
     branches: 
       - main
 jobs:
-  format check:
+  format-check:
     runs-on: ubuntu-latest
     steps:
       - name: Check out to repo
