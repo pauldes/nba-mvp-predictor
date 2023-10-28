@@ -5,7 +5,7 @@ on:
   # This job is run manually at the beginning of the season
   workflow_dispatch: # Allow for manual trigger from github.com
 env:
-  LOG_LEVEL: INFO
+  LOG_LEVEL: DEBUG
 jobs:
   download-data-and-train-model:
     runs-on: ubuntu-latest

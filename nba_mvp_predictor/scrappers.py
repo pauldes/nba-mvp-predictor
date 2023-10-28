@@ -58,8 +58,10 @@ class BasketballReferenceScrapper(Scrapper):
     def get_request(cls, uri):
         root_url = "https://www.basketball-reference.com/"
         url = path.join(root_url, uri)
+        logger.debug("Waiting time...")
         # Wait some time to avoid BR anti-bot measures (HTTP 429)
         utils.wait_random_time(2, 10)
+        logger.debug("Requesting %s...", url)
         r = requests.get(url)
         if r.status_code == 200:
             return r
