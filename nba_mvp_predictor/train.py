@@ -420,7 +420,7 @@ def make_gold_data_and_train_model():
         winners.loc[:, "REAL_RANK"] = winners["Pred. MVP"].map(ranks_reference)
         winners.loc[:, "PRED_RANK"] = winners["True MVP"].map(predicted_ranks_reference)
         winners = winners.sort_index(ascending=True)
-        all_winners = all_winners.append(winners)
+        all_winners = pandas.concat([all_winners, winners])
 
     logger.debug(numpy.mean(results.AE))
     logger.debug(results.AE.max())

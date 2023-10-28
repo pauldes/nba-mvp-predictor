@@ -57,7 +57,7 @@ def load_model_make_predictions(max_n=50):
     if today in history.DATE.unique():
         logger.warning("Predictions already made for today")
     else:
-        history = history.append(data, ignore_index=True)
+        history = pandas.concat([history, data], ignore_index=True)
         history.to_csv(
             conf.data.history.path,
             sep=conf.data.history.sep,
