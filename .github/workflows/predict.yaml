@@ -109,7 +109,9 @@ jobs:
           pipenv install --deploy
       - name: Look at downloaded artifacts
         run: |
+          echo 'File at root'
           ls -a
+          echo 'File in ./data/'
           ls -a ./data/
       - name: Run the CLI command to explain predictions
         run: |
