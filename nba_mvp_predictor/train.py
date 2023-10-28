@@ -101,16 +101,12 @@ def make_gold_data_and_train_model():
     features = [col for col in data.columns if col not in not_features]
     num_features = list(preprocess.get_numerical_columns(data[features]))
     cat_features = list(preprocess.get_categorical_columns(data[features]))
-    print("Not features", "(", len(not_features), ") :\n", ", ".join(not_features))
-    print(
-        "\nNumerical features", "(", len(num_features), ") :\n", ", ".join(num_features)
+    logger.debug(f"Not features ( {len(not_features)}): {', '.join(not_features)}")
+    logger.debug(
+        f"Numerical features ( {len(num_features)}): {', '.join(num_features)}"
     )
-    print(
-        "\nCategorical features",
-        "(",
-        len(cat_features),
-        ") :\n",
-        ", ".join(cat_features),
+    logger.debug(
+        f"Categorical features ( {len(cat_features)}): {', '.join(cat_features)}"
     )
 
     # Maximum two players per team ?
@@ -141,9 +137,6 @@ def make_gold_data_and_train_model():
         standardized_type = "min_max"
     else:
         standardized_type = "std"
-
-    print("'" + "', '".join(selected_cat_features) + "'")
-    print("'" + "', '".join(selected_num_features) + "'")
 
     data_processed_features_only, data_raw = preprocess.scale_per_value_of(
         data,
@@ -275,14 +268,8 @@ def make_gold_data_and_train_model():
         regressor_name = str(regressor.__class__.__name__)
         non_default_params = str(regressor).split("(")[1].split(")")[0]
 
-        print(
-            "Model",
-            step + 1,
-            "of",
-            len(regressors),
-            ":",
-            regressor_name,
-            non_default_params,
+        logger.debug(
+            f"Model {step + 1} of {len(regressors)}: {regressor_name} {non_default_params}"
         )
 
         train_MAEs = []

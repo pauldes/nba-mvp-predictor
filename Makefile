@@ -17,4 +17,5 @@ pylint:
 	pipenv run pylint nba_mvp_predictor --disable missing-module-docstring,import-error,fixme --fail-under=7.0
 
 clean:
-	rm ./data/ -v !(".keep")
+	rm ./data/*
+	touch ./data/.keep
