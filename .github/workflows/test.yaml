@@ -18,7 +18,8 @@ jobs:
           python -m pip install --upgrade pip pipenv
           pipenv install --dev
       - name: Check format
-        run: make format-check
+        run:  |
+          make format-check
   pipfile-lock-check:
     runs-on: ubuntu-latest
     steps:
