@@ -114,4 +114,15 @@ def get_standings(date=None):
             w_df.rename(columns={"Western Conference": "TEAM"}, inplace=True)
         d["EASTERN_CONF"] = e_df
         d["WESTERN_CONF"] = w_df
-    return d
+        return d
+    else:
+        retry_after = r.headers["Retry-After"]
+        if r.status_code == 429:
+            message = (
+                f"(status code 429, too many requests, retry after {retry_after})"
+            )
+        else:
+            message = f"(status code {r.status_code}"
+        raise ConnectionError(
+            f"Could not connect to BR and get data, status code : {message}"
+        )
