@@ -12,7 +12,7 @@ def standardize(dataframe, fit_on=None, fit_per_values_of=None, min_max_scaler=F
         raise NotImplementedError
     if fit_on is None:
         fit_on = dataframe.copy()
-    scaled = dataframe.copy()
+    scaled = dataframe.copy().astype("float64")
     if fit_per_values_of is not None:
         series = fit_per_values_of.copy()
         for unique in series.unique():
