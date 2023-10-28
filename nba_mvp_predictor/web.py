@@ -92,7 +92,7 @@ def build_performances():
     return performances
 
 
-@st.cache(ttl=3600)  # 1h cache
+@st.cache_data(ttl=3600)  # 1h cache
 def download_performances():
     date, url = artifacts.get_last_artifact("performances.csv")
     logger.debug(f"Downloading performances from {url}")
@@ -101,7 +101,7 @@ def download_performances():
     )
 
 
-@st.cache(ttl=3600)  # 1h cache
+@st.cache_data(ttl=3600)  # 1h cache
 def download_predictions():
     date, url = artifacts.get_last_artifact("predictions-2024.csv")
     logger.debug(f"Downloading predictions from {url}")
@@ -110,7 +110,7 @@ def download_predictions():
     )
 
 
-@st.cache(ttl=3600)  # 1h cache
+@st.cache_data(ttl=3600)  # 1h cache
 def download_shap_values():
     date, url = artifacts.get_last_artifact("shap_values-2024.csv")
     logger.debug(f"Downloading shap values from {url}")
@@ -143,7 +143,7 @@ def build_shap_values():
     return shap_values
 
 
-@st.cache(ttl=3600)  # 1h cache
+@st.cache_data(ttl=3600)  # 1h cache
 def download_history():
     date, url = artifacts.get_last_artifact("history-2024.csv")
     logger.debug(f"Downloading history from {url}")
@@ -210,7 +210,6 @@ def local_css(file_name):
         st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
 
 
-# @st.cache
 def inject_google_analytics_tag():
     index_path = os.path.dirname(st.__file__) + "/static/index.html"
     code = analytics.get_google_analytic_code()
@@ -240,7 +239,7 @@ def run():
     if conf.enable_google_analytics:
         inject_google_analytics_tag()
     local_css("./nba_mvp_predictor/custom.css")
-    if conf.enable_web:
+    if conf.web.enable_web:
         try:
             predictions = build_predictions()
             building_predictions_succeeded = True
