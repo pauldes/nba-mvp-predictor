@@ -1,23 +1,12 @@
-from datetime import datetime
-import joblib
 import json
+from datetime import datetime
 
-from sklearn import (
-    dummy,
-    tree,
-    model_selection,
-    metrics,
-    preprocessing,
-    linear_model,
-    ensemble,
-    neural_network,
-    base,
-)
-import pandas
+import joblib
 import numpy
+import pandas
+from sklearn import base, metrics, model_selection, neural_network
 
-from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, preprocess, analyze
+from nba_mvp_predictor import analyze, conf, load, logger, preprocess
 
 _MIN_TARGET_CORRELATION = 0.05
 _MAX_FEATURES_CORRELATION = 0.95

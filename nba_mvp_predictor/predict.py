@@ -1,10 +1,9 @@
-from datetime import datetime
 import json
+from datetime import datetime
 
 import pandas
 
-from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, preprocess, train
+from nba_mvp_predictor import conf, load, logger, preprocess, train
 
 
 def load_model_make_predictions(max_n=50):

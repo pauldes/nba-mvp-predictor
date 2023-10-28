@@ -1,15 +1,15 @@
-from datetime import datetime, date
-from distutils.command.sdist import sdist
 import os
 import re
+from datetime import date, datetime
+from distutils.command.sdist import sdist
 
-import streamlit as st
-import pandas
 import numpy
+import pandas
+import streamlit as st
 from matplotlib import pyplot
 
-from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import load, evaluate, artifacts, download, analytics
+from nba_mvp_predictor import (analytics, artifacts, conf, download, evaluate,
+                               load, logger)
 
 # Constants
 PAGE_PREDICTIONS = "Current predictions"
@@ -485,9 +485,7 @@ def run():
         st.header(str(navigation_page))
 
         if navigation_page == PAGE_PREDICTIONS:
-
             if building_predictions_succeeded:
-
                 col1, col2 = st.columns(2)
                 col1.subheader("Predicted top 3")
                 col2.subheader("Prediction parameters")
@@ -614,7 +612,6 @@ def run():
             st.subheader("Predictions history")
 
             if building_history_succeeded:
-
                 col1, col2, col3 = st.columns([2, 3, 3])
                 keep_top_n = col2.slider(
                     "Number of players to show",
@@ -701,9 +698,7 @@ def run():
                 )
 
         elif navigation_page == PAGE_PERFORMANCE:
-
             if building_performances_succeeded:
-
                 col1, col2 = st.columns(2)
                 # col1
                 percentage = mvp_found_pct(performances)
@@ -752,9 +747,7 @@ def run():
                 )
 
         elif navigation_page == PAGE_EXPLICABILITY:
-
             if building_shap_values_succeeded:
-
                 # Remove binary features - should no be trusted for SHAP
                 shap_values = shap_values[
                     [

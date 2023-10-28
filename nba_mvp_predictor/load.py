@@ -1,10 +1,9 @@
-import joblib
 import json
 
+import joblib
 import pandas
 
-from nba_mvp_predictor import conf
-from nba_mvp_predictor import scrappers
+from nba_mvp_predictor import conf, scrappers
 
 
 def load_model():

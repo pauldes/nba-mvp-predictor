@@ -3,10 +3,10 @@ This file is imported from
 https://github.com/vishaalagartha/basketball_reference_scraper
 Using this package as a dependency fails (requirements conflict)
 """
+
 import pandas as pd
-from datetime import datetime
-from requests import get
 from bs4 import BeautifulSoup
+from requests import get
 
 
 def get_schedule(season, playoffs=False):

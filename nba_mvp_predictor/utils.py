@@ -1,7 +1,8 @@
-import yaml
-import box
 import random
 import time
+
+import box
+import yaml
 
 
 def get_dict_from_yaml(yaml_path: str):

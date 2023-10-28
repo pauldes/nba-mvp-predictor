@@ -1,11 +1,9 @@
 import argparse
 import sys
-from typing import List
 
 import streamlit.web.cli
 
-from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import download, train, predict, explain
+from nba_mvp_predictor import download, explain, predict, train
 
 
 def download_data(args=None):

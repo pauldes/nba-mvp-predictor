@@ -1,5 +1,5 @@
-import pandas
 import numpy
+import pandas
 
 
 def softmax(series: pandas.Series):

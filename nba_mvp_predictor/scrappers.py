@@ -1,15 +1,14 @@
 import datetime
-from abc import ABC, abstractmethod
 import time
+from abc import ABC, abstractmethod
 from os import path
 
-import requests
 import pandas
-from bs4 import BeautifulSoup
+import requests
 from basketball_reference_scrapper.seasons import get_standings
+from bs4 import BeautifulSoup
 
-from nba_mvp_predictor import utils
-from nba_mvp_predictor import conf, logger
+from nba_mvp_predictor import conf, logger, utils
 
 """ 
 1955-56 through 1979-1980: Voting was done by players. Rules prohibited player from voting for himself or any teammate.

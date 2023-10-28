@@ -2,8 +2,7 @@ from typing import List
 
 import requests
 
-from nba_mvp_predictor import conf, logger
-from nba_mvp_predictor import scrappers
+from nba_mvp_predictor import conf, logger, scrappers
 
 
 def download_data(
