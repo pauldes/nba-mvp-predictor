@@ -8,10 +8,10 @@ black-check:
 	pipenv run black nba_mvp_predictor --check
 
 isort:
-	pipenv run isort nba_mvp_predictor
+	pipenv run isort nba_mvp_predictor --profile black
 
 isort-check:
-	pipenv run isort nba_mvp_predictor --check-only
+	pipenv run isort nba_mvp_predictor --check-only  --profile black
 
 pylint:
 	pipenv run pylint nba_mvp_predictor --disable missing-module-docstring,import-error,fixme --fail-under=7.0
