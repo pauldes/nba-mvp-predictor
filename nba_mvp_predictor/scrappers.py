@@ -131,7 +131,7 @@ class BasketballReferenceScrapper(Scrapper):
             seasons = allowed_seasons
         total_dfs = []
         for season in seasons:
-            logger.debug(f"Retrieving MVP of season {season}...")
+            logger.info(f"Retrieving MVP of season {season}...")
             results = self.retrieve_mvp_votes(season)
             results.loc[:, "player_season_team"] = (
                 results["PLAYER"].str.replace(" ", "")
@@ -243,7 +243,7 @@ class BasketballReferenceScrapper(Scrapper):
             seasons = allowed_seasons
         total_dfs = []
         for season in seasons:
-            logger.debug(f"Retrieving standings of season {season}...")
+            logger.info(f"Retrieving standings of season {season}...")
             date = "06-01-" + str(season)
             dfs = []
             results = self.get_standings(date=date)
@@ -361,8 +361,7 @@ class BasketballReferenceScrapper(Scrapper):
             ]
             stat_type_dfs = []
             for stat_type in stat_types:
-                time.sleep(5)
-                logger.debug(f"Retrieving {stat_type} stats for season {season}...")
+                logger.info(f"Retrieving {stat_type} stats for season {season}...")
                 try:
                     stat_type_df = self.get_roster_stats_v2(season, stat_type)
                 except Exception as e:
