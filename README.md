@@ -13,7 +13,7 @@ Have a look at the last model predictions at [nba-mvp-predictor.streamlit.app](h
 ## Development
 
 Install the Python dependencies :
-```pipenv install --python 3.8 --dev```
+```pipenv install --python 3.10 --dev```
 
 Use the app :
 ```pipenv run python . --help```

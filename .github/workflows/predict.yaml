@@ -19,10 +19,10 @@ jobs:
           timezone: Europe/Paris
       - name: Check out to repo
         uses: actions/checkout@v2
-      - name: Set up Python 3.8
+      - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.10
       - name: Download features from artifact
         uses: aochmann/actions-download-artifact@master
         with:
@@ -80,10 +80,10 @@ jobs:
           timezone: Europe/Paris
       - name: Check out to repo
         uses: actions/checkout@v2
-      - name: Set up Python 3.8
+      - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.10
       - name: Download model input from artifact
         uses: aochmann/actions-download-artifact@master
         with:
