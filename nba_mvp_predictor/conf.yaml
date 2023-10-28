@@ -57,7 +57,7 @@ data:
     encoding: utf-8
 
 web:
-  enable-web: False
+  enable-web: True
   disabled-web-text: >
     🌴  
 
