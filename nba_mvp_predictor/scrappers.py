@@ -98,8 +98,13 @@ class BasketballReferenceScrapper(Scrapper):
             data = data.drop("RANK", axis="columns")
             return data
         else:
+            retry_after = r.headers["Retry-After"]
+            if r.status_code == 429:
+                message = f"(status code 429, too many requests, retry after {retry_after})"
+            else:
+                message = f"(status code {r.status_code}"
             raise ConnectionError(
-                "Could not connect to BR and get data, status code : %s", r.status_code
+                f"Could not connect to BR and get data, status code : {message}"
             )
 
     def get_mvp(self, subset_by_seasons: list = None):
@@ -174,8 +179,12 @@ class BasketballReferenceScrapper(Scrapper):
             return data
         else:
             retry_after = r.headers["Retry-After"]
+            if r.status_code == 429:
+                message = f"(status code 429, too many requests, retry after {retry_after})"
+            else:
+                message = f"(status code {r.status_code}"
             raise ConnectionError(
-                f"Could not connect to BR and get data, status code : {r.status_code}  {retry_after}"
+                f"Could not connect to BR and get data, status code : {message}"
             )
 
     def get_team_standings(self, subset_by_seasons: list = None):
@@ -426,6 +435,10 @@ class BasketballReferenceScrapper(Scrapper):
             return all_conf_df
         else:
             retry_after = r.headers["Retry-After"]
+            if r.status_code == 429:
+                message = f"(status code 429, too many requests, retry after {retry_after})"
+            else:
+                message = f"(status code {r.status_code}"
             raise ConnectionError(
-                f"Could not connect to BR and get data, status code : {r.status_code}  {retry_after}"
+                f"Could not connect to BR and get data, status code : {message}"
             )
