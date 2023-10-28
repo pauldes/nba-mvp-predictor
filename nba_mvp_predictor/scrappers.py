@@ -5,7 +5,6 @@ from os import path
 
 import pandas
 import requests
-from basketball_reference_scrapper.seasons import get_standings
 from bs4 import BeautifulSoup
 
 from nba_mvp_predictor import conf, logger, utils
@@ -56,7 +55,7 @@ class BasketballReferenceScrapper(Scrapper):
         )
 
     @classmethod
-    def get_request(uri):
+    def get_request(cls, uri):
         root_url = "https://www.basketball-reference.com/"
         url = path.join(root_url, uri)
         # Wait some time to avoid BR anti-bot measures (HTTP 429)
@@ -209,15 +208,15 @@ class BasketballReferenceScrapper(Scrapper):
         soup = BeautifulSoup(r.content, "html.parser")
         e_table = soup.find("table", attrs={"id": "standings_e"})
         w_table = soup.find("table", attrs={"id": "standings_w"})
-        e_df = pd.DataFrame(
+        e_df = pandas.DataFrame(
             columns=["TEAM", "W", "L", "W/L%", "GB", "PW", "PL", "PS/G", "PA/G"]
         )
-        w_df = pd.DataFrame(
+        w_df = pandas.DataFrame(
             columns=["TEAM", "W", "L", "W/L%", "GB", "PW", "PL", "PS/G", "PA/G"]
         )
         if e_table and w_table:
-            e_df = pd.read_html(str(e_table))[0]
-            w_df = pd.read_html(str(w_table))[0]
+            e_df = pandas.read_html(str(e_table))[0]
+            w_df = pandas.read_html(str(w_table))[0]
             e_df.rename(columns={"Eastern Conference": "TEAM"}, inplace=True)
             w_df.rename(columns={"Western Conference": "TEAM"}, inplace=True)
         d["EASTERN_CONF"] = e_df
@@ -245,7 +244,7 @@ class BasketballReferenceScrapper(Scrapper):
             logger.debug(f"Retrieving standings of season {season}...")
             date = "06-01-" + str(season)
             dfs = []
-            results = get_standings(date=date)
+            results = self.get_standings(date=date)
             for conference, data in results.items():
                 logger.debug(f"Standings data columns: {', '.join(data.columns)}")
                 data = data.dropna(axis="index", how="any")
