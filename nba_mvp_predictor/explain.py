@@ -7,7 +7,7 @@ from nba_mvp_predictor import conf, load, logger
 def explain_model():
     """Explain model predictions."""
     model = load.load_model()
-    model_input = load.load_model_input()
+    model_input = load.load_model_input().astype(float)
     predictions = load.load_predictions()
     predictions = predictions.sort_values(by="PRED_RANK", ascending=True)
     player_season_team_list = predictions.index.to_list()
