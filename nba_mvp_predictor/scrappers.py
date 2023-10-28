@@ -100,7 +100,9 @@ class BasketballReferenceScrapper(Scrapper):
         else:
             retry_after = r.headers["Retry-After"]
             if r.status_code == 429:
-                message = f"(status code 429, too many requests, retry after {retry_after})"
+                message = (
+                    f"(status code 429, too many requests, retry after {retry_after})"
+                )
             else:
                 message = f"(status code {r.status_code}"
             raise ConnectionError(
@@ -180,7 +182,9 @@ class BasketballReferenceScrapper(Scrapper):
         else:
             retry_after = r.headers["Retry-After"]
             if r.status_code == 429:
-                message = f"(status code 429, too many requests, retry after {retry_after})"
+                message = (
+                    f"(status code 429, too many requests, retry after {retry_after})"
+                )
             else:
                 message = f"(status code {r.status_code}"
             raise ConnectionError(
@@ -436,7 +440,9 @@ class BasketballReferenceScrapper(Scrapper):
         else:
             retry_after = r.headers["Retry-After"]
             if r.status_code == 429:
-                message = f"(status code 429, too many requests, retry after {retry_after})"
+                message = (
+                    f"(status code 429, too many requests, retry after {retry_after})"
+                )
             else:
                 message = f"(status code {r.status_code}"
             raise ConnectionError(
