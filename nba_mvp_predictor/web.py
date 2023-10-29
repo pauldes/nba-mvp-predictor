@@ -228,6 +228,13 @@ def remove_trailing_sequence(string, sequence):
         return string
 
 
+def format_feature_name(feature_name) -> str:
+    # Rename _advanced features - they are unique anyway
+    feature_name = remove_trailing_sequence(feature_name, "_advanced")
+    feature_name = feature_name.replace("_", " ")
+    return feature_name
+
+
 def run():
     st.set_page_config(
         page_title=conf.web.tab_title,
@@ -752,12 +759,7 @@ def run():
                         if "ERN_CONF" not in f and "POS_" not in f
                     ]
                 ]
-                # Rename _advanced features - they are unique anyway
-                mapping = {
-                    f: remove_trailing_sequence(f, "_advanced")
-                    for f in shap_values.columns
-                }
-                shap_values = shap_values.rename(columns=mapping)
+                shap_values = shap_values.rename(columns=format_feature_name)
 
                 st.subheader("Local explanation")
                 st.markdown(
@@ -817,7 +819,7 @@ def run():
                 st.markdown(
                     "To understand which stats have an impact on the model prediction for the MVP share of the top-10 players."
                 )
-                # vals = numpy.abs(shap_values.values).mean(0)
+
                 vals = numpy.array(shap_values.values).mean(0)
                 vals_abs = numpy.abs(shap_values.values).mean(0)
                 shap_importance = pandas.DataFrame(
@@ -828,9 +830,20 @@ def run():
                         "abs_feature_importance_vals",
                     ],
                 )
-
+                keep_to_n_features: int = st.slider(
+                    "Number of stats to show",
+                    min_value=10,
+                    max_value=len(shap_importance),
+                    value=10,
+                    step=1,
+                    format="%d stats",
+                    label_visibility="hidden",
+                )
+                shap_importance = shap_importance.sort_values(
+                    by=["abs_feature_importance_vals"], ascending=False
+                ).head(keep_to_n_features)
+                chart_height = 28 * keep_to_n_features
                 col1, col2 = st.columns([10, 9])
-
                 shap_importance = shap_importance.sort_values(
                     by=["feature_importance_vals"], ascending=True
                 )
@@ -843,7 +856,7 @@ def run():
                             "point": True,
                             "tooltip": True,
                         },
-                        "title": {"text": None},  # "Average impact on the prediction"
+                        "title": {"text": None},
                         "encoding": {
                             "x": {
                                 "field": "feature_importance_vals",
@@ -853,7 +866,7 @@ def run():
                             "y": {
                                 "field": "col_name",
                                 "type": "nominal",
-                                "title": "Statistics",
+                                "title": None,
                                 "sort": "-x",
                             },
                             "color": {
@@ -865,7 +878,7 @@ def run():
                             },
                         },
                     },
-                    height=700,
+                    height=chart_height,
                     use_container_width=True,
                 )
 
@@ -881,7 +894,7 @@ def run():
                             "point": True,
                             "tooltip": True,
                         },
-                        "title": {"text": None},  # "Average absolute impact"
+                        "title": {"text": None},
                         "encoding": {
                             "x": {
                                 "field": "abs_feature_importance_vals",
@@ -893,6 +906,7 @@ def run():
                                 "type": "nominal",
                                 "title": None,
                                 "sort": "-x",
+                                "axis": {"labelLimit": -1},
                             },
                             "color": {
                                 "field": "abs_feature_importance_vals",
@@ -903,15 +917,13 @@ def run():
                             },
                         },
                     },
-                    height=700,
+                    height=chart_height,
                     use_container_width=True,
                 )
-
             else:
                 st.warning(
                     "This page is unavailable because loading explainability file failed."
                 )
-
         else:
             st.error("Unknown page selected.")
     else:
