@@ -31,8 +31,42 @@ def make_bronze_data():
         .merge(team_standings, how="inner", on=["TEAM", "SEASON"])
         .set_index(bronze.index.name)
     )
-    for col in ["MVP_WINNER", "MVP_PODIUM", "MVP_CANDIDATE"]:
-        bronze[col] = bronze[col].fillna(False)
+    # Add a feature: PREVIOUS_SEASON_MVP_WINNER
+    previous_season_winners = bronze[bronze["MVP_WINNER"] == True][
+        ["PLAYER", "TEAM", "SEASON"]
+    ]
+    previous_season_winners["SEASON"] = previous_season_winners["SEASON"] + 1
+    previous_season_winners["PREVIOUS_SEASON_MVP_WINNER"] = True
+    # Add a feature: PREVIOUS_SEASON_MVP_PODIUM_NOT_WINNER
+    previous_season_podium_not_winners = bronze[
+        (bronze["MVP_WINNER"] == False) & (bronze["MVP_PODIUM"] == True)
+    ][["PLAYER", "TEAM", "SEASON"]]
+    previous_season_podium_not_winners["SEASON"] = (
+        previous_season_podium_not_winners["SEASON"] + 1
+    )
+    previous_season_podium_not_winners["PREVIOUS_SEASON_MVP_PODIUM_NOT_WINNER"] = True
+    # Merge these two features
+    bronze = (
+        bronze.reset_index(drop=False)
+        .merge(
+            previous_season_podium_not_winners,
+            how="left",
+            on=["PLAYER", "TEAM", "SEASON"],
+        )
+        .set_index(bronze.index.name)
+        .reset_index(drop=False)
+        .merge(previous_season_winners, how="left", on=["PLAYER", "TEAM", "SEASON"])
+        .set_index(bronze.index.name)
+    )
+
+    for col in [
+        "MVP_WINNER",
+        "MVP_PODIUM",
+        "MVP_CANDIDATE",
+        "PREVIOUS_SEASON_MVP_WINNER",
+        "PREVIOUS_SEASON_MVP_PODIUM_NOT_WINNER",
+    ]:
+        bronze[col] = bronze[col].fillna(False).astype(bool)
     for col in ["MVP_VOTES_SHARE"]:
         bronze[col] = bronze[col].fillna(0.0)
     logger.info(
@@ -67,7 +101,6 @@ def make_silver_data():
     data = data[data["CONF_RANK"] <= 10]
     data = data[data["MP"] >= 24.0]
     removed_players = data_copy.loc[~data_copy.index.isin(data.index)]
-    cols = ["SEASON", "G", "CONF_RANK", "MP"]
     removed_mvp_candidates = removed_players[removed_players.MVP_CANDIDATE]
     logger.debug(f"{len(removed_mvp_candidates)} MVP candidates removed due to filters")
     if len(removed_mvp_candidates) > 0:
