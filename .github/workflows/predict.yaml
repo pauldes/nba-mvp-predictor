@@ -70,6 +70,7 @@ jobs:
           name: model_input.csv
           path: ./data/model_input.csv
           retention-days: 1
+
   explain-predictions:
     needs: make-predictions
     runs-on: ubuntu-latest
@@ -107,10 +108,10 @@ jobs:
           pipenv install --deploy
       - name: Look at downloaded artifacts
         run: |
-          echo 'File at root'
-          ls -a
-          echo 'File in ./data/'
-          ls -a ./data/
+          echo '>>> File at root'
+          ls -al
+          echo '>>> File in ./data/'
+          ls -al ./data/
       - name: Run the CLI command to explain predictions
         run: |
           pipenv run python . explain
@@ -120,4 +121,12 @@ jobs:
           name: shap_values-2024.csv
           path: ./data/shap_values-2024.csv
           retention-days: 10
-      
+
+  clean-artifacts:
+    needs: explain-predictions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete model input from artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: model_input.csv
