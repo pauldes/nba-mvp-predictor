@@ -89,12 +89,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: model_input.csv
-          path: ./data/model_input.csv
+          path: ./data/
       - name: Download predictions from artifact
         uses: actions/download-artifact@v3
         with:
           name: predictions-2024.csv
-          path: ./data/predictions-2024.csv
+          path: ./data/
       - name: Download model from artifact
         uses: aochmann/actions-download-artifact@master
         with:
