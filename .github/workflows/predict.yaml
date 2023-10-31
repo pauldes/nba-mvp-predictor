@@ -7,7 +7,7 @@ env:
   LOG_LEVEL: INFO
 on:
   schedule:
-    - cron:  '0 18 * * *' # Everyday at 12UTC
+    - cron:  '0 14 * * *'
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
   make-predictions:
