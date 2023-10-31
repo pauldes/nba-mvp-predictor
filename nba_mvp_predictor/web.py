@@ -633,6 +633,8 @@ def run():
                 )
                 slider_min_value = max(int(history.days_ago.min()), 3)
                 slider_max_value = int(history.days_ago.max())
+                logger.debug("Slider minimum value: %s", slider_min_value)
+                logger.debug("Slider maximum value: %s", slider_max_value)
                 if slider_min_value < slider_max_value:
                     num_past_days = col3.slider(
                         "Show history for last",
@@ -644,6 +646,7 @@ def run():
                     )
                 else:
                     logger.warning("Could not build history range slider")
+                    logger.warning("Most likely there is not enough history")
                     num_past_days = 1
 
                 prepared_history = prepare_history(
