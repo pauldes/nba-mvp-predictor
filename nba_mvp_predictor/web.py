@@ -555,25 +555,10 @@ def run():
                 # show_top_n = min([compute_probs_based_on_top_n, 10])
 
                 st.subheader(f"Predicted top {show_top_n}")
-
-                col1, col2 = st.columns(2)
-                # col2.markdown("Player statistics")
-                cols = [
-                    col
-                    for col in predictions.columns
-                    if "MVP" not in col and "PRED" not in col
-                ]
-                col2.dataframe(
-                    data=predictions.head(show_top_n)[cols],
-                    width=None,
-                    height=300,
-                )
-
+                col1 = st.container()
                 predictions["player"] = predictions.index
                 predictions["chance"] = predictions["MVP probability"].str[:-1]
                 predictions["chance"] = pandas.to_numeric(predictions["chance"])
-
-                # col1.markdown("Chart")
                 col1.vega_lite_chart(
                     predictions.head(show_top_n),
                     {
