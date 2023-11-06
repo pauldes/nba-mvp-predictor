@@ -4,9 +4,9 @@ from datetime import datetime
 import joblib
 import numpy
 import pandas
-from sklearn import base, metrics, model_selection, neural_network
+from sklearn import base, metrics, model_selection
 
-from nba_mvp_predictor import analyze, conf, load, logger, preprocess
+from nba_mvp_predictor import analyze, conf, load, logger, model, preprocess
 
 _MIN_TARGET_CORRELATION = 0.05
 _MAX_FEATURES_CORRELATION = 0.95
@@ -90,16 +90,19 @@ def make_silver_data():
     data_copy = data.copy()
     # Apply filters
     # 50% games played
-    # 50% of time played per game (24mn)
-    # Team ranked 10th in conference at least
+    # 28 minutes per game
+    # 2 FG attemptes
+    # Team ranked 12th in conference at least
     for season in data.SEASON.unique():
         max_g = data[data.SEASON == season]["G"].max()
         treshold = 0.5 * max_g
         data = data[
             (data.SEASON != season) | ((data.SEASON == season) & (data.G >= treshold))
         ]
-    data = data[data["CONF_RANK"] <= 10]
-    data = data[data["MP"] >= 24.0]
+    data = data[data["FGA_per_game"] >= 2]
+    data = data[data["CONF_RANK"] <= 12]
+    data = data[data["MP"] >= 28.0]
+
     removed_players = data_copy.loc[~data_copy.index.isin(data.index)]
     removed_mvp_candidates = removed_players[removed_players.MVP_CANDIDATE]
     logger.debug(f"{len(removed_mvp_candidates)} MVP candidates removed due to filters")
@@ -281,13 +284,7 @@ def make_gold_data_and_train_model():
     with open("data/features.json", "w") as outfile:
         json.dump(features_dict, outfile, indent=2)
 
-    regressor = neural_network.MLPRegressor(
-        hidden_layer_sizes=9,
-        learning_rate="adaptive",
-        learning_rate_init=0.065,
-        random_state=0,
-    )
-    regressors = [regressor]
+    regressors = [model.get_model()]
 
     splits = 3
     repeats = 2
@@ -442,9 +439,9 @@ def make_gold_data_and_train_model():
         winners = winners.sort_index(ascending=True)
         all_winners = pandas.concat([all_winners, winners])
 
-    logger.debug(numpy.mean(results.AE))
-    logger.debug(results.AE.max())
-    logger.debug(numpy.mean(results.AE**2))
+    logger.debug("Mean absolute error: %f", numpy.mean(results.AE))
+    logger.debug("Max absolute error: %f", results.AE.max())
+    logger.debug("Mean squared error: %f", numpy.mean(results.AE**2))
     all_winners["Real MVP rank"] = 1
     # To avoid extremely high values and skewed means, limit rank to 10
     all_winners["PRED_RANK"] = all_winners["PRED_RANK"].clip(upper=10)
