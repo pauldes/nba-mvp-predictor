@@ -18,6 +18,7 @@ def explain_model():
     # Compare to a population of all candidates
     population_size = 80
     logger.debug(f"Number of players in predictions : {len(player_season_team_list)}")
+    logger.debug(f"Total population : {len(model_input)}")
     # New method : Sample 100 players randomly.
     population = model_input.sample(population_size)
     logger.debug(f"Population size for SHAP : {population_size}")
