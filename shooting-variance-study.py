@@ -137,7 +137,6 @@ def plot_shot_distributions(
         fontweight="bold",
         color=font_color,
     )
-    seaborn.set(font="sans-serif")
     ax.text(
         50,
         130,
