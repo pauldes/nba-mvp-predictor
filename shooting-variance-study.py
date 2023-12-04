@@ -7,7 +7,7 @@ from matplotlib.font_manager import fontManager, FontProperties
 import pandas
 import seaborn
 
-TRIALS = 1_000_000
+TRIALS = 20_000
 
 
 @dataclass
@@ -68,6 +68,24 @@ def load_yearly_data():
     data["2P%"] = (data["eFG%"] * data["FGA"] - 1.5 * data["3P%"] * data["3PA"]) / data[
         "2PA"
     ]
+    data['3PT_share'] = data['3PA'] / data['FGA']
+    return data
+
+def load_games_data():
+    data = pandas.read_csv(
+        "data/games_details.csv",
+        usecols=["GAME_ID", "TEAM_ID", "FG3A", "FG3M", "FGA", "FGM"],
+        header=0,
+    ).fillna(0.0)
+    data = data.groupby(["GAME_ID", "TEAM_ID"]).sum()
+    data = data.rename(columns={"FG3A": "3PA", "FG3M": "3PM", "FGA": "FGA", "FGM": "FGM"})
+    data["2PA"] = data["FGA"] - data["3PA"]
+    data["2PM"] = data["FGM"] - data["3PM"]
+    data["2P%"] = (data["2PM"] / data["2PA"]).round(3)
+    data["3P%"] = (data["3PM"] / data["3PA"]).round(3)
+    data["PTs"] = 2 * data["2PM"] + 3 * data["3PM"]
+    data["PTs_per_FGA"] = (data["PTs"] / data["FGA"]).round(3)
+    data['3PT_share'] = (data['3PA'] / data['FGA']).round(3)
     return data
 
 
@@ -123,33 +141,81 @@ def plot_shot_distributions(
     ax.text(
         50,
         130,
-        f"{total_shots} field goal attempts • {round(100*twos_percentage,1)} 2PT% • {round(100*threes_percentage,1)} 3PT%",
+        f"{total_shots} field goal attempts • {round(100*twos_percentage,1)} 2PT% • {round(100*threes_percentage,1)} 3PT% (last 5 seasons avg.)",
         fontsize=9,
         horizontalalignment="center",
         verticalalignment="top",
         color=font_color,
     )
+    x_68 = int(-(len(averages)*10/100))
+    x_95 = int(-(len(averages)*30/100))
     ax.text(
-        0,
-        averages[-1] + 1 * stds[-1],
-        f"68% of outcomes (±1σ)",
+        threes_attempted[x_68] + 1,
+        averages[x_68] + 0.5 * stds[x_68],
+        f"68% of outcomes\n(±1σ)",
         fontsize=9,
         horizontalalignment="left",
-        verticalalignment="top",
+        verticalalignment="center",
         color=font_color,
-        rotation=3,
-        alpha=0.7,
+        alpha=0.6,
     )
     ax.text(
-        0,
-        averages[-1] + 2 * stds[-1],
-        f"95% of outcomes (±2σ)",
+        threes_attempted[x_95] + 1,
+        averages[x_95] + 1.5 * stds[x_95],
+        f"95% of outcomes\n(±2σ)",
         fontsize=9,
         horizontalalignment="left",
-        verticalalignment="top",
+        verticalalignment="center",
         color=font_color,
-        rotation=5,
-        alpha=0.7,
+        alpha=0.6,
+    )
+    ax.arrow(
+        threes_attempted[x_68], 
+        averages[x_68],
+        0,
+        1 * stds[x_68],
+        ls="--",
+        linewidth=1,
+        color=font_color,
+        alpha=0.6,
+        head_width=1, head_length=1,
+        length_includes_head=True
+    )
+    ax.arrow(
+        threes_attempted[x_68], 
+        averages[x_68],
+        0,
+        -1 * stds[x_68],
+        ls="--",
+        linewidth=1,
+        color=font_color,
+        alpha=0.6,
+        head_width=1, head_length=1,
+        length_includes_head=True
+    )
+    ax.arrow(
+        threes_attempted[x_95], 
+        averages[x_95],
+        0,
+        2 * stds[x_95],
+        ls="--",
+        linewidth=1,
+        color=font_color,
+        alpha=0.6,
+        head_width=1, head_length=1,
+        length_includes_head=True
+    )
+    ax.arrow(
+        threes_attempted[x_95], 
+        averages[x_95],
+        0,
+        -2 * stds[x_95],
+        ls="--",
+        linewidth=1,
+        color=font_color,
+        alpha=0.6,
+        head_width=1, head_length=1,
+        length_includes_head=True
     )
     pyplot.text(
         110,
@@ -166,8 +232,8 @@ def plot_shot_distributions(
     ax.set_ylabel("Expected points", color=font_color, fontsize=10)
     ax.xaxis.label.set_color(font_color)
     ax.yaxis.label.set_color(font_color)
-    ax.tick_params(axis="x", colors='#d6d4d4', labelsize=9)
-    ax.tick_params(axis="y", colors='#d6d4d4', labelsize=9)
+    ax.tick_params(axis="x", colors="#d6d4d4", labelsize=9)
+    ax.tick_params(axis="y", colors="#d6d4d4", labelsize=9)
     ax.set_facecolor(grid_background_color)
     ax.spines["bottom"].set_color(font_color)
     ax.spines["top"].set_color(font_color)
@@ -226,7 +292,7 @@ for i in range(0, total_shots + 1):
             threes_attempted,
             twos_percentage_last_5_seasons,
             threes_percentage_last_5_seasons,
-            per_100=False,
+            per_100=True,
         )
     )
     print(f"{twos_attempted} 2s, {threes_attempted} 3s: {print_measures(result)}")
@@ -240,3 +306,21 @@ plot_shot_distributions(
     threes_percentage_last_5_seasons,
     twos_percentage_last_5_seasons,
 )
+
+
+# Get real-world data
+real_world_data = load_games_data()
+print(real_world_data.sample(10))
+real_world_data['3PT_share_rounded'] = real_world_data['3PT_share'].round(1)
+aggregated_real_world_data = real_world_data.groupby('3PT_share_rounded').agg(
+    {'PTs_per_FGA': ['mean', 'std', 'count']}
+)
+aggregated_real_world_data = aggregated_real_world_data[aggregated_real_world_data[('PTs_per_FGA', 'count')] > 30]
+print(aggregated_real_world_data.sort_values(by=('3PT_share_rounded'), ascending=False))
+
+threes_share = aggregated_real_world_data.index.values
+averages = aggregated_real_world_data[('PTs_per_FGA', 'mean')].values
+stds = aggregated_real_world_data[('PTs_per_FGA', 'std')].values
+threes_percentage = 0.50
+twos_percentage = 0.50
+#plot_shot_distributions(threes_share, averages, stds, threes_percentage, twos_percentage)
