@@ -89,13 +89,13 @@ def make_silver_data():
     )
     data_copy = data.copy()
     # Apply filters
-    # 50% games played
+    # 60% games played
     # 28 minutes per game
     # 2 FG attemptes
     # Team ranked 12th in conference at least
     for season in data.SEASON.unique():
         max_g = data[data.SEASON == season]["G"].max()
-        treshold = 0.5 * max_g
+        treshold = 0.6 * max_g
         data = data[
             (data.SEASON != season) | ((data.SEASON == season) & (data.G >= treshold))
         ]
