@@ -41,6 +41,7 @@ jobs:
           name: history-2025.csv
           workflow: train.yaml
           path: ./data/
+          if_no_artifact_found: warn
       - name: Install dependencies from Pipfile
         run: |
           python -m pip install --upgrade pip
