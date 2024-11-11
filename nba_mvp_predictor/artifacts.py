@@ -29,8 +29,8 @@ def load_json_from_url(url: str, auth=None):
         dict: Dictionnaire issu du fichier JSON
     """
     response = requests.get(url, auth=auth)
-    if response.status_code == 403:
-        raise Exception(f"Error 403 when requesting {url} : {response.content}")
+    if str(response.status_code).startswith('4'):
+        raise Exception(f"Error {response.status_code} when requesting {url} : {response.content}")
     return response.json()
 
 
