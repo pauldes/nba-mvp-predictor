@@ -163,6 +163,7 @@ class BasketballReferenceScrapper(Scrapper):
             "per_100poss": "per_poss",
             "advanced": "advanced",
         }
+        not_stats = ["RK", "AWARDS"]
         stat_type = url_mapper[stat_type]
         uri = f"leagues/NBA_{season}_{stat_type}.html"
         r = cls.get_request(uri)
@@ -179,7 +180,9 @@ class BasketballReferenceScrapper(Scrapper):
             regex=True,
         )
         data = data.rename(columns={"TM": "TEAM"})
-        data = data.drop("RK", axis="columns")
+        data = data.drop(
+            [col for col in data.columns if col in not_stats], axis="columns"
+        )
         for col in data.columns:
             if col.startswith("3P"):
                 data[col] = data[col].fillna(0.0)
@@ -365,7 +368,7 @@ class BasketballReferenceScrapper(Scrapper):
                 try:
                     stat_type_df = self.get_roster_stats_v2(season, stat_type)
                 except Exception as e:
-                    logger.warning(
+                    logger.error(
                         f"Could not retrieve data. Are you sure NBA was played in season {season}? {e}"
                     )
                 else:
