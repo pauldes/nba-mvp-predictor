@@ -447,10 +447,12 @@ def make_gold_data_and_train_model():
     all_winners["PRED_RANK"] = all_winners["PRED_RANK"].clip(upper=10)
     all_winners["REAL_RANK"] = all_winners["REAL_RANK"].clip(upper=10)
     logger.info(
-        "Pourcentage de MVP bien trouvé sur le jeu de test : %f",
+        "Share of MVP correctly identified in test dataset : %f",
         (all_winners["Pred. MVP"] == all_winners["True MVP"]).sum() / len(all_winners),
     )
-    logger.info("Rang réel moyen du MVP prédit: %f", (all_winners["REAL_RANK"]).mean())
+    logger.info(
+        "Average real rank of predicted MVPs: %f", (all_winners["REAL_RANK"]).mean()
+    )
     all_winners["Pred. MVP"] = all_winners["Pred. MVP"].map(data_all["PLAYER"])
     all_winners["True MVP"] = all_winners["True MVP"].map(data_all["PLAYER"])
     all_winners.to_csv(
