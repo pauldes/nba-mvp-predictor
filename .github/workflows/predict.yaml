@@ -29,18 +29,21 @@ jobs:
           name: features.json
           workflow: train.yaml
           path: ./data/
+          search_artifacts: true
       - name: Download model from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
           name: model.joblib
           workflow: train.yaml
           path: ./data/
+          search_artifacts: true
       - name: Download history from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
           name: history-2025.csv
           workflow: train.yaml
           path: ./data/
+          search_artifacts: true
           if_no_artifact_found: warn
       - name: Install dependencies from Pipfile
         run: |
@@ -102,6 +105,7 @@ jobs:
           name: model.joblib
           workflow: train.yaml
           path: ./data/
+          search_artifacts: true
       - name: Install dependencies from Pipfile
         run: |
           python -m pip install --upgrade pip
