@@ -27,20 +27,19 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           name: features.json
-          latest: true
+          workflow: train.yml
           path: ./data/
       - name: Download model from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
           name: model.joblib
           workflow: train.yml
-          latest: true
           path: ./data/
       - name: Download history from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
           name: history-2024.csv
-          latest: true
+          workflow: train.yml
           path: ./data/
       - name: Install dependencies from Pipfile
         run: |
@@ -101,7 +100,6 @@ jobs:
         with:
           name: model.joblib
           workflow: train.yml
-          latest: true
           path: ./data/
       - name: Install dependencies from Pipfile
         run: |
