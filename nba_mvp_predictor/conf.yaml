@@ -36,11 +36,11 @@ data:
     encoding: utf-8
     compression: zip
   predictions:
-    path: data/predictions-2024.csv
+    path: data/predictions-2025.csv
     sep: ;
     encoding: utf-8
   history:
-    path: data/history-2024.csv
+    path: data/history-2025.csv
     sep: ;
     encoding: utf-8
   features:
@@ -52,7 +52,7 @@ data:
     sep: ;
     encoding: utf-8
   shap-values:
-    path: data/shap_values-2024.csv
+    path: data/shap_values-2025.csv
     sep: ;
     encoding: utf-8
 
