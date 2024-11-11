@@ -24,19 +24,20 @@ jobs:
         with:
           python-version: "3.10"
       - name: Download features from artifact
-        uses: aochmann/actions-download-artifact@master
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: features.json
           latest: true
           path: ./data/
       - name: Download model from artifact
-        uses: aochmann/actions-download-artifact@master
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: model.joblib
+          workflow: train.yml
           latest: true
           path: ./data/
       - name: Download history from artifact
-        uses: aochmann/actions-download-artifact@master
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: history-2024.csv
           latest: true
@@ -96,9 +97,10 @@ jobs:
           name: predictions-2024.csv
           path: ./data/
       - name: Download model from artifact
-        uses: aochmann/actions-download-artifact@master
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: model.joblib
+          workflow: train.yml
           latest: true
           path: ./data/
       - name: Install dependencies from Pipfile
