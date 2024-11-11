@@ -387,6 +387,17 @@ class BasketballReferenceScrapper(Scrapper):
                         "player_season_team", drop=True
                     )
                     stat_type_df = stat_type_df.dropna(axis="columns", how="all")
+                    if stat_type_df.index.duplicated().any():
+                        # Players with same name on same team in same season will generate duplicates
+                        duplicated_indexes = stat_type_df.index[
+                            stat_type_df.index.duplicated()
+                        ].tolist()
+                        logger.warning(
+                            f"Duplicate index values found in {stat_type} stats for season {season}: {duplicated_indexes}. Removing duplicates."
+                        )
+                        stat_type_df = stat_type_df[
+                            ~stat_type_df.index.duplicated(keep="first")
+                        ]
                     stat_type_dfs.append(stat_type_df)
 
             season_df = pandas.concat(
