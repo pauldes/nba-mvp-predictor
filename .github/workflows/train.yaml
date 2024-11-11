@@ -32,19 +32,19 @@ jobs:
         run: |
           pipenv run python . train
       - name: Upload model as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: model.joblib
           path: ./data/model.joblib
           retention-days: 10
       - name: Upload features as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: features.json
           path: ./data/features.json
           retention-days: 10
       - name: Upload model performances as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: performances.csv
           path: ./data/performances.csv

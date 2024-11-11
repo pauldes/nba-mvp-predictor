@@ -53,19 +53,19 @@ jobs:
         run: |
           pipenv run python . predict
       - name: Upload predictions as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: predictions-2024.csv
           path: ./data/predictions-2024.csv
           retention-days: 10
       - name: Upload history as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: history-2024.csv
           path: ./data/history-2024.csv
           retention-days: 10
       - name: Upload model input dataset as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: model_input.csv
           path: ./data/model_input.csv
@@ -116,7 +116,7 @@ jobs:
         run: |
           pipenv run python . explain
       - name: Upload SHAP values dataset as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: shap_values-2024.csv
           path: ./data/shap_values-2024.csv

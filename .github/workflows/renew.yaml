@@ -17,7 +17,7 @@ jobs:
           latest: true
           path: ./
       - name: Upload model as artifact for 10 more days
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: model.joblib
           path: ./model.joblib
@@ -32,7 +32,7 @@ jobs:
           latest: true
           path: ./
       - name: Upload model performances as artifact for 10 more days
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: performances.csv
           path: ./performances.csv
@@ -47,7 +47,7 @@ jobs:
           latest: true
           path: ./
       - name: Upload features as artifact for 10 more days
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: features.json
           path: ./features.json
@@ -62,7 +62,7 @@ jobs:
           latest: true
           path: ./
       - name: Upload model input as artifact for 10 more days
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: model_input.csv
           path: ./model_input.csv
@@ -79,7 +79,7 @@ jobs:
   #         latest: true
   #         path: ./
   #     - name: Upload predictions as artifact for 10 more days
-  #       uses: actions/upload-artifact@v2
+  #       uses: actions/upload-artifact@v4
   #       with: 
   #         name: predictions-2024.csv
   #         path: ./predictions-2024.csv
@@ -94,7 +94,7 @@ jobs:
   #         latest: true
   #         path: ./
   #     - name: Upload predictions as artifact for 10 more days
-  #       uses: actions/upload-artifact@v2
+  #       uses: actions/upload-artifact@v4
   #       with: 
   #         name: shap_values-2024.csv
   #         path: ./shap_values-2024.csv
@@ -109,7 +109,7 @@ jobs:
   #         latest: true
   #         path: ./
   #     - name: Upload history as artifact for 10 more days
-  #       uses: actions/upload-artifact@v2
+  #       uses: actions/upload-artifact@v4
   #       with: 
   #         name: history-2024.csv
   #         path: ./history-2024.csv
