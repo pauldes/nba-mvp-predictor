@@ -6,6 +6,7 @@ import seaborn
 
 NUM_CURRENT_LEADERS = 3
 NUM_ALL_TIME_LEADERS = 3
+SHOW_FIRST_N_GAMES = 20
 
 def get_player_slug(player: str) -> str:
     """ Get BBR player slug from player name.
@@ -72,14 +73,15 @@ def get_game_logs(player: str, season: int) -> pandas.DataFrame:
     )
     # Keep rows where "Game" is a number
     data = data[data["Game"].astype(str).str.isnumeric()]
-    data = data[data["3P"].astype(str).str.isnumeric()]
+    # Set 3PA and 3PA to 0 where 3P is not numeric
+    data.loc[~data["3P"].astype(str).str.isnumeric(), "3P"] = 0
+    data.loc[~data["3PA"].astype(str).str.isnumeric(), "3PA"] = 0
     # Cast to int
     data["Game"] = data["Game"].astype(int)
     data["3P"] = data["3P"].astype(int)
     data["3PA"] = data["3PA"].astype(int)
-    # Add cumulative 3PA
+    # Sort
     data = data.sort_values("Game", ascending=True)
-    data["Cumulative 3PA"] = data["3PA"].cumsum()
     return data
 
 def get_leaders(top_n=10):
@@ -95,47 +97,105 @@ def get_leaders(top_n=10):
             f"Status code: {r.status_code}"
             f"Response: {r.text}"
         )
-    return data[0][
+    data = data[0][
         [
             "Player",
             "Season",
             "3PA",
         ]
     ].sort_values("3PA", ascending=False).head(top_n)
+    data['Rank'] = data.index + 1
+    return data
 
 def plot_results(data: pandas.DataFrame):
     seaborn.set_theme()
     fig, ax = pyplot.subplots(figsize=(10, 5))
+    data_to_display = data[data["Game"] <= SHOW_FIRST_N_GAMES]
     seaborn.lineplot(
         x="Game",
         y="Cumulative 3PA",
         hue="PlayerSeason",
-        data=data,
-        palette="tab10",
+        data=data_to_display[data_to_display["Current"]],
         ax=ax,
+        palette="flare",
+        linewidth=3,
+        alpha=0.8,
     )
-    ax.set_title(f"{NUM_CURRENT_LEADERS} current and {NUM_ALL_TIME_LEADERS} all-time leaders in 3PA")
-    ax.set_xlabel("Game")
+    seaborn.lineplot(
+        x="Game",
+        y="Cumulative 3PA",
+        hue="PlayerSeason",
+        data=data_to_display[~data_to_display["Current"]],
+        ax=ax,
+        palette="crest",
+        linewidth=2,
+        linestyle="--",
+    )
+    ax.set_title(
+        f"Current and all-time leaders in 3PA", 
+        fontsize=14,
+        fontweight="bold",
+    )
+    ax.set_xlabel("Games")
     ax.set_ylabel("3PA")
+    # X-axis must be integers
+    ax.xaxis.set_major_locator(pyplot.MaxNLocator(integer=True))
     # Set legend at bottom right
     ax.legend(loc="lower right")
-    seaborn.despine()
+    pyplot.text(
+        data_to_display["Game"].max(),
+        data_to_display["Cumulative 3PA"].max() / 1.80,
+        "@wontcalltimeout",
+        fontsize=8,
+        horizontalalignment="center",
+        verticalalignment="center",
+        rotation=90,
+        alpha=0.5,
+    )
+    pyplot.text(
+        SHOW_FIRST_N_GAMES / 2,
+        data_to_display["Cumulative 3PA"].max() + 5,
+        f"First {SHOW_FIRST_N_GAMES} games",
+        fontstyle="italic",
+        fontsize=12,
+        horizontalalignment="center",
+        verticalalignment="center",
+    )
+    #seaborn.despine()
     fig.savefig(f"data/3pt_attempts.png")
 
+def format_rank(rank: int) -> str:
+    if rank == 1:
+        return "1st"
+    elif rank == 2:
+        return "2nd"
+    elif rank == 3:
+        return "3rd"
+    else:
+        return f"{rank}th"
+
 def main():
+    use_average_for_all_time = True
     data = []
     current_leaders = get_current_leaders(top_n=NUM_CURRENT_LEADERS, current_season=2025)
     for leader in current_leaders.to_dict(orient="records"):
-        time.sleep(1.8)
-        game_log = get_game_logs(leader["Player"], leader["Season"])[["Game", "Cumulative 3PA"]]
-        game_log["PlayerSeason"] = f"{leader['Player'].split(' ')[-1]}{leader['Season']}"
+        time.sleep(0.99)
+        game_log = get_game_logs(leader["Player"], leader["Season"])[["Game", "3PA"]]
+        game_log["Cumulative 3PA"] = game_log["3PA"].cumsum()
+        game_log["PlayerSeason"] = f"{leader['Player'].split(' ')[-1]} {leader['Season']}"
+        game_log['Current'] = True
         data.append(game_log)
     leaders = get_leaders(top_n=NUM_ALL_TIME_LEADERS)
     leaders['Season'] = leaders['Season'].str[:4].astype(int) + 1
     for leader in leaders.to_dict(orient="records"):
-        time.sleep(1.8)
-        game_log = get_game_logs(leader["Player"], leader["Season"])[["Game", "Cumulative 3PA"]]
-        game_log["PlayerSeason"] = f"{leader['Player'].split(' ')[-1]}{leader['Season']}"
+        time.sleep(1.8) 
+        game_log = get_game_logs(leader["Player"], leader["Season"])[["Game", "3PA"]]
+        if use_average_for_all_time:
+            avg_3pa = leader["3PA"] / 82
+            game_log["3PA"] = avg_3pa
+        game_log["Cumulative 3PA"] = game_log["3PA"].cumsum()
+        game_log["PlayerSeason"] = f"{leader['Player'].split(' ')[-1]} {leader['Season']} ({format_rank(leader['Rank'])} all-time)"
+        game_log['Current'] = False
         data.append(game_log)
     data = pandas.concat(data)
     data.to_csv("data/3pt_attempts.csv", index=False)
