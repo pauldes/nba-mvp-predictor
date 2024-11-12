@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from matplotlib import pyplot
-from matplotlib.ticker import FormatStrFormatter, MultipleLocator, PercentFormatter
+from matplotlib.ticker import MultipleLocator
 from numpy import std, random, average
 from matplotlib.font_manager import fontManager, FontProperties
 
