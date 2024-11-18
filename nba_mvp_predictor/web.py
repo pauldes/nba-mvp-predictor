@@ -500,7 +500,7 @@ def run():
                     "Number of players used to estimate probability",
                     min_value=3,
                     max_value=10,
-                    value=10,
+                    value=5,
                     step=1,
                     format="%d players",
                 )
