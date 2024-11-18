@@ -198,7 +198,6 @@ def main():
         game_log['Current'] = False
         data.append(game_log)
     data = pandas.concat(data)
-    data.to_csv("data/3pt_attempts.csv", index=False)
     plot_results(data)
 
 if __name__ == "__main__":
