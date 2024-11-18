@@ -14,7 +14,7 @@ PAGE_EXPLICABILITY = "Explain predictions"
 PAGE_PERFORMANCE = "Model performance"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
-SEASON_END_DATE = date(year=2024, month=4, day=10)
+SEASON_END_DATE = date(year=2025, month=4, day=13)
 
 pandas.set_option("display.precision", 2)
 
