@@ -105,27 +105,27 @@ def plot_results(data: pandas.DataFrame):
     # Show grid
     ax.grid(True, which='major', linewidth=.5, color='lightgrey')
     ax.xaxis.set_major_locator(pyplot.MaxNLocator(integer=True))
-    ax.set_ylim(0, 1)
+    ax.set_ylim(0.25, 0.75)
     ax.set_xlim(data["Season"].min(), data["Season"].max())
     ax.set_facecolor('white')
     # Change y axis to get 0.5 in the middle
-    ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
+    ax.set_yticks([0.3, 0.4, 0.5, 0.6, 0.7])
     # Change y axis to percentages
-    ax.set_yticklabels(["0%", "25%", "50%", "75%", "100%"])
+    ax.set_yticklabels(["30%", "40%", "50%", "60%", "70%"])
     # Draw a line at 50%
     pyplot.axhline(0.5, linestyle="dotted", linewidth=1, color="black")
     # Add a text in each area
     pyplot.text(
         data["Season"].median() + 5,
-        0.25,
+        0.35,
         "WEST WINS",
         fontsize=15,
         color='white',
         fontweight="bold",
     )
     pyplot.text(
-        data["Season"].median() - 10,
-        0.75,
+        data["Season"].median() - 15,
+        0.65,
         "EAST WINS",
         fontsize=15,
         color='white',
@@ -134,7 +134,7 @@ def plot_results(data: pandas.DataFrame):
     )
     pyplot.text(
         data["Season"].max() - 1,
-        0.05,
+        0.3,
         "@wontcalltimeout",
         fontsize=8,
         horizontalalignment="center",
@@ -147,13 +147,14 @@ def plot_results(data: pandas.DataFrame):
     max_season_west = data[data["West win %"] == max_west]["Season"].values[0]
     pyplot.text(
         max_season_west,
-        max_west + 0.03,
+        max_west + 0.02,
         f"{max_west:.1%}",
         fontsize=9,
         color="white",
         horizontalalignment="center",
         verticalalignment="center",
         fontstyle="italic",
+        fontweight="bold",
     )
     seaborn.despine()
     fig.savefig(f"data/conference_wins.png")
