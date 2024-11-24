@@ -14,8 +14,9 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           name: model.joblib
-          latest: true
+          workflow: train.yaml # TODO: switch to renew.yaml after first run
           path: ./
+          search_artifacts: true
       - name: Upload model as artifact for 10 more days
         uses: actions/upload-artifact@v4
         with: 
@@ -29,8 +30,9 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           name: performances.csv
-          latest: true
+          workflow: train.yaml # TODO: switch to renew.yaml after first run
           path: ./
+          search_artifacts: true
       - name: Upload model performances as artifact for 10 more days
         uses: actions/upload-artifact@v4
         with: 
@@ -44,31 +46,18 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           name: features.json
-          latest: true
+          workflow: train.yaml # TODO: switch to renew.yaml after first run
           path: ./
+          search_artifacts: true
       - name: Upload features as artifact for 10 more days
         uses: actions/upload-artifact@v4
         with: 
           name: features.json
           path: ./features.json
           retention-days: 10
-  renew-model-input:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download model input from artifact
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          name: model_input.csv
-          latest: true
-          path: ./
-      - name: Upload model input as artifact for 10 more days
-        uses: actions/upload-artifact@v4
-        with: 
-          name: model_input.csv
-          path: ./model_input.csv
-          retention-days: 10
 
   # TODO : Run these jobs if season is over, use an environment variable ?
+  # TODO add model_input 
   # renew-predictions:
   #   runs-on: ubuntu-latest
   #   steps:
