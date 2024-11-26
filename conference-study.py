@@ -161,7 +161,18 @@ def plot_results(data: pandas.DataFrame):
 
 def main():
     try:
-        data = pandas.read_csv("data/conference_wins.csv", index_col=False)
+        current_season = 2025
+        data_old = pandas.read_csv("data/conference_wins.csv", index_col=False)
+        data_old = data_old[data_old['Season'] < current_season]
+        data = pandas.DataFrame(columns=["Season", "East win %", "West win %"])
+        east_wins, west_wins = get_wins_vs_other_conference(current_season)
+        pct_wins_east = east_wins / (east_wins + west_wins)
+        pct_wins_west = west_wins / (east_wins + west_wins)
+        data.loc[len(data)] = [current_season, pct_wins_east, pct_wins_west]
+        data = pandas.concat(
+            [data_old, data],
+            ignore_index=True,
+        )
     except FileNotFoundError:
         data = pandas.DataFrame(columns=["Season", "East win %", "West win %"])
         for season in SEASONS:
