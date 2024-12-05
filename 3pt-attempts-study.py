@@ -4,9 +4,9 @@ import pandas
 import requests
 import seaborn
 
-NUM_CURRENT_LEADERS = 3
-NUM_ALL_TIME_LEADERS = 3
-SHOW_FIRST_N_GAMES = 20
+NUM_CURRENT_LEADERS = 1
+NUM_ALL_TIME_LEADERS = 1
+SHOW_FIRST_N_GAMES = 30
 
 def get_player_slug(player: str) -> str:
     """ Get BBR player slug from player name.
