@@ -18,6 +18,54 @@ Install the Python dependencies :
 Use the app :
 ```pipenv run python . --help```
 
+## Process and Methodology
+
+The simplified pipeline overview for the prediction process is as follows:
+- Extract player data from Basketball Reference
+- Train regression models using MVP shares as response
+  - Filter the data to narrow the player pool as much as possible (goes from bronze -> silver -> gold data)
+  - Split the gold data into training and validation sets
+  - Train with Multi Layer Perceptron and KFold Validation
+- Predict the current MVP using the fitted model
+- Display feature importance using Shapley values
+
+#### Data Retrieval
+
+Retrieving the player and team data is the first step. The abstract class is defined and implemented in ```scrappers.py``` and it makes use of the Beatiful Soup API to get player stats, team standings, and a dataframe of all the MVP winners starting from the 1974 NBA season up until the latest season from Basketball Reference. Then, the ```download.py``` file uses the methods defined in ```scrappers.py``` to dump the needed dataframes to csv files.
+
+#### Preprocessing and Training 
+
+This is the primary step of the pipleline and it is implemented mainly in ```train.py```. The filteration of data starts from raw data and ends up as "gold" data, which is data that is ready to be used in modeling:
+- First, the raw data is converted to "bronze" data which is just a formatting of the raw downloaded data
+- Next, filters of >= 50% games played, >= 24 MPG, and team seed of at least 10 in the conference were applied to further reduce the dataset. This is the "silver" data
+- Finally, the "gold" dataset not only reduces the player space, but also reduces the dimensionality (features/columns) of the dataset by removing categorical features as well as features that don't meet the 98% correlation threshold.
+
+The "gold" dataset generation method is also where both the normalization of the data and the actual training occur. The normalization methods are either min-max scaling or standardization:
+- Min-max scaling: Transforms all the numeric values per column to be within 0 and 1. That is, all values in a certain column are divided by the maximum value of that column.
+- Standardization: Transforms all the numeric values per column to lie on a normal distribution. That is, all values are centered around a mean of 0 and a standard deviation of 1
+
+The dataset is split into training and validation sets based on seasons. Then, the architecture for the MLP regressor is defined, with the following hyperparameters:
+```python
+hidden_layer_sizes=9,
+learning_rate="adaptive",
+learning_rate_init=0.065,
+random_state=0
+```
+
+Each step of the model is printed with its training and validation MAE, MSE, and MaxAE - all different accuracy metrics - to display the progress of the MLP with each step until convergence. Furthermore, this is done with a KFold Validation of 3 splits and 2 repeats.
+
+A final regressor is then selected to fit the data and this model is saved using ```joblib```.
+
+#### Predictions and evaluation
+
+```predict.py``` then loads the saved model from the training stage as well as the "silver" data, the data that the model will be used on to make predictions. Using the "silver" set rather than the "gold" data avoids extreme overfitting (since the model has already seen it). 
+
+First, the dimensionality of the data is reduced the and the values are scaled the same way to match both the required dimensions of the predict method as well as to keep the scale of the values consistent with what the model was trained on. 
+
+The predictions are then made using Sci-kit learn's predict method and appended to the original dataframe. From there, the dataframe is reduced based on a prediction value greater than 0.0 to identify the players that the model predicted as MVP for their year. 
+
+As for evaluation, Shapley values are plotted in ```explain.py``` as a way to display the features that contributed the most to determining an MVP winner (sorted in descending order).
+
 ## Main challenges
 
 
