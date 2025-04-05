@@ -132,6 +132,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete model input from artifacts
-        uses: geekyeggo/delete-artifact@v2
+        uses: geekyeggo/delete-artifact@v4
         with:
           name: model_input.csv
