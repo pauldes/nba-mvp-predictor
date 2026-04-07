@@ -107,7 +107,7 @@ def make_silver_data():
     # 60% games played
     # 28 minutes per game
     # 2 FG attemptes
-    # Team ranked 12th in conference at least
+    # Team ranked 8th in conference at least
     for season in data.SEASON.unique():
         max_g = data[data.SEASON == season]["G"].max()
         treshold = 0.6 * max_g
