@@ -19,7 +19,7 @@ def get_artifacts():
     return artifacts
 
 
-def load_json_from_url(url: str, auth=None):
+def load_json_from_url(url: str, auth: tuple[str, str] | None = None):
     """Charge un fichier JSON en mémoire depuis une URL
 
     Args:

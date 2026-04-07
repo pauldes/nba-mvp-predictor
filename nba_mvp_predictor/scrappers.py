@@ -57,14 +57,14 @@ class Scrapper(ABC):
         pass
 
     @abstractmethod
-    def get_team_standings(self, subset_by_seasons: list = None):
+    def get_team_standings(self, subset_by_seasons: list[int] | None = None):
         pass
 
     @abstractmethod
     def get_team_standings_on_date(self, day: int, month: int, year: int):
         pass
 
-    def get_mvp(self, subset_by_seasons: list = None):
+    def get_mvp(self, subset_by_seasons: list[int] | None = None):
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month
         if month > 9:
@@ -93,9 +93,9 @@ class Scrapper(ABC):
 
     def build_multi_season_league_player_stats(
         self,
-        subset_by_teams: list = None,
-        subset_by_seasons: list = None,
-        subset_by_stat_types: list = None,
+        subset_by_teams: list[str] | None = None,
+        subset_by_seasons: list[int] | None = None,
+        subset_by_stat_types: list[str] | None = None,
     ):
         """
         Merge many seasons and many stat modes into one wide player-level DataFrame.
@@ -354,7 +354,7 @@ class BasketballReferenceScrapper(Scrapper):
         d["WESTERN_CONF"] = w_df
         return d
 
-    def get_team_standings(self, subset_by_seasons: list = None):
+    def get_team_standings(self, subset_by_seasons: list[int] | None = None):
         """Assumptions : the season is over by June 1st."""
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month

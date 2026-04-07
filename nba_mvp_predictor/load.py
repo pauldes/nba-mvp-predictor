@@ -15,7 +15,7 @@ def load_model():
     return joblib.load(conf.data.model.path)
 
 
-def load_player_stats(nrows: int = None):
+def load_player_stats(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.player_stats.path,
         sep=conf.data.player_stats.sep,
@@ -26,7 +26,7 @@ def load_player_stats(nrows: int = None):
     )
 
 
-def load_mvp_votes(nrows: int = None):
+def load_mvp_votes(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.mvp_votes.path,
         sep=conf.data.mvp_votes.sep,
@@ -37,7 +37,7 @@ def load_mvp_votes(nrows: int = None):
     )
 
 
-def load_team_standings(nrows: int = None):
+def load_team_standings(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.team_standings.path,
         sep=conf.data.team_standings.sep,
@@ -48,7 +48,7 @@ def load_team_standings(nrows: int = None):
     )
 
 
-def load_bronze_data(nrows: int = None):
+def load_bronze_data(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.bronze.path,
         sep=conf.data.bronze.sep,
@@ -59,7 +59,7 @@ def load_bronze_data(nrows: int = None):
     )
 
 
-def load_silver_data(nrows: int = None):
+def load_silver_data(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.silver.path,
         sep=conf.data.silver.sep,
@@ -70,7 +70,7 @@ def load_silver_data(nrows: int = None):
     )
 
 
-def load_gold_data(nrows: int = None):
+def load_gold_data(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.gold.path,
         sep=conf.data.gold.sep,
@@ -81,7 +81,7 @@ def load_gold_data(nrows: int = None):
     )
 
 
-def load_predictions(nrows: int = None):
+def load_predictions(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.predictions.path,
         sep=conf.data.predictions.sep,
@@ -93,7 +93,7 @@ def load_predictions(nrows: int = None):
     )
 
 
-def load_history(nrows: int = None):
+def load_history(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.history.path,
         sep=conf.data.history.sep,
@@ -113,7 +113,7 @@ def load_features():
     return features_dict
 
 
-def load_model_input(nrows: int = None):
+def load_model_input(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.model_input.path,
         sep=conf.data.model_input.sep,
@@ -125,7 +125,7 @@ def load_model_input(nrows: int = None):
     )
 
 
-def load_shap_values(nrows: int = None):
+def load_shap_values(nrows: int | None = None):
     return pandas.read_csv(
         conf.data.shap_values.path,
         sep=conf.data.shap_values.sep,
