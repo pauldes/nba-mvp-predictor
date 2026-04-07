@@ -2,32 +2,57 @@ import datetime
 import time
 from abc import ABC, abstractmethod
 from os import path
+from typing import ClassVar
+from urllib.parse import urljoin
 
 import pandas
-import requests
 from bs4 import BeautifulSoup
+from curl_cffi import requests as _br_http
 
-from nba_mvp_predictor import conf, logger, utils
+from nba_mvp_predictor import logger, utils
 
-""" 
-1955-56 through 1979-1980: Voting was done by players. Rules prohibited player from voting for himself or any teammate.
-1980-81 to present: Voting conducted by media. 
 """
+1955-56 through 1979-1980: Voting was done by players. Rules prohibited player from voting
+for himself or any teammate.
+1980-81 to present: Voting conducted by media.
+"""
+
+_TEAM_NAMES_PATH = path.join(path.dirname(__file__), "team_names.yaml")
 
 
 class Scrapper(ABC):
-    """Abstract class working as an interface for scrapper classes."""
+    """Abstract interface for scraping Basketball Reference."""
 
+    #: First season end year (BR-style label, e.g. 1974 = 1973–74). Each concrete subclass must
+    #: assign this.
+    FIRST_SEASON_END: ClassVar[int]
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if cls is Scrapper:
+            return
+        if "FIRST_SEASON_END" not in cls.__dict__:
+            raise TypeError(
+                f"{cls.__qualname__} must define class attribute FIRST_SEASON_END "
+                "(int: first season end year, e.g. 1974 for 1973–74)."
+            )
+
+    def __init__(self):
+        self.team_names = utils.get_dict_from_yaml(_TEAM_NAMES_PATH)
+
+    @classmethod
     @abstractmethod
-    def retrieve_mvp_votes(season: int):
+    def retrieve_mvp_votes(cls, season):
         pass
 
+    @classmethod
     @abstractmethod
-    def get_mvp(self, subset_by_seasons: list = None):
-        pass
+    def wait_between_request(cls) -> None:
+        """Pause before each outbound HTTP request (rate limiting / politeness)."""
 
+    @classmethod
     @abstractmethod
-    def fetch_single_season_league_stat_table(season, stat_type):
+    def fetch_single_season_league_stat_table(cls, season, stat_type):
         """One season, one stat mode (e.g. per_game); one league-wide table."""
         pass
 
@@ -36,47 +61,195 @@ class Scrapper(ABC):
         pass
 
     @abstractmethod
+    def get_team_standings_on_date(self, day: int, month: int, year: int):
+        pass
+
+    def get_mvp(self, subset_by_seasons: list = None):
+        year = datetime.datetime.now().year
+        month = datetime.datetime.now().month
+        if month > 9:
+            year += 1
+        allowed_seasons = range(self.__class__.FIRST_SEASON_END, year)
+        if subset_by_seasons is not None:
+            seasons = [
+                season for season in subset_by_seasons if season in allowed_seasons
+            ]
+        else:
+            seasons = allowed_seasons
+        total_dfs = []
+        for season in seasons:
+            logger.info(f"Retrieving MVP of season {season}...")
+            results = self.__class__.retrieve_mvp_votes(season)
+            results.loc[:, "player_season_team"] = (
+                results["PLAYER"].str.replace(" ", "")
+                + "_"
+                + results["SEASON"]
+                + "_"
+                + results["TEAM"]
+            )
+            results = results.set_index("player_season_team", drop=True)
+            total_dfs.append(results)
+        return pandas.concat(total_dfs, join="outer", axis="index", ignore_index=False)
+
     def build_multi_season_league_player_stats(
         self,
         subset_by_teams: list = None,
         subset_by_seasons: list = None,
         subset_by_stat_types: list = None,
     ):
-        """Many seasons × many stat modes, merged into one player-level frame."""
-        pass
+        """
+        Merge many seasons and many stat modes into one wide player-level DataFrame.
 
-    @abstractmethod
-    def get_team_standings_on_date(self, day: int, month: int, year: int):
-        pass
+        Defaults: all teams, all allowed seasons, all stat modes.
+        """
+        year = datetime.datetime.now().year
+        month = datetime.datetime.now().month
+        if month > 9:
+            year += 1
+        allowed_stat_types = [
+            "totals",
+            "per_game",
+            "per_36min",
+            "per_100poss",
+            "advanced",
+        ]
+        allowed_seasons = self._allowed_season_end_years(year)
+        allowed_teams = list(set(self.team_names.values()))
+
+        if subset_by_teams is not None:
+            subset_by_teams = [str(s).upper() for s in subset_by_teams]
+
+        if subset_by_seasons is not None:
+            seasons = [
+                season for season in subset_by_seasons if season in allowed_seasons
+            ]
+        else:
+            seasons = list(allowed_seasons)
+        if subset_by_stat_types is not None:
+            subset_by_stat_types = [str(s).lower() for s in subset_by_stat_types]
+            stat_types = [
+                stat_type
+                for stat_type in subset_by_stat_types
+                if stat_type in allowed_stat_types
+            ]
+        else:
+            stat_types = allowed_stat_types
+
+        season_dfs = []
+        for season in seasons:
+            do_not_suffix = [
+                "PLAYER",
+                "POS",
+                "AGE",
+                "TEAM",
+                "SEASON",
+                "G",
+                "GS",
+                "FG%",
+                "3P%",
+                "FT%",
+                "2P%",
+                "eFG%",
+                "MP",
+            ]
+            stat_type_dfs = []
+            for stat_type in stat_types:
+                logger.info(f"Retrieving {stat_type} stats for season {season}...")
+                try:
+                    stat_type_df = self.__class__.fetch_single_season_league_stat_table(
+                        season, stat_type
+                    )
+                except Exception as e:
+                    logger.error(
+                        "Could not retrieve data. Are you sure NBA was played in season %s? %s",
+                        season,
+                        e,
+                    )
+                else:
+                    stat_type_df.columns = [
+                        col + "_" + str(stat_type) if col not in do_not_suffix else col
+                        for col in stat_type_df.columns
+                    ]
+                    stat_type_df.loc[:, "player_season_team"] = (
+                        stat_type_df["PLAYER"].str.replace(" ", "")
+                        + "_"
+                        + stat_type_df["SEASON"]
+                        + "_"
+                        + stat_type_df["TEAM"]
+                    )
+                    stat_type_df = stat_type_df.set_index(
+                        "player_season_team", drop=True
+                    )
+                    stat_type_df = stat_type_df.dropna(axis="columns", how="all")
+                    if stat_type_df.index.duplicated().any():
+                        duplicated_indexes = stat_type_df.index[
+                            stat_type_df.index.duplicated()
+                        ].tolist()
+                        logger.warning(
+                            "Duplicate index values found in %s stats for season %s: %s. Removing duplicates.",
+                            stat_type,
+                            season,
+                            duplicated_indexes,
+                        )
+                        stat_type_df = stat_type_df[
+                            ~stat_type_df.index.duplicated(keep="first")
+                        ]
+                    stat_type_dfs.append(stat_type_df)
+
+            season_df = pandas.concat(
+                stat_type_dfs, join="outer", axis="columns", ignore_index=False
+            )
+            season_df = season_df.loc[:, ~season_df.columns.duplicated()]
+            season_dfs.append(season_df)
+
+        full_df = pandas.concat(
+            season_dfs, join="outer", axis="index", ignore_index=False
+        )
+
+        if subset_by_teams is not None:
+            full_df = full_df[full_df.TEAM.isin(subset_by_teams)]
+
+        return full_df
+
+    def _allowed_season_end_years(self, calendar_year_upper: int):
+        """Season end years from ``FIRST_SEASON_END`` through ``calendar_year_upper`` inclusive."""
+        return range(self.__class__.FIRST_SEASON_END, calendar_year_upper + 1)
 
 
 class BasketballReferenceScrapper(Scrapper):
-    def __init__(self):
-        self.team_names = utils.get_dict_from_yaml(
-            "./nba_mvp_predictor/team_names.yaml"
-        )
+    #: 1973–74 onward; BR ``leagues/NBA_{year}_*.html`` pages.
+    FIRST_SEASON_END = 1974
+    BR_ORIGIN = "https://www.basketball-reference.com"
+    #: Browser TLS / HTTP fingerprint for ``curl_cffi`` (see their ``impersonate`` presets).
+    BR_IMPERSONATE_DEFAULT = "firefox147"
+    BR_REQUEST_TIMEOUT_SECONDS = 60.0
+
+    @classmethod
+    def wait_between_request(cls) -> None:
+        time.sleep(utils.sample_uniform_seconds(3.0, 4.0))
 
     @classmethod
     def get_request(cls, uri):
-        root_url = "https://www.basketball-reference.com/"
-        url = path.join(root_url, uri)
-        logger.debug("Waiting time...")
-        # Wait some time to avoid BR anti-bot measures (HTTP 429)
-        utils.wait_random_time(2, 10)
-        logger.debug("Requesting %s...", url)
-        r = requests.get(url)
+        url = urljoin(f"{cls.BR_ORIGIN}/", uri)
+        cls.wait_between_request()
+        impersonate = cls.BR_IMPERSONATE_DEFAULT
+        logger.debug("Requesting %s (impersonate=%s)...", url, impersonate)
+        r = _br_http.get(
+            url,
+            impersonate=impersonate,
+            timeout=cls.BR_REQUEST_TIMEOUT_SECONDS,
+        )
         if r.status_code == 200:
             return r
+        logger.error("Failed to get %s", url)
+        retry_after = r.headers.get("Retry-After", "")
+        if r.status_code == 429:
+            message = f"(too many requests, retry after {retry_after})"
         else:
-            logger.error("Failed to get %s", url)
-            retry_after = r.headers["Retry-After"]
-            if r.status_code == 429:
-                message = f"(too many requests, retry after {retry_after})"
-            else:
-                message = f"(status code {r.status_code}"
-            raise ConnectionError(
-                f"Could not connect to BR and get data, status code : {message}"
-            )
+            message = f"(status code {r.status_code})"
+        raise ConnectionError(
+            f"Could not connect to BR and get data, status code : {message}"
+        )
 
     @classmethod
     def retrieve_mvp_votes(cls, season):
@@ -99,7 +272,6 @@ class BasketballReferenceScrapper(Scrapper):
         data = data.rename(columns={"TM": "TEAM"})
         data = data[["PLAYER", "TEAM", "SEASON", "MVP_VOTES_SHARE", "RANK"]]
         data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
-            # "[^A-Za-z]", "", regex=True
             "[ _'.*]",
             "",
             regex=True,
@@ -118,45 +290,8 @@ class BasketballReferenceScrapper(Scrapper):
         data = data.drop("RANK", axis="columns")
         return data
 
-    def get_mvp(self, subset_by_seasons: list = None):
-        year = datetime.datetime.now().year
-        month = datetime.datetime.now().month
-        if month > 9:
-            # Season starts after september
-            year += 1
-        allowed_seasons = range(1974, year)
-        if subset_by_seasons is not None:
-            seasons = [
-                season for season in subset_by_seasons if season in allowed_seasons
-            ]
-        else:
-            seasons = allowed_seasons
-        total_dfs = []
-        for season in seasons:
-            logger.info(f"Retrieving MVP of season {season}...")
-            results = self.retrieve_mvp_votes(season)
-            results.loc[:, "player_season_team"] = (
-                results["PLAYER"].str.replace(" ", "")
-                + "_"
-                + results["SEASON"]
-                + "_"
-                + results["TEAM"]
-            )
-            results = results.set_index("player_season_team", drop=True)
-            total_dfs.append(results)
-        all_df = pandas.concat(
-            total_dfs, join="outer", axis="index", ignore_index=False
-        )
-        return all_df
-
     @classmethod
     def fetch_single_season_league_stat_table(cls, season, stat_type):
-        """
-        Fetch one league-wide player table: exactly one season and one stat mode.
-
-        Season: end year of season, as int or str.
-        stat_type (case insensitive): 'totals', 'per_game', 'per_36min', 'per_100poss', 'advanced'.
-        """
         season = str(season)
         stat_type = str(stat_type).lower()
         url_mapper = {
@@ -177,7 +312,6 @@ class BasketballReferenceScrapper(Scrapper):
         data.columns = [str(col).upper() for col in data.columns]
         data.loc[:, "SEASON"] = season
         data.loc[:, "PLAYER"] = data["PLAYER"].str.replace(
-            # "[^-'a-zA-ZÀ-ÿ]", "", regex=True
             "[ _'.*]",
             "",
             regex=True,
@@ -193,20 +327,9 @@ class BasketballReferenceScrapper(Scrapper):
 
     @classmethod
     def get_standings(cls, date=None):
-        """Ported from https://github.com/vishaalagartha/basketball_reference_scraper.
-
-
-        Args:
-            date (_type_, optional): _description_. Defaults to None.
-
-        Raises:
-            ConnectionError: _description_
-
-        Returns:
-            _type_: _description_
-        """
+        """Ported from https://github.com/vishaalagartha/basketball_reference_scraper."""
         if date is None:
-            date = datetime.now()
+            date = datetime.datetime.now()
         else:
             date = pandas.to_datetime(date)
         d = {}
@@ -232,15 +355,12 @@ class BasketballReferenceScrapper(Scrapper):
         return d
 
     def get_team_standings(self, subset_by_seasons: list = None):
-        """Assumptions : the season is over by June 1st.
-        TODO : Use the season dataset to find last game date.
-        """
+        """Assumptions : the season is over by June 1st."""
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month
         if month > 9:
-            # Season starts after september
             year += 1
-        allowed_seasons = range(1974, year + 1)
+        allowed_seasons = range(self.__class__.FIRST_SEASON_END, year + 1)
         if subset_by_seasons is not None:
             seasons = [
                 season for season in subset_by_seasons if season in allowed_seasons
@@ -254,10 +374,10 @@ class BasketballReferenceScrapper(Scrapper):
             dfs = []
             results = self.get_standings(date=date)
             for conference, data in results.items():
-                logger.debug(f"Standings data columns: {', '.join(data.columns)}")
+                logger.debug("Standings data columns: %s", ", ".join(data.columns))
                 data = data.dropna(axis="index", how="any")
                 logger.debug(
-                    f"First column name before renaming: {data.columns.values[0]}"
+                    "First column name before renaming: %s", data.columns.values[0]
                 )
                 data = data.rename(columns={data.columns[0]: "TEAM"})
                 data.loc[:, "TEAM"] = (
@@ -274,7 +394,7 @@ class BasketballReferenceScrapper(Scrapper):
                 data = data.sort_values(by="W/L%", ascending=False)
                 data = data.reset_index(drop=True)
                 data.loc[:, "CONF_RANK"] = data.index + 1
-                logger.debug(f"Conference : {conference}")
+                logger.debug("Conference : %s", conference)
                 data.loc[:, "CONF"] = (
                     conference.replace(" ", "_").upper().replace("CONFERENCE", "CONF")
                 )
@@ -298,128 +418,7 @@ class BasketballReferenceScrapper(Scrapper):
                 dfs, join="outer", axis="index", ignore_index=False
             )
             total_dfs.append(all_conf_df)
-        all_conf_df = pandas.concat(
-            total_dfs, join="outer", axis="index", ignore_index=False
-        )
-        return all_conf_df
-
-    def build_multi_season_league_player_stats(
-        self,
-        subset_by_teams: list = None,
-        subset_by_seasons: list = None,
-        subset_by_stat_types: list = None,
-    ):
-        """
-        Merge many seasons and many stat modes into one wide player-level DataFrame.
-
-        Defaults: all teams, all allowed seasons, all stat modes.
-        """
-        year = datetime.datetime.now().year
-        month = datetime.datetime.now().month
-        if month > 9:
-            # Season starts after september
-            year += 1
-        allowed_stat_types = [
-            "totals",
-            "per_game",
-            "per_36min",
-            "per_100poss",
-            "advanced",
-        ]
-        allowed_seasons = range(1974, year + 1)
-        allowed_teams = list(set(self.team_names.values()))
-
-        if subset_by_teams is not None:
-            subset_by_teams = [str(s).upper() for s in subset_by_teams]
-
-        if subset_by_seasons is not None:
-            seasons = [
-                season for season in subset_by_seasons if season in allowed_seasons
-            ]
-        else:
-            seasons = allowed_seasons
-        if subset_by_stat_types is not None:
-            subset_by_stat_types = [str(s).lower() for s in subset_by_stat_types]
-            stat_types = [
-                stat_type
-                for stat_type in subset_by_stat_types
-                if stat_type in allowed_stat_types
-            ]
-        else:
-            stat_types = allowed_stat_types
-
-        season_dfs = []
-        for season in seasons:
-            time.sleep(5)
-            do_not_suffix = [
-                "PLAYER",
-                "POS",
-                "AGE",
-                "TEAM",
-                "SEASON",
-                "G",
-                "GS",
-                "FG%",
-                "3P%",
-                "FT%",
-                "2P%",
-                "eFG%",
-                "MP",
-            ]
-            stat_type_dfs = []
-            for stat_type in stat_types:
-                logger.info(f"Retrieving {stat_type} stats for season {season}...")
-                try:
-                    stat_type_df = self.fetch_single_season_league_stat_table(
-                        season, stat_type
-                    )
-                except Exception as e:
-                    logger.error(
-                        f"Could not retrieve data. Are you sure NBA was played in season {season}? {e}"
-                    )
-                else:
-                    stat_type_df.columns = [
-                        col + "_" + str(stat_type) if col not in do_not_suffix else col
-                        for col in stat_type_df.columns
-                    ]
-                    stat_type_df.loc[:, "player_season_team"] = (
-                        stat_type_df["PLAYER"].str.replace(" ", "")
-                        + "_"
-                        + stat_type_df["SEASON"]
-                        + "_"
-                        + stat_type_df["TEAM"]
-                    )
-                    stat_type_df = stat_type_df.set_index(
-                        "player_season_team", drop=True
-                    )
-                    stat_type_df = stat_type_df.dropna(axis="columns", how="all")
-                    if stat_type_df.index.duplicated().any():
-                        # Players with same name on same team in same season will generate duplicates
-                        duplicated_indexes = stat_type_df.index[
-                            stat_type_df.index.duplicated()
-                        ].tolist()
-                        logger.warning(
-                            f"Duplicate index values found in {stat_type} stats for season {season}: {duplicated_indexes}. Removing duplicates."
-                        )
-                        stat_type_df = stat_type_df[
-                            ~stat_type_df.index.duplicated(keep="first")
-                        ]
-                    stat_type_dfs.append(stat_type_df)
-
-            season_df = pandas.concat(
-                stat_type_dfs, join="outer", axis="columns", ignore_index=False
-            )
-            season_df = season_df.loc[:, ~season_df.columns.duplicated()]
-            season_dfs.append(season_df)
-
-        full_df = pandas.concat(
-            season_dfs, join="outer", axis="index", ignore_index=False
-        )
-
-        if subset_by_teams is not None:
-            full_df = full_df[full_df.TEAM.isin(subset_by_teams)]
-
-        return full_df
+        return pandas.concat(total_dfs, join="outer", axis="index", ignore_index=False)
 
     def get_team_standings_on_date(self, day: int, month: int, year: int):
         uri = f"friv/standings.fcgi?month={month}&day={day}&year={year}&lg_id=NBA"
@@ -439,9 +438,11 @@ class BasketballReferenceScrapper(Scrapper):
         dfs = []
 
         for conference, data in results.items():
-            logger.debug(f"Standings data columns: {', '.join(data.columns)}")
+            logger.debug("Standings data columns: %s", ", ".join(data.columns))
             data = data.dropna(axis="index", how="any")
-            logger.debug(f"First column name before renaming: {data.columns.values[0]}")
+            logger.debug(
+                "First column name before renaming: %s", data.columns.values[0]
+            )
             data = data.rename(columns={data.columns[0]: "TEAM"})
             data.loc[:, "TEAM"] = (
                 data["TEAM"].str.upper().str.replace("[^A-Z]", "", regex=True)
@@ -455,9 +456,8 @@ class BasketballReferenceScrapper(Scrapper):
             data = data.sort_values(by="W/L%", ascending=False)
             data = data.reset_index(drop=True)
             data.loc[:, "CONF_RANK"] = data.index + 1
-            # data.loc[:, "CONF_RANK"] = data["W/L%"].rank(ascending=False, method='max')
 
-            logger.debug(f"Conference : {conference}")
+            logger.debug("Conference : %s", conference)
             data.loc[:, "CONF"] = (
                 conference.replace(" ", "_").upper().replace("CONFERENCE", "CONF")
             )
@@ -480,5 +480,4 @@ class BasketballReferenceScrapper(Scrapper):
             )
             data = data.set_index("TEAM", drop=True)
             dfs.append(data)
-        all_conf_df = pandas.concat(dfs, join="outer", axis="index", ignore_index=False)
-        return all_conf_df
+        return pandas.concat(dfs, join="outer", axis="index", ignore_index=False)

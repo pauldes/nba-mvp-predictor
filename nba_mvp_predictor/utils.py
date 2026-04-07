@@ -1,5 +1,4 @@
 import random
-import time
 
 import box
 import yaml
@@ -12,5 +11,7 @@ def get_dict_from_yaml(yaml_path: str):
     return conf_dict
 
 
-def wait_random_time(min, max) -> None:
-    time.sleep(random.randint(min, max))
+def sample_uniform_seconds(low: float = 0, high: float = 1) -> float:
+    """Sample a uniformly random duration in ``[min(low, high), max(low, high)]`` (seconds)."""
+    a, b = min(low, high), max(low, high)
+    return random.uniform(a, b)

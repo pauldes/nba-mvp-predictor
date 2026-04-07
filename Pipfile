@@ -15,7 +15,7 @@ nba-mvp-predictor = {editable = true, path = "./nba_mvp_predictor"}
 scikit-learn = "*"
 lxml = "*"
 shap = "*"
-nba-api = "*"
+curl-cffi = "*"
 
 [dev-packages]
 black = "*"
