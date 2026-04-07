@@ -40,7 +40,7 @@ jobs:
       - name: Download history from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
-          name: history-2025.csv
+          name: history-2026.csv
           workflow: predict.yaml
           path: ./data/
           search_artifacts: true
@@ -50,23 +50,23 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade pipenv
           pipenv install --deploy
-      - name: Run the CLI command to download data for season 2025
+      - name: Run the CLI command to download data for BR seasons 2025 and 2026
         run: |
-          pipenv run python . download --season 2024 2025
+          pipenv run python . download --season 2025 2026
       - name: Run the CLI command to predict model
         run: |
           pipenv run python . predict
       - name: Upload predictions as artifact
         uses: actions/upload-artifact@v4
         with: 
-          name: predictions-2025.csv
-          path: ./data/predictions-2025.csv
+          name: predictions-2026.csv
+          path: ./data/predictions-2026.csv
           retention-days: 3
       - name: Upload history as artifact
         uses: actions/upload-artifact@v4
         with: 
-          name: history-2025.csv
-          path: ./data/history-2025.csv
+          name: history-2026.csv
+          path: ./data/history-2026.csv
           retention-days: 3
       - name: Upload model input dataset as artifact
         uses: actions/upload-artifact@v4
@@ -97,7 +97,7 @@ jobs:
       - name: Download predictions from artifact
         uses: actions/download-artifact@v4
         with:
-          name: predictions-2025.csv
+          name: predictions-2026.csv
           path: ./data/
       - name: Download model from artifact
         uses: dawidd6/action-download-artifact@v6
@@ -123,8 +123,8 @@ jobs:
       - name: Upload SHAP values dataset as artifact
         uses: actions/upload-artifact@v4
         with: 
-          name: shap_values-2025.csv
-          path: ./data/shap_values-2025.csv
+          name: shap_values-2026.csv
+          path: ./data/shap_values-2026.csv
           retention-days: 10
 
   clean-artifacts:
