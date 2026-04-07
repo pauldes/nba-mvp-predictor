@@ -27,14 +27,16 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           name: features.json
-          workflow: renew.yaml # Switch between renew.yaml and train.yaml as needed
+          branch: main
+          workflow_search: true # Will fetch latest from train or renew workflow
           path: ./data/
           search_artifacts: true
       - name: Download model from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
           name: model.joblib
-          workflow: renew.yaml # Switch between renew.yaml and train.yaml as needed
+          branch: main
+          workflow_search: true # Will fetch latest from train or renew workflow
           path: ./data/
           search_artifacts: true
       - name: Download history from artifact
@@ -103,7 +105,8 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           name: model.joblib
-          workflow: renew.yaml # Switch between renew.yaml and train.yaml as needed
+          branch: main
+          workflow_search: true # Will fetch latest from train or renew workflow
           path: ./data/
           search_artifacts: true
       - name: Install dependencies from Pipfile
