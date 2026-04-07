@@ -53,7 +53,7 @@ class Scrapper(ABC):
     @classmethod
     @abstractmethod
     def fetch_single_season_league_stat_table(cls, season, stat_type):
-        """One season, one stat mode (e.g. per_game); one league-wide table."""
+        """One season, one stat mode (e.g. per_game), one league-wide table."""
         pass
 
     @abstractmethod
@@ -217,15 +217,14 @@ class Scrapper(ABC):
 
 
 class BasketballReferenceScrapper(Scrapper):
-    #: 1973–74 onward; BR ``leagues/NBA_{year}_*.html`` pages.
     FIRST_SEASON_END = 1974
     BR_ORIGIN = "https://www.basketball-reference.com"
-    #: Browser TLS / HTTP fingerprint for ``curl_cffi`` (see their ``impersonate`` presets).
     BR_IMPERSONATE_DEFAULT = "firefox147"
     BR_REQUEST_TIMEOUT_SECONDS = 60.0
 
     @classmethod
     def wait_between_request(cls) -> None:
+        # Basketball Reference asks for at least ~3 seconds between requests.
         time.sleep(utils.sample_uniform_seconds(3.0, 4.0))
 
     @classmethod
