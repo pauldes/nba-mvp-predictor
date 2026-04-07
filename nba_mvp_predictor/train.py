@@ -323,7 +323,6 @@ def make_gold_data_and_train_model():
         val_MAEs = []
         val_MSEs = []
         val_MSLEs = []
-        val_MAPEs = []
         val_MAXs = []
 
         # End run if ened abnormally
@@ -358,12 +357,10 @@ def make_gold_data_and_train_model():
             val_MAEs.append(metrics.mean_absolute_error(y_val, y_pred))
             val_MSEs.append(metrics.mean_squared_error(y_val, y_pred))
             # val_MSLEs.append(metrics.mean_squared_log_error(y_val, y_pred))
-            val_MAPEs.append(metrics.mean_absolute_percentage_error(y_val, y_pred))
             val_MAXs.append(metrics.max_error(y_val, y_pred))
             # mlflow.log_metric(key="val_MAE", value=metrics.mean_absolute_error(y_val, y_pred), step=step)
             # mlflow.log_metric(key="val_MSE", value=metrics.mean_squared_error(y_val, y_pred), step=step)
             # #mlflow.log_metric(key="val_MSLE", value=metrics.mean_squared_log_error(y_val, y_pred), step=step)
-            # mlflow.log_metric(key="val_MAPE", value=metrics.mean_absolute_percentage_error(y_val, y_pred), step=step)
             # mlflow.log_metric(key="train_MAE", value=metrics.mean_absolute_error(y_train, y_pred_train), step=step)
             # mlflow.log_metric(key="train_MSE", value=metrics.mean_squared_error(y_train, y_pred_train), step=step)
             # Add a MSE/MAE on MVP candidates
@@ -375,7 +372,6 @@ def make_gold_data_and_train_model():
         logger.debug("Training MaxAE: %f", numpy.mean(train_MAXs))
         logger.debug("Validation MAE: %f", numpy.mean(val_MAEs))
         logger.debug("Validation MSE: %f", numpy.mean(val_MSEs))
-        logger.debug("Validation MAPE: %f", numpy.mean(val_MAPEs))
         logger.debug("Validation MaxAE: %f", numpy.mean(val_MAXs))
 
         # mlflow.end_run()
