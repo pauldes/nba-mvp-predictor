@@ -1,12 +1,10 @@
-from typing import List
-
 import requests
 
 from nba_mvp_predictor import conf, logger, scrappers
 
 
 def download_data(
-    seasons: List[int] = None,
+    seasons: list[int] | None = None,
     scrapper: scrappers.Scrapper = scrappers.BasketballReferenceScrapper(),
 ):
     logger.info("Downloading player stats...")
@@ -26,7 +24,7 @@ def download_data(
         logger.error(f"Downloading team standings failed : {e}")
 
 
-def download_player_stats(seasons: List[int], scrapper: scrappers.Scrapper):
+def download_player_stats(seasons: list[int] | None, scrapper: scrappers.Scrapper):
     # We do not retrieve totals stats since we want to be able to predict at any moment in the season
     # That's not a big deal since we will have total games played, stats per game and per minute (will be highly correlated)
     # We could have normalized totals within the season if we'd have really want to use them
@@ -43,7 +41,7 @@ def download_player_stats(seasons: List[int], scrapper: scrappers.Scrapper):
     )
 
 
-def download_mvp_votes(seasons: List[int], scrapper: scrappers.Scrapper):
+def download_mvp_votes(seasons: list[int] | None, scrapper: scrappers.Scrapper):
     data = scrapper.get_mvp(
         subset_by_seasons=seasons,
     )
@@ -56,7 +54,7 @@ def download_mvp_votes(seasons: List[int], scrapper: scrappers.Scrapper):
     )
 
 
-def download_team_standings(seasons: List[int], scrapper: scrappers.Scrapper):
+def download_team_standings(seasons: list[int] | None, scrapper: scrappers.Scrapper):
     data = scrapper.get_team_standings(
         subset_by_seasons=seasons,
     )
@@ -70,7 +68,11 @@ def download_team_standings(seasons: List[int], scrapper: scrappers.Scrapper):
 
 
 def download_data_from_url_to_file(
-    url: str, path: str, stream: bool = True, auth=None, headers=None
+    url: str,
+    path: str,
+    stream: bool = True,
+    auth: tuple[str, str] | None = None,
+    headers: dict[str, str] | None = None,
 ):
     """Télécharge un fichier de données depuis une URL.
 

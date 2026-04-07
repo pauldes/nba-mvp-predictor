@@ -36,16 +36,16 @@ jobs:
         with: 
           name: model.joblib
           path: ./data/model.joblib
-          retention-days: 10
+          retention-days: 40
       - name: Upload features as artifact
         uses: actions/upload-artifact@v4
         with: 
           name: features.json
           path: ./data/features.json
-          retention-days: 10
+          retention-days: 40
       - name: Upload model performances as artifact
         uses: actions/upload-artifact@v4
         with: 
           name: performances.csv
           path: ./data/performances.csv
-          retention-days: 10
+          retention-days: 40

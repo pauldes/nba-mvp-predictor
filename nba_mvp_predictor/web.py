@@ -14,7 +14,7 @@ PAGE_EXPLICABILITY = "Explain predictions"
 PAGE_PERFORMANCE = "Model performance"
 CONFIDENCE_MODE_SOFTMAX = "Softmax-based"
 CONFIDENCE_MODE_SHARE = "Share-based"
-SEASON_END_DATE = date(year=2025, month=4, day=13)
+SEASON_END_DATE = date(year=2026, month=4, day=12)
 
 pandas.set_option("display.precision", 2)
 
@@ -103,7 +103,7 @@ def download_performances():
 
 @st.cache_data(ttl=3600)  # 1h cache
 def download_predictions():
-    date, url = artifacts.get_last_artifact("predictions-2025.csv")
+    date, url = artifacts.get_last_artifact("predictions-2026.csv")
     logger.debug(f"Downloading predictions from {url}")
     download.download_data_from_url_to_file(
         url, "./data/predictions-artifact.csv.zip", auth=artifacts.get_github_auth()
@@ -112,10 +112,10 @@ def download_predictions():
 
 @st.cache_data(ttl=3600)  # 1h cache
 def download_shap_values():
-    date, url = artifacts.get_last_artifact("shap_values-2025.csv")
+    date, url = artifacts.get_last_artifact("shap_values-2026.csv")
     logger.debug(f"Downloading shap values from {url}")
     download.download_data_from_url_to_file(
-        url, "./data/shap_values-2025.csv.zip", auth=artifacts.get_github_auth()
+        url, "./data/shap_values-2026.csv.zip", auth=artifacts.get_github_auth()
     )
 
 
@@ -123,7 +123,7 @@ def build_shap_values():
     use_local_file = False
     if use_local_file:
         shap_values = pandas.read_csv(
-            "./data/shap_values-2025.csv",
+            "./data/shap_values-2026.csv",
             sep=conf.data.shap_values.sep,
             encoding=conf.data.shap_values.encoding,
             compression=None,
@@ -133,7 +133,7 @@ def build_shap_values():
     else:
         download_shap_values()
         shap_values = pandas.read_csv(
-            "./data/shap_values-2025.csv.zip",
+            "./data/shap_values-2026.csv.zip",
             sep=conf.data.shap_values.sep,
             encoding=conf.data.shap_values.encoding,
             compression="zip",
@@ -145,7 +145,7 @@ def build_shap_values():
 
 @st.cache_data(ttl=3600)  # 1h cache
 def download_history():
-    date, url = artifacts.get_last_artifact("history-2025.csv")
+    date, url = artifacts.get_last_artifact("history-2026.csv")
     logger.debug(f"Downloading history from {url}")
     download.download_data_from_url_to_file(
         url, "./data/history-artifact.csv.zip", auth=artifacts.get_github_auth()
@@ -470,12 +470,10 @@ def run():
             datetime.now().year + 1 if datetime.now().month > 9 else datetime.now().year
         )
 
-        st.markdown(
-            f"""
+        st.markdown(f"""
         *Predicting the NBA Most Valuable Player for the {current_season-1}-{str(current_season)[-2:]} season using machine learning.*
         *Last update : {last_update}.*
-        """
-        )
+        """)
 
         navigation_page = st.sidebar.radio(
             "Navigate to", [PAGE_PREDICTIONS, PAGE_EXPLICABILITY, PAGE_PERFORMANCE]
@@ -544,12 +542,10 @@ def run():
 
                 for n, player_name in enumerate(top_3):
                     title_level = "###" + n * "#"
-                    col1.markdown(
-                        f"""
+                    col1.markdown(f"""
                     ##### {emojis[n]} **{player_name}**
                     *{top_3[player_name]} probability to win MVP*
-                    """
-                    )
+                    """)
 
                 show_top_n = compute_probs_based_on_top_n
                 # show_top_n = min([compute_probs_based_on_top_n, 10])
@@ -700,13 +696,11 @@ def run():
                 col1.markdown(
                     f"##### All {num_test_seasons} seasons ({performances.index.min()}-{performances.index.max()})"
                 )
-                col1.markdown(
-                    f"""
+                col1.markdown(f"""
                 - **{percentage}** of MVPs correctly found
                 - The true MVP is ranked **{avg_real_rank}** by the model in average
                 - The true rank of the predicted MVP is **{avg_pred_rank}** in average
-                """
-                )
+                """)
                 # col2
                 performances_last10 = performances.head(10)
                 percentage = mvp_found_pct(performances_last10)
@@ -716,21 +710,17 @@ def run():
                 col2.markdown(
                     f"##### Last {num_test_seasons} seasons ({performances_last10.index.min()}-{performances_last10.index.max()})"
                 )
-                col2.markdown(
-                    f"""
+                col2.markdown(f"""
                 - **{percentage}** of MVPs correctly found
                 - The true MVP is ranked **{avg_real_rank}** by the model in average
                 - The true rank of the predicted MVP is **{avg_pred_rank}** in average
-                """
-                )
+                """)
 
                 st.dataframe(data=performances, width=None, height=None)
-                st.markdown(
-                    """
+                st.markdown("""
                 Predictions of the model are made on the unseen season using holdout method.
                 Players with no MVP vote are considered as ranked 10th for simplification.
-                """
-                )
+                """)
 
             else:
                 st.warning(
@@ -786,22 +776,18 @@ def run():
                     "👍 Stats with the strongest **positive impact** on the model prediction for this player:"
                 )
                 for i, col in enumerate(st.columns(num_stats)):
-                    col.success(
-                        f"""
+                    col.success(f"""
                         **{(top_features_positive_impact[i])}**   
                         *+{round(top_features_positive_impact_values[i], 2)} MVP share*
-                        """
-                    )
+                        """)
                 st.markdown(
                     "👎 Stats with the strongest **negative impact** on the model prediction for this player:"
                 )
                 for i, col in enumerate(st.columns(num_stats)):
-                    col.error(
-                        f"""
+                    col.error(f"""
                         **{top_features_negative_impact[i]}**    
                         *{round(top_features_negative_impact_values[i], 2)} MVP share*
-                        """
-                    )
+                        """)
 
                 st.subheader("Global explanation")
                 st.markdown(
