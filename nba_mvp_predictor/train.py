@@ -13,7 +13,22 @@ _MAX_FEATURES_CORRELATION = 0.95
 
 
 def make_bronze_data():
-    """Make bronze training data from raw downloaded data."""
+    """Make bronze training data from raw downloaded data.
+
+    Tries to read existing bronze from disk first; on ``FileNotFoundError``,
+    builds from raw CSVs and writes bronze.
+    """
+    try:
+        load.load_bronze_data(nrows=1)
+    except FileNotFoundError:
+        logger.info("No existing bronze data found: building from raw files")
+    else:
+        logger.info(
+            "Using existing bronze data at %s (skipping rebuild)",
+            conf.data.bronze.path,
+        )
+        return
+
     player_stats = load.load_player_stats()
     mvp_votes = load.load_mvp_votes()
     team_standings = load.load_team_standings()
