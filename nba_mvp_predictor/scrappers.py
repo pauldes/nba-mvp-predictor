@@ -27,7 +27,8 @@ class Scrapper(ABC):
         pass
 
     @abstractmethod
-    def get_roster_stats_v2(season, stat_type):
+    def fetch_single_season_league_stat_table(season, stat_type):
+        """One season, one stat mode (e.g. per_game); one league-wide table."""
         pass
 
     @abstractmethod
@@ -35,12 +36,13 @@ class Scrapper(ABC):
         pass
 
     @abstractmethod
-    def get_player_stats(
+    def build_multi_season_league_player_stats(
         self,
         subset_by_teams: list = None,
         subset_by_seasons: list = None,
         subset_by_stat_types: list = None,
     ):
+        """Many seasons × many stat modes, merged into one player-level frame."""
         pass
 
     @abstractmethod
@@ -148,11 +150,12 @@ class BasketballReferenceScrapper(Scrapper):
         return all_df
 
     @classmethod
-    def get_roster_stats_v2(cls, season, stat_type):
+    def fetch_single_season_league_stat_table(cls, season, stat_type):
         """
-        Return all players stats for one season.
-        Season : end year of season, as int or str
-        Available stat types (case insensitive) : 'totals', 'per_game', 'per_36min', 'per_100poss', 'advanced'
+        Fetch one league-wide player table: exactly one season and one stat mode.
+
+        Season: end year of season, as int or str.
+        stat_type (case insensitive): 'totals', 'per_game', 'per_36min', 'per_100poss', 'advanced'.
         """
         season = str(season)
         stat_type = str(stat_type).lower()
@@ -300,15 +303,16 @@ class BasketballReferenceScrapper(Scrapper):
         )
         return all_conf_df
 
-    def get_player_stats(
+    def build_multi_season_league_player_stats(
         self,
         subset_by_teams: list = None,
         subset_by_seasons: list = None,
         subset_by_stat_types: list = None,
     ):
         """
-        Get a set of stats.
-        Defaults to all teams, all seasons, all stat types.
+        Merge many seasons and many stat modes into one wide player-level DataFrame.
+
+        Defaults: all teams, all allowed seasons, all stat modes.
         """
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month
@@ -366,7 +370,9 @@ class BasketballReferenceScrapper(Scrapper):
             for stat_type in stat_types:
                 logger.info(f"Retrieving {stat_type} stats for season {season}...")
                 try:
-                    stat_type_df = self.get_roster_stats_v2(season, stat_type)
+                    stat_type_df = self.fetch_single_season_league_stat_table(
+                        season, stat_type
+                    )
                 except Exception as e:
                     logger.error(
                         f"Could not retrieve data. Are you sure NBA was played in season {season}? {e}"

@@ -30,7 +30,7 @@ def download_player_stats(seasons: List[int], scrapper: scrappers.Scrapper):
     # We do not retrieve totals stats since we want to be able to predict at any moment in the season
     # That's not a big deal since we will have total games played, stats per game and per minute (will be highly correlated)
     # We could have normalized totals within the season if we'd have really want to use them
-    data = scrapper.get_player_stats(
+    data = scrapper.build_multi_season_league_player_stats(
         subset_by_seasons=seasons,
         subset_by_stat_types=["per_game", "per_36min", "per_100poss", "advanced"],
     )
