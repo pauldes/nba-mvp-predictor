@@ -6,8 +6,7 @@ import numpy
 import pandas
 import streamlit as st
 
-from nba_mvp_predictor import (analytics, artifacts, conf, download, evaluate,
-                               logger)
+from nba_mvp_predictor import analytics, artifacts, conf, download, evaluate, logger
 
 # Constants
 PAGE_PREDICTIONS = "Current predictions"
@@ -740,91 +739,184 @@ def run():
                 ]
                 shap_values = shap_values.rename(columns=format_feature_name)
 
+                top10_players = [
+                    p
+                    for p in predictions.index.to_list()[:10]
+                    if p in shap_values.index
+                ]
+
                 st.subheader("Local explanation")
-                st.markdown(
-                    "To understand which stats have the strongest impact on the model prediction for the MVP share one player."
-                )
-                selected_player = st.selectbox(
-                    "Select a player", predictions.index.to_list()[:10]
-                )
-                a = shap_values.loc[selected_player, :]
-                features_positive_impact = a[a > 0.0]
-                features_negative_impact = a[a < 0.0]
+                if not top10_players:
+                    st.warning(
+                        "No overlap between the predictions top-10 and the explainability export."
+                    )
+                else:
+                    selected_player = st.selectbox(
+                        "Player",
+                        top10_players,
+                        key="explicability_selected_player",
+                    )
+                    a = shap_values.loc[selected_player, :]
+                    features_positive_impact = a[a > 0.0]
+                    features_negative_impact = a[a < 0.0]
 
-                num_stats = 3
-                top_features_positive_impact = (
-                    features_positive_impact.sort_values(ascending=False)
-                    .index[:num_stats]
-                    .to_list()
-                )
-                top_features_positive_impact_values = (
-                    features_positive_impact.sort_values(ascending=False).values[
-                        :num_stats
-                    ]
-                )
-                top_features_negative_impact = (
-                    features_negative_impact.sort_values(ascending=True)
-                    .index[:num_stats]
-                    .to_list()
-                )
-                top_features_negative_impact_values = (
-                    features_negative_impact.sort_values(ascending=True).values[
-                        :num_stats
-                    ]
-                )
+                    num_stats = 3
+                    top_features_positive_impact = (
+                        features_positive_impact.sort_values(ascending=False)
+                        .index[:num_stats]
+                        .to_list()
+                    )
+                    top_features_positive_impact_values = (
+                        features_positive_impact.sort_values(ascending=False).values[
+                            :num_stats
+                        ]
+                    )
+                    top_features_negative_impact = (
+                        features_negative_impact.sort_values(ascending=True)
+                        .index[:num_stats]
+                        .to_list()
+                    )
+                    top_features_negative_impact_values = (
+                        features_negative_impact.sort_values(ascending=True).values[
+                            :num_stats
+                        ]
+                    )
 
-                st.markdown(
-                    "👍 Stats with the strongest **positive impact** on the model prediction for this player:"
-                )
-                for i, col in enumerate(st.columns(num_stats)):
-                    col.success(f"""
-                        **{(top_features_positive_impact[i])}**   
-                        *+{round(top_features_positive_impact_values[i], 2)} MVP share*
-                        """)
-                st.markdown(
-                    "👎 Stats with the strongest **negative impact** on the model prediction for this player:"
-                )
-                for i, col in enumerate(st.columns(num_stats)):
-                    col.error(f"""
-                        **{top_features_negative_impact[i]}**    
-                        *{round(top_features_negative_impact_values[i], 2)} MVP share*
-                        """)
+                    st.markdown(
+                        f"👍 Stats with the strongest **positive impact** on the model prediction for **{selected_player}**:"
+                    )
+                    for i, col in enumerate(st.columns(num_stats)):
+                        col.success(f"""
+                            **{(top_features_positive_impact[i])}**   
+                            *+{round(top_features_positive_impact_values[i], 2)} MVP share*
+                            """)
+                    st.markdown(
+                        f"👎 Stats with the strongest **negative impact** on the model prediction for **{selected_player}**:"
+                    )
+                    for i, col in enumerate(st.columns(num_stats)):
+                        col.error(f"""
+                            **{top_features_negative_impact[i]}**    
+                            *{round(top_features_negative_impact_values[i], 2)} MVP share*
+                            """)
+
+                    if len(top10_players) < 10:
+                        st.warning(
+                            "Only "
+                            f"{len(top10_players)} players appear in both the predictions top-10 "
+                            "and the explainability export; the peer average uses whoever is available."
+                        )
+                    n_shap_cols = len(shap_values.columns)
+                    compare_max_stats = max(3, n_shap_cols)
+                    others = [p for p in top10_players if p != selected_player]
+                    if len(others) == 0:
+                        st.markdown(f"**{selected_player} vs rest of top 10**")
+                        st.info(
+                            "At least two players must appear in both predictions and the "
+                            "explainability export to compare versus peers."
+                        )
+                    else:
+                        st.markdown(f"**{selected_player} vs rest of top 10**")
+                        compare_slider_cols = st.columns([1, 1])
+                        with compare_slider_cols[0]:
+                            compare_n_stats: int = st.slider(
+                                "Number of stats to show",
+                                min_value=min(3, compare_max_stats),
+                                max_value=compare_max_stats,
+                                value=min(10, compare_max_stats),
+                                step=1,
+                                format="%d stats",
+                                label_visibility="hidden",
+                                key="shap_compare_n",
+                            )
+                        mean_other = shap_values.loc[others].mean()
+                        delta = shap_values.loc[selected_player] - mean_other
+                        compare_df = (
+                            pandas.DataFrame(
+                                {
+                                    "col_name": delta.index,
+                                    "delta": delta.values,
+                                }
+                            )
+                            .assign(
+                                abs_delta=lambda d: d["delta"].abs(),
+                            )
+                            .nlargest(compare_n_stats, "abs_delta")
+                        )
+                        compare_chart_height = 420
+                        st.vega_lite_chart(
+                            compare_df,
+                            {
+                                "mark": {
+                                    "type": "bar",
+                                    "point": True,
+                                    "tooltip": True,
+                                },
+                                "title": {"text": None},
+                                "encoding": {
+                                    "x": {
+                                        "field": "col_name",
+                                        "type": "nominal",
+                                        "title": None,
+                                        "sort": {
+                                            "field": "abs_delta",
+                                            "op": "max",
+                                            "order": "descending",
+                                        },
+                                        "axis": {
+                                            "labelAngle": -55,
+                                            "labelLimit": 280,
+                                            "labelOverlap": False,
+                                        },
+                                    },
+                                    "y": {
+                                        "field": "delta",
+                                        "type": "quantitative",
+                                        "title": None,
+                                        "scale": {"zero": True},
+                                    },
+                                    "color": {
+                                        "field": "delta",
+                                        "type": "quantitative",
+                                        "title": None,
+                                        "legend": None,
+                                        "scale": {"scheme": "redyellowgreen"},
+                                    },
+                                },
+                            },
+                            height=compare_chart_height,
+                            use_container_width=True,
+                        )
 
                 st.subheader("Global explanation")
                 st.markdown(
                     "To understand which stats have an impact on the model prediction for the MVP share of the top-10 players."
                 )
 
-                vals = numpy.array(shap_values.values).mean(0)
                 vals_abs = numpy.abs(shap_values.values).mean(0)
                 shap_importance = pandas.DataFrame(
-                    list(zip(shap_values.columns, vals, vals_abs)),
-                    columns=[
-                        "col_name",
-                        "feature_importance_vals",
-                        "abs_feature_importance_vals",
-                    ],
+                    {
+                        "col_name": shap_values.columns,
+                        "abs_feature_importance_vals": vals_abs,
+                    }
                 )
-                keep_to_n_features: int = st.slider(
-                    "Number of stats to show",
-                    min_value=10,
-                    max_value=len(shap_importance),
-                    value=10,
-                    step=1,
-                    format="%d stats",
-                    label_visibility="hidden",
-                )
-                shap_importance = shap_importance.sort_values(
+                st.markdown("**Average absolute impact (positive or negative)**")
+                global_slider_cols = st.columns([1, 1])
+                with global_slider_cols[0]:
+                    keep_to_n_features: int = st.slider(
+                        "Number of stats to show",
+                        min_value=10,
+                        max_value=len(shap_importance),
+                        value=10,
+                        step=1,
+                        format="%d stats",
+                        label_visibility="hidden",
+                    )
+                shap_importance_chart = shap_importance.sort_values(
                     by=["abs_feature_importance_vals"], ascending=False
                 ).head(keep_to_n_features)
-                chart_height = 28 * keep_to_n_features
-                col1, col2 = st.columns([10, 9])
-                shap_importance = shap_importance.sort_values(
-                    by=["feature_importance_vals"], ascending=True
-                )
-                col1.markdown("**Average impact on the predicted MVP share**")
-                col1.vega_lite_chart(
-                    shap_importance,
+                chart_height = 420
+                st.vega_lite_chart(
+                    shap_importance_chart,
                     {
                         "mark": {
                             "type": "bar",
@@ -834,54 +926,20 @@ def run():
                         "title": {"text": None},
                         "encoding": {
                             "x": {
-                                "field": "feature_importance_vals",
-                                "type": "quantitative",
-                                "title": "Average impact (MVP share)",
-                            },
-                            "y": {
                                 "field": "col_name",
                                 "type": "nominal",
                                 "title": None,
-                                "sort": "-x",
+                                "sort": "-y",
+                                "axis": {
+                                    "labelAngle": -55,
+                                    "labelLimit": 280,
+                                    "labelOverlap": False,
+                                },
                             },
-                            "color": {
-                                "field": "feature_importance_vals",
-                                "type": "quantitative",
-                                "title": None,
-                                "legend": None,
-                                "scale": {"scheme": "redyellowgreen"},
-                            },
-                        },
-                    },
-                    height=chart_height,
-                    use_container_width=True,
-                )
-
-                shap_importance = shap_importance.sort_values(
-                    by=["abs_feature_importance_vals"], ascending=True
-                )
-                col2.markdown("**Average absolute impact (positive or negative)**")
-                col2.vega_lite_chart(
-                    shap_importance,
-                    {
-                        "mark": {
-                            "type": "bar",
-                            "point": True,
-                            "tooltip": True,
-                        },
-                        "title": {"text": None},
-                        "encoding": {
-                            "x": {
+                            "y": {
                                 "field": "abs_feature_importance_vals",
                                 "type": "quantitative",
-                                "title": "Average absolute impact (MVP share)",
-                            },
-                            "y": {
-                                "field": "col_name",
-                                "type": "nominal",
                                 "title": None,
-                                "sort": "-x",
-                                "axis": {"labelLimit": -1},
                             },
                             "color": {
                                 "field": "abs_feature_importance_vals",
