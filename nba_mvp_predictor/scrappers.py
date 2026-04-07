@@ -1,5 +1,6 @@
 import datetime
 import time
+from io import StringIO
 from abc import ABC, abstractmethod
 from os import path
 from typing import ClassVar
@@ -264,7 +265,7 @@ class BasketballReferenceScrapper(Scrapper):
             table = table_nba_mvp
         else:
             raise Exception("No table found for MVP data for season", season)
-        data = pandas.read_html(str(table), header=1)[0]
+        data = pandas.read_html(StringIO(str(table)), header=1)[0]
         data.columns = [str(col).upper() for col in data.columns]
         data.loc[:, "SEASON"] = season
         data = data.rename(columns={"SHARE": "MVP_VOTES_SHARE"})
@@ -306,7 +307,7 @@ class BasketballReferenceScrapper(Scrapper):
         r = cls.get_request(uri)
         soup = BeautifulSoup(r.content, "html.parser")
         table = soup.find("table")
-        data = pandas.read_html(str(table))[0]
+        data = pandas.read_html(StringIO(str(table)))[0]
         data = data.loc[data.Player != "Player", :]
         data.columns = [str(col).upper() for col in data.columns]
         data.loc[:, "SEASON"] = season
@@ -345,8 +346,8 @@ class BasketballReferenceScrapper(Scrapper):
             columns=["TEAM", "W", "L", "W/L%", "GB", "PW", "PL", "PS/G", "PA/G"]
         )
         if e_table and w_table:
-            e_df = pandas.read_html(str(e_table))[0]
-            w_df = pandas.read_html(str(w_table))[0]
+            e_df = pandas.read_html(StringIO(str(e_table)))[0]
+            w_df = pandas.read_html(StringIO(str(w_table)))[0]
             e_df.rename(columns={"Eastern Conference": "TEAM"}, inplace=True)
             w_df.rename(columns={"Western Conference": "TEAM"}, inplace=True)
         d["EASTERN_CONF"] = e_df
@@ -425,9 +426,9 @@ class BasketballReferenceScrapper(Scrapper):
 
         soup = BeautifulSoup(r.content, "html.parser")
         table_east = soup.find("table", {"id": "standings_e"})
-        data_east = pandas.read_html(str(table_east))[0]
+        data_east = pandas.read_html(StringIO(str(table_east)))[0]
         table_west = soup.find("table", {"id": "standings_w"})
-        data_west = pandas.read_html(str(table_west))[0]
+        data_west = pandas.read_html(StringIO(str(table_west)))[0]
 
         results = {
             "West": data_west,
