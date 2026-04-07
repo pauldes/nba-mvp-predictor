@@ -1,36 +1,39 @@
-from typing import List
+from typing import List, Optional
 
 import requests
 
-from nba_mvp_predictor import conf, logger, scrappers
+from nba_mvp_predictor import conf, logger
+from nba_mvp_predictor.extractor import BasketballReferenceExtractor, DataExtractor
 
 
 def download_data(
     seasons: List[int] = None,
-    scrapper: scrappers.Scrapper = scrappers.BasketballReferenceScrapper(),
+    extractor: Optional[DataExtractor] = None,
 ):
+    if extractor is None:
+        extractor = BasketballReferenceExtractor()
     logger.info("Downloading player stats...")
     try:
-        download_player_stats(seasons=seasons, scrapper=scrapper)
+        download_player_stats(seasons=seasons, extractor=extractor)
     except Exception as e:
         logger.error(f"Downloading player stats failed : {e}")
     logger.info("Downloading MVP votes...")
     try:
-        download_mvp_votes(seasons=seasons, scrapper=scrapper)
+        download_mvp_votes(seasons=seasons, extractor=extractor)
     except Exception as e:
         logger.error(f"Downloading MVP votes failed : {e}")
     logger.info("Downloading team standings...")
     try:
-        download_team_standings(seasons=seasons, scrapper=scrapper)
+        download_team_standings(seasons=seasons, extractor=extractor)
     except Exception as e:
         logger.error(f"Downloading team standings failed : {e}")
 
 
-def download_player_stats(seasons: List[int], scrapper: scrappers.Scrapper):
+def download_player_stats(seasons: List[int], extractor: DataExtractor):
     # We do not retrieve totals stats since we want to be able to predict at any moment in the season
     # That's not a big deal since we will have total games played, stats per game and per minute (will be highly correlated)
     # We could have normalized totals within the season if we'd have really want to use them
-    data = scrapper.build_multi_season_league_player_stats(
+    data = extractor.build_multi_season_league_player_stats(
         subset_by_seasons=seasons,
         subset_by_stat_types=["per_game", "per_36min", "per_100poss", "advanced"],
     )
@@ -43,8 +46,8 @@ def download_player_stats(seasons: List[int], scrapper: scrappers.Scrapper):
     )
 
 
-def download_mvp_votes(seasons: List[int], scrapper: scrappers.Scrapper):
-    data = scrapper.get_mvp(
+def download_mvp_votes(seasons: List[int], extractor: DataExtractor):
+    data = extractor.get_mvp(
         subset_by_seasons=seasons,
     )
     data.to_csv(
@@ -56,8 +59,8 @@ def download_mvp_votes(seasons: List[int], scrapper: scrappers.Scrapper):
     )
 
 
-def download_team_standings(seasons: List[int], scrapper: scrappers.Scrapper):
-    data = scrapper.get_team_standings(
+def download_team_standings(seasons: List[int], extractor: DataExtractor):
+    data = extractor.get_team_standings(
         subset_by_seasons=seasons,
     )
     data.to_csv(

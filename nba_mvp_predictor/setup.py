@@ -14,7 +14,7 @@ setup(
         "load",
         "predict",
         "preprocess",
-        "scrappers",
+        "extractor",
         "train",
         "utils",
         "web",

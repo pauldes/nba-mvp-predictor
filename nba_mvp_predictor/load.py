@@ -3,7 +3,7 @@ import json
 import joblib
 import pandas
 
-from nba_mvp_predictor import conf, scrappers
+from nba_mvp_predictor import conf
 
 
 def load_model():
