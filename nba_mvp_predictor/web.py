@@ -6,7 +6,8 @@ import numpy
 import pandas
 import streamlit as st
 
-from nba_mvp_predictor import analytics, artifacts, conf, download, evaluate, logger
+from nba_mvp_predictor import (analytics, artifacts, conf, download, evaluate,
+                               logger)
 
 # Constants
 PAGE_PREDICTIONS = "Current predictions"
@@ -716,7 +717,7 @@ def run():
                 - The true rank of the predicted MVP is **{avg_pred_rank}** in average
                 """)
 
-                st.dataframe(data=performances, width=None, height=None)
+                st.dataframe(performances)
                 st.markdown("""
                 Predictions of the model are made on the unseen season using holdout method.
                 Players with no MVP vote are considered as ranked 10th for simplification.

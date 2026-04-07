@@ -1,7 +1,7 @@
 import datetime
 import time
-from io import StringIO
 from abc import ABC, abstractmethod
+from io import StringIO
 from os import path
 from typing import ClassVar
 from urllib.parse import urljoin
