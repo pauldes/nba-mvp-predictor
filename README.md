@@ -31,7 +31,7 @@ Solutions :
     - 50% games played
     - 28 minutes per game
     - 2 FG attemptes
-    - Team ranked 12th in conference at least
+    - Team ranked 8th in conference at least
 
 #### Label consistency
 

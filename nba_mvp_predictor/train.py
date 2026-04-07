@@ -115,7 +115,7 @@ def make_silver_data():
             (data.SEASON != season) | ((data.SEASON == season) & (data.G >= treshold))
         ]
     data = data[data["FGA_per_game"] >= 2]
-    data = data[data["CONF_RANK"] <= 12]
+    data = data[data["CONF_RANK"] <= 8]
     data = data[data["MP"] >= 28.0]
 
     removed_players = data_copy.loc[~data_copy.index.isin(data.index)]
