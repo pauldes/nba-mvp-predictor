@@ -3,7 +3,7 @@ env:
   LOG_LEVEL: INFO
 on:
   schedule:
-   - cron:  '0 12 * * MON' # At 12:00 on Mondays
+   - cron: "0 12 1 * *" # 12:00 UTC on the 1st of each month
   workflow_dispatch: # Allow for manual trigger from github.com
 jobs:
   # These jobs shall run once the model has be trained.
@@ -17,12 +17,12 @@ jobs:
           workflow: renew.yaml # Switch between renew.yaml and train.yaml as needed
           path: ./
           search_artifacts: true
-      - name: Upload model as artifact for 10 more days
+      - name: Upload model as artifact (renewed retention)
         uses: actions/upload-artifact@v4
         with: 
           name: model.joblib
           path: ./model.joblib
-          retention-days: 10
+          retention-days: 40
   renew-model-performances:
     runs-on: ubuntu-latest
     steps:
@@ -33,12 +33,12 @@ jobs:
           workflow: renew.yaml # Switch between renew.yaml and train.yaml as needed
           path: ./
           search_artifacts: true
-      - name: Upload model performances as artifact for 10 more days
+      - name: Upload model performances as artifact (renewed retention)
         uses: actions/upload-artifact@v4
         with: 
           name: performances.csv
           path: ./performances.csv
-          retention-days: 10
+          retention-days: 40
   renew-model-features:
     runs-on: ubuntu-latest
     steps:
@@ -49,12 +49,12 @@ jobs:
           workflow: renew.yaml # Switch between renew.yaml and train.yaml as needed
           path: ./
           search_artifacts: true
-      - name: Upload features as artifact for 10 more days
+      - name: Upload features as artifact (renewed retention)
         uses: actions/upload-artifact@v4
         with: 
           name: features.json
           path: ./features.json
-          retention-days: 10
+          retention-days: 40
 
   # TODO : Run these jobs if season is over, use an environment variable ?
   # TODO add model_input 
@@ -67,12 +67,12 @@ jobs:
   #         name: predictions-2026.csv
   #         latest: true
   #         path: ./
-  #     - name: Upload predictions as artifact for 10 more days
+  #     - name: Upload predictions as artifact (renewed retention)
   #       uses: actions/upload-artifact@v4
   #       with: 
   #         name: predictions-2026.csv
   #         path: ./predictions-2026.csv
-  #         retention-days: 10
+  #         retention-days: 40
   # renew-shap-values:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -82,12 +82,12 @@ jobs:
   #         name: shap_values-2026.csv
   #         latest: true
   #         path: ./
-  #     - name: Upload predictions as artifact for 10 more days
+  #     - name: Upload SHAP values as artifact (renewed retention)
   #       uses: actions/upload-artifact@v4
   #       with: 
   #         name: shap_values-2026.csv
   #         path: ./shap_values-2026.csv
-  #         retention-days: 10
+  #         retention-days: 40
   # renew-predictions-history:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -97,9 +97,9 @@ jobs:
   #         name: history-2026.csv
   #         latest: true
   #         path: ./
-  #     - name: Upload history as artifact for 10 more days
+  #     - name: Upload history as artifact (renewed retention)
   #       uses: actions/upload-artifact@v4
   #       with: 
   #         name: history-2026.csv
   #         path: ./history-2026.csv
-  #         retention-days: 10
+  #         retention-days: 40
