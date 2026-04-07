@@ -8,7 +8,7 @@ def get_model():
 
 def _get_regressor():
     return neural_network.MLPRegressor(
-        hidden_layer_sizes=9,
+        hidden_layer_sizes=8,
         learning_rate="adaptive",
         learning_rate_init=0.065,
         random_state=0,
