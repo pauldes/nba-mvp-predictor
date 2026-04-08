@@ -15,17 +15,13 @@ def explain_model():
     sample_size = 10
     logger.debug(f"SHAP values will be computed for : {sample_size} top players")
     sample = model_input[model_input.index.isin(player_season_team_list[:sample_size])]
-    # Compare to a population of all candidates
-    population_size = 80
     logger.debug(f"Number of players in predictions : {len(player_season_team_list)}")
     logger.debug(f"Total population : {len(model_input)}")
-    # New method : Sample 100 players randomly.
-    population = model_input.sample(population_size)
-    logger.debug(f"Population size for SHAP : {population_size}")
+    population = model_input
+    logger.debug(f"Population size for SHAP : {len(population)}")
 
     explainer = shap.Explainer(model.predict, population, algorithm="auto")
     shap_values = explainer(sample)
-    top10_shap_values = {}
     sample["player"] = sample.index
     sample["player"] = sample["player"].map(predictions["PLAYER"])
     sample = sample.reset_index(drop=True)
