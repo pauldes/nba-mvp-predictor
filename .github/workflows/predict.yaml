@@ -44,6 +44,8 @@ jobs:
         with:
           name: history-2026.csv
           workflow: predict.yaml
+          branch: main
+          workflow_search: true
           path: ./data/
           search_artifacts: true
           if_no_artifact_found: warn
