@@ -16,11 +16,15 @@ scikit-learn = "*"
 lxml = "*"
 shap = "*"
 curl-cffi = "*"
+html5lib = "*"
+statsmodels = "*"
 
 [dev-packages]
 black = "*"
 isort = "*"
 pylint = "*"
+jupyter = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.12"
