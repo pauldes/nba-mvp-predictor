@@ -19,10 +19,10 @@ jobs:
           timezone: Europe/Paris
       - name: Check out to repo
         uses: actions/checkout@v4
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
       - name: Download features from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
@@ -42,7 +42,7 @@ jobs:
       - name: Download history from artifact
         uses: dawidd6/action-download-artifact@v6
         with:
-          name: history-2026.csv
+          name: history-2027.csv
           workflow: predict.yaml
           branch: main
           workflow_search: true
@@ -54,23 +54,23 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade pipenv
           pipenv install --deploy
-      - name: Run the CLI command to download data for BR seasons 2025 and 2026
+      - name: Run the CLI command to download data for BR seasons 2026 and 2027
         run: |
-          pipenv run python . download --season 2025 2026
+          pipenv run python . download --seasons 2026 2027
       - name: Run the CLI command to predict model
         run: |
           pipenv run python . predict
       - name: Upload predictions as artifact
         uses: actions/upload-artifact@v4
         with: 
-          name: predictions-2026.csv
-          path: ./data/predictions-2026.csv
+          name: predictions-2027.csv
+          path: ./data/predictions-2027.csv
           retention-days: 3
       - name: Upload history as artifact
         uses: actions/upload-artifact@v4
         with: 
-          name: history-2026.csv
-          path: ./data/history-2026.csv
+          name: history-2027.csv
+          path: ./data/history-2027.csv
           retention-days: 3
       - name: Upload model input dataset as artifact
         uses: actions/upload-artifact@v4
@@ -89,10 +89,10 @@ jobs:
           timezone: Europe/Paris
       - name: Check out to repo
         uses: actions/checkout@v2
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10"
+          python-version: "3.12"
       - name: Download model input from artifact
         uses: actions/download-artifact@v4
         with:
@@ -101,7 +101,7 @@ jobs:
       - name: Download predictions from artifact
         uses: actions/download-artifact@v4
         with:
-          name: predictions-2026.csv
+          name: predictions-2027.csv
           path: ./data/
       - name: Download model from artifact
         uses: dawidd6/action-download-artifact@v6
@@ -128,8 +128,8 @@ jobs:
       - name: Upload SHAP values dataset as artifact
         uses: actions/upload-artifact@v4
         with: 
-          name: shap_values-2026.csv
-          path: ./data/shap_values-2026.csv
+          name: shap_values-2027.csv
+          path: ./data/shap_values-2027.csv
           retention-days: 10
 
   clean-artifacts:
