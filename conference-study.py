@@ -1,3 +1,4 @@
+from io import StringIO
 import time
 from matplotlib import pyplot
 import pandas
@@ -17,7 +18,7 @@ def get_wins_vs_other_conference(season: int):
     r = requests.get(url)
     if r.status_code == 200:
         data = pandas.read_html(
-            r.text.replace("<!--", "").replace("-->", ""), # Remove comments
+            StringIO(r.text.replace("<!--", "").replace("-->", "")), # Remove comments
             attrs={"id": "expanded_standings"},
             header=1,
         )
@@ -48,11 +49,11 @@ def get_wins(season: int):
     r = requests.get(url)
     if r.status_code == 200:
         east_wins = pandas.read_html(
-            r.text,
+            StringIO(r.text),
             attrs={"id": "confs_standings_E"},
         )[0]["W"].sum()
         west_wins = pandas.read_html(
-            r.text,
+            StringIO(r.text),
             attrs={"id": "confs_standings_W"},
         )[0]["W"].sum()
     else:

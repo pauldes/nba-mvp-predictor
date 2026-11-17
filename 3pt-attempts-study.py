@@ -1,3 +1,4 @@
+from io import StringIO
 import time
 from matplotlib import pyplot
 import pandas
@@ -26,7 +27,7 @@ def get_current_leaders(top_n=3, current_season=2025):
     print('Loading', url, '...')
     r = requests.get(url)
     if r.status_code == 200:
-        data = pandas.read_html(r.text)
+        data = pandas.read_html(StringIO(r.text))
     else:
         raise Exception(
             "Failed to fetch data"
@@ -52,7 +53,7 @@ def get_game_logs(player: str, season: int) -> pandas.DataFrame:
     print('Loading', url, '...')
     r = requests.get(url)
     if r.status_code == 200:
-        data = pandas.read_html(r.text)
+        data = pandas.read_html(StringIO(r.text))
     else:
         raise Exception(
             "Failed to fetch data"
@@ -89,7 +90,7 @@ def get_leaders(top_n=10):
     print('Loading', url, '...')
     r = requests.get(url)
     if r.status_code == 200:
-        data = pandas.read_html(r.text)
+        data = pandas.read_html(StringIO(r.text))
     else:
         raise Exception(
             "Failed to fetch data"
