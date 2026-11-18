@@ -136,7 +136,7 @@ def plot_results(data: pandas.DataFrame, current_player: str):
     )
     fig.text(
         TITLE_X,
-        0.85,
+        0.865,
         f"Total 3PA by team game. All-time leaders at season pace (total / {SEASON_GAMES}). "
         f"As of {datetime.date.today():%b %-d, %Y}.",
         fontsize=13,
@@ -167,7 +167,7 @@ def plot_results(data: pandas.DataFrame, current_player: str):
         va="bottom",
         color=WATERMARK_COLOR,
     )
-    pyplot.tight_layout(rect=(0, 0, 0.98, 0.82))
+    pyplot.tight_layout(rect=(0, 0, 0.98, 0.835))
     fig.savefig("data/3pt_attempts.png")
 
 def format_season(season: int) -> str:
