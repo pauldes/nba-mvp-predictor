@@ -12,7 +12,8 @@ from nba_mvp_predictor.scrappers import BasketballReferenceScrapper
 
 NUM_CURRENT_LEADERS = 1
 NUM_ALL_TIME_LEADERS = 3
-SHOW_FIRST_N_GAMES = 30
+SEASON_GAMES = 82
+SHOW_FIRST_N_GAMES = 20
 CURRENT_SEASON = 2027
 BAR_COLOR = "#3478bd"
 HIGHLIGHT_COLOR = "#f3bb4a"
@@ -57,10 +58,11 @@ def get_game_logs(player_id: str, season: int) -> pandas.DataFrame:
     rows = []
     for tr in table.find("tbody").find_all("tr"):
         cells = {cell.get("data-stat"): cell.get_text() for cell in tr.find_all(["th", "td"])}
-        # Header rows repeat inside the body, and games not played have no shooting stats
-        if not cells.get("ranker", "").isnumeric() or "fg3a" not in cells:
+        # Header rows repeat inside the body
+        if not cells.get("team_game_num_season", "").isnumeric():
             continue
-        rows.append({"Game": int(cells["ranker"]), "3PA": int(cells["fg3a"])})
+        # Missed games count as 0 so the x axis follows team games
+        rows.append({"Game": int(cells["team_game_num_season"]), "3PA": int(cells.get("fg3a") or 0)})
     return pandas.DataFrame(rows).sort_values("Game")
 
 
@@ -113,7 +115,7 @@ def plot_results(data: pandas.DataFrame, current_player: str):
     label_ys = nudge_labels([label[2] for label in labels], min_gap=y_max * 0.04)
     for (text, x, _, current), y in zip(labels, label_ys):
         ax.text(
-            x + 0.5,
+            x + 0.3,
             y,
             text,
             fontproperties=BOLD_FONT if current else None,
@@ -126,7 +128,7 @@ def plot_results(data: pandas.DataFrame, current_player: str):
     fig.text(
         TITLE_X,
         0.97,
-        f"{current_player} is shooting 3s\nat a record pace",
+        f"{current_player} is on pace\nfor the 2nd most 3s ever",
         fontproperties=BOLD_FONT,
         fontsize=26,
         ha="left",
@@ -135,33 +137,34 @@ def plot_results(data: pandas.DataFrame, current_player: str):
     fig.text(
         TITLE_X,
         0.85,
-        f"Total 3PA by game played. All-time leaders at their season average. "
+        f"Total 3PA by team game. All-time leaders at season pace (total / {SEASON_GAMES}). "
         f"As of {datetime.date.today():%b %-d, %Y}.",
         fontsize=13,
         color=MUTED_COLOR,
         ha="left",
         va="top",
     )
-    ax.set_xlabel("Games played", fontsize=18, labelpad=10)
+    ax.set_xlabel("Team games", fontsize=18, labelpad=10)
     ax.set_ylabel("3-point attempts", fontsize=18, labelpad=10)
     ax.tick_params(axis="both", labelsize=14, colors=MUTED_COLOR, length=0)
     ax.xaxis.set_major_locator(MultipleLocator(5))
     ax.yaxis.set_major_locator(MultipleLocator(Y_TICK_STEP))
-    ax.set_xlim(0, SHOW_FIRST_N_GAMES + 7)
+    ax.set_xlim(0, SHOW_FIRST_N_GAMES + 9)
     ax.set_ylim(0, y_max)
     ax.set_xticks(range(0, SHOW_FIRST_N_GAMES + 1, 5))
     ax.grid(axis="both", color=GRID_COLOR, linewidth=1, zorder=0)
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
-    # Lines rise to the top right, so the watermark goes to the empty top left
+    # Lines rise to the top right, so the watermark goes to the empty bottom right
     ax.text(
-        0.01,
-        0.98,
+        0.99,
+        0.02,
         "@wontcalltimeout",
         transform=ax.transAxes,
         fontsize=11,
-        ha="left",
-        va="top",
+        rotation=90,
+        ha="right",
+        va="bottom",
         color=WATERMARK_COLOR,
     )
     pyplot.tight_layout(rect=(0, 0, 0.98, 0.82))
@@ -172,11 +175,11 @@ def format_season(season: int) -> str:
 
 
 def main():
-    use_average_for_all_time = True
     data = []
     current_leaders = get_current_leaders(top_n=NUM_CURRENT_LEADERS, current_season=CURRENT_SEASON)
     for leader in current_leaders.to_dict(orient="records"):
         game_log = get_game_logs(leader["player_id"], leader["Season"])
+        game_log = pandas.concat([pandas.DataFrame({"Game": [0], "3PA": [0]}), game_log])
         game_log["Cumulative 3PA"] = game_log["3PA"].cumsum()
         game_log["PlayerSeason"] = f"{leader['Player'].split(' ')[-1]} {format_season(leader['Season'])}"
         game_log['Current'] = True
@@ -184,13 +187,12 @@ def main():
     leaders = get_leaders(top_n=NUM_ALL_TIME_LEADERS)
     leaders['Season'] = leaders['Season'].str[:4].astype(int) + 1
     for leader in leaders.to_dict(orient="records"):
-        game_log = get_game_logs(leader["player_id"], leader["Season"])
-        if use_average_for_all_time:
-            avg_3pa = leader["3PA"] / 82
-            game_log["3PA"] = avg_3pa
-        game_log["Cumulative 3PA"] = game_log["3PA"].cumsum()
+        # Straight pace line from 0 to the season total at game 82
+        game_log = pandas.DataFrame({"Game": range(SEASON_GAMES + 1)})
+        game_log["Cumulative 3PA"] = game_log["Game"] * leader["3PA"] / SEASON_GAMES
         game_log["PlayerSeason"] = (
-            f"{leader['Player'].split(' ')[-1]} {format_season(leader['Season'])} (#{leader['Rank']} all-time)"
+            f"{leader['Player'].split(' ')[-1]} {format_season(leader['Season'])} "
+            f"(#{leader['Rank']}, {leader['3PA']:,} 3PA)"
         )
         game_log['Current'] = False
         data.append(game_log)
