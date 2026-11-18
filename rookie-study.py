@@ -36,7 +36,7 @@ STATS = {
 METRICS = {
     "shot_attempts": {
         "formula": lambda data: data["FGA"] + 0.44 * data["FTA"],
-        "title": "Darius Acuff Jr. is outshooting\nevery rookie of the last 30 years",
+        "title": "Darius Acuff Jr. takes more shots\nthan any rookie of the last 30 years",
         "xlabel": "True shot attempts per game",
     },
     "possessions": {
