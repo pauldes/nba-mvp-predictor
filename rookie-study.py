@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from bs4 import BeautifulSoup
 from matplotlib import pyplot
@@ -11,7 +12,7 @@ import seaborn
 
 from nba_mvp_predictor.scrappers import BasketballReferenceScrapper
 
-DRAFT_YEARS = range(1997, 2027)
+DRAFT_YEARS = range(1978, 2027)
 MAX_PICK = 30
 MIN_MINUTES_PER_GAME = 5
 MIN_GAMES = 10
@@ -24,6 +25,7 @@ HIGHLIGHT_COLOR = "#f3bb4a"
 MUTED_COLOR = "#999999"
 GRID_COLOR = "#ececec"
 TITLE_X = 0.02
+RUNNER_UP_SPACING = 1.1
 BOLD_FONT = FontProperties(fname="/System/Library/Fonts/Supplemental/Verdana Bold.ttf")
 STATS = {
     "games": "G",
@@ -36,12 +38,12 @@ STATS = {
 METRICS = {
     "shot_attempts": {
         "formula": lambda data: data["FGA"] + 0.44 * data["FTA"],
-        "title": "Darius Acuff Jr. takes more shots\nthan any rookie of the last 30 years",
+        "title": "Darius Acuff Jr. takes more shots\nthan any rookie of the last 50 years",
         "xlabel": "True shot attempts per game",
     },
     "possessions": {
         "formula": lambda data: data["FGA"] + 0.44 * data["FTA"] + data["TOV"],
-        "title": "Darius Acuff Jr. ends more possessions\nthan any rookie of the last 30 years",
+        "title": "Darius Acuff Jr. ends more possessions\nthan any rookie of the last 50 years",
         "xlabel": "Possessions used per game",
     },
 }
@@ -98,14 +100,19 @@ def get_data() -> pandas.DataFrame:
 
 def get_headshot(player_id: str):
     path = f"data/{player_id}.jpg"
+    missing_path = f"data/{player_id}.nophoto"
+    if os.path.exists(missing_path):
+        return None
     try:
         return pyplot.imread(path)
     except FileNotFoundError:
         pass
     r = BasketballReferenceScrapper.get_request(f"players/{player_id[0]}/{player_id}.html")
-    meta = BeautifulSoup(r.content, "html.parser").find("div", id="meta")
-    url = meta.find("img")["src"]
-    r = BasketballReferenceScrapper.get_request(url.removeprefix(BasketballReferenceScrapper.BR_ORIGIN))
+    image = BeautifulSoup(r.content, "html.parser").find("div", id="meta").find("img")
+    if image is None:
+        open(missing_path, "w").close()
+        return None
+    r = BasketballReferenceScrapper.get_request(image["src"].removeprefix(BasketballReferenceScrapper.BR_ORIGIN))
     with open(path, "wb") as f:
         f.write(r.content)
     return pyplot.imread(path)
@@ -123,8 +130,7 @@ def crop_to_ellipse(image, color: str, border_px: float):
     return rgba
 
 
-def add_headshot(ax, player_id: str, rank: int, bar: tuple, box: tuple, zoom: float, color: str):
-    headshot = get_headshot(player_id)
+def add_headshot(ax, headshot, rank: int, bar: tuple, box: tuple, zoom: float, color: str):
     image = crop_to_ellipse(headshot, color, border_px=2 / zoom)
     ax.add_artist(
         AnnotationBbox(
@@ -151,7 +157,7 @@ def add_headshot(ax, player_id: str, rank: int, bar: tuple, box: tuple, zoom: fl
     )
 
 
-def plot_results(data: pandas.DataFrame, runners_up: pandas.DataFrame, metric: str):
+def plot_results(data: pandas.DataFrame, runners_up: list, metric: str):
     seaborn.set_theme(style="white", font="Verdana")
     fig, ax = pyplot.subplots(figsize=(12, 7), facecolor="white")
     ax.set_facecolor("white")
@@ -161,25 +167,25 @@ def plot_results(data: pandas.DataFrame, runners_up: pandas.DataFrame, metric: s
     highlighted_bin = int(highlighted_value // 1)
     colors = [HIGHLIGHT_COLOR if value == highlighted_bin else BAR_COLOR for value in counts.index]
     ax.bar(counts.index, counts.values, width=0.9, color=colors, zorder=2)
-    # All headshots share one row, each right above its bar
+    # All headshots share one row: the highlighted one above its bar, runners-up spread to its left
     headshot_y = counts.max() * 0.35
     add_headshot(
         ax,
-        HIGHLIGHTED_PLAYER_ID,
+        get_headshot(HIGHLIGHTED_PLAYER_ID),
         (data["value"] > highlighted_value).sum() + 1,
         (highlighted_bin, counts[highlighted_bin]),
         (highlighted_bin, headshot_y),
         0.55,
         HIGHLIGHT_COLOR,
     )
-    for _, player in runners_up.iterrows():
+    for i, (headshot, player) in enumerate(runners_up):
         value_bin = int(player["value"] // 1)
         add_headshot(
             ax,
-            player["player_id"],
+            headshot,
             (data["value"] > player["value"]).sum() + 1,
             (value_bin, counts[value_bin]),
-            (value_bin, headshot_y),
+            (highlighted_bin - (i + 1.5) * RUNNER_UP_SPACING, headshot_y),
             0.25,
             BAR_COLOR,
         )
@@ -195,7 +201,7 @@ def plot_results(data: pandas.DataFrame, runners_up: pandas.DataFrame, metric: s
     fig.text(
         TITLE_X,
         0.83,
-        f"First round picks, rookie seasons {min(DRAFT_YEARS) + 1}-{max(DRAFT_YEARS) + 1}, "
+        f"First round picks, "
         f"min {MIN_MINUTES_PER_GAME} min per game and {MIN_GAMES} games ({len(data)} rookies)",
         fontsize=13,
         color=MUTED_COLOR,
@@ -233,7 +239,8 @@ def main():
     data = get_data()
     data["value"] = METRICS[metric]["formula"](data)
     data = data[
-        (data["pick"] <= MAX_PICK)
+        (data["season"] - 1).isin(DRAFT_YEARS)
+        & (data["pick"] <= MAX_PICK)
         & (data["MP"] >= MIN_MINUTES_PER_GAME)
         & (data["G"] >= MIN_GAMES)
     ]
@@ -241,8 +248,16 @@ def main():
     if len(highlighted) != 1:
         raise ValueError(f"{HIGHLIGHTED_PLAYER_ID} not found after filters")
     print(data.sort_values("value", ascending=False).head(10).to_string(index=False))
-    others = data[data["player_id"] != HIGHLIGHTED_PLAYER_ID]
-    plot_results(data, others.nlargest(NUM_RUNNERS_UP, "value"), metric)
+    others = data[data["player_id"] != HIGHLIGHTED_PLAYER_ID].sort_values("value", ascending=False)
+    # Players without a photo are skipped, the next best fills their slot
+    runners_up = []
+    for _, player in others.iterrows():
+        headshot = get_headshot(player["player_id"])
+        if headshot is not None:
+            runners_up.append((headshot, player))
+        if len(runners_up) == NUM_RUNNERS_UP:
+            break
+    plot_results(data, runners_up, metric)
 
 
 if __name__ == "__main__":
