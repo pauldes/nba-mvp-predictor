@@ -156,9 +156,9 @@ def plot_results(data: pandas.DataFrame, runners_up: pandas.DataFrame):
             0.2,
             "steelblue",
         )
-    fig.suptitle("Shot attempts among rookies", fontsize=14, fontweight="bold", y=0.96)
+    fig.suptitle("Darius Acuff Jr. is outshooting every rookie of the last 30 years", fontsize=14, fontweight="bold", y=0.94)
     ax.set_title(
-        f"First {MAX_PICK} picks, rookie seasons {min(DRAFT_YEARS) + 1}-{max(DRAFT_YEARS) + 1}, "
+        f"First round picks, rookie seasons {min(DRAFT_YEARS) + 1}-{max(DRAFT_YEARS) + 1}, "
         f"min {MIN_MINUTES_PER_GAME} min per game and {MIN_GAMES} games ({len(data)} rookies)",
         fontsize=10,
         fontstyle="italic",
