@@ -213,15 +213,16 @@ def plot_results(data: pandas.DataFrame, runners_up: pandas.DataFrame, metric: s
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
     fig.text(
-        0.98,
+        0.975,
         0.97,
         "@wontcalltimeout",
         fontsize=14,
+        rotation=90,
         ha="right",
         va="top",
         color="#666666",
     )
-    pyplot.tight_layout(rect=(0, 0, 1, 0.78))
+    pyplot.tight_layout(rect=(0, 0, 0.95, 0.78))
     fig.savefig(f"data/rookie_{metric}.png")
 
 
