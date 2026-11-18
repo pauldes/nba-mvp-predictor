@@ -25,7 +25,7 @@ HIGHLIGHT_COLOR = "#f3bb4a"
 MUTED_COLOR = "#999999"
 GRID_COLOR = "#ececec"
 TITLE_X = 0.02
-RUNNER_UP_SPACING = 1.1
+RUNNER_UP_SPACING = 0.06
 BOLD_FONT = FontProperties(fname="/System/Library/Fonts/Supplemental/Verdana Bold.ttf")
 STATS = {
     "games": "G",
@@ -159,7 +159,7 @@ def add_headshot(ax, headshot, rank: int, bar: tuple, box: tuple, zoom: float, c
 
 def plot_results(data: pandas.DataFrame, runners_up: list, metric: str):
     seaborn.set_theme(style="white", font="Verdana")
-    fig, ax = pyplot.subplots(figsize=(12, 7), facecolor="white")
+    fig, ax = pyplot.subplots(figsize=(10, 9), facecolor="white")
     ax.set_facecolor("white")
     counts = data["value"].floordiv(1).astype(int).value_counts().sort_index()
     counts = counts.reindex(range(counts.index.min(), counts.index.max() + 1), fill_value=0)
@@ -185,7 +185,7 @@ def plot_results(data: pandas.DataFrame, runners_up: list, metric: str):
             headshot,
             (data["value"] > player["value"]).sum() + 1,
             (value_bin, counts[value_bin]),
-            (highlighted_bin - (i + 1.5) * RUNNER_UP_SPACING, headshot_y),
+            (highlighted_bin - (i + 1.5) * RUNNER_UP_SPACING * len(counts), headshot_y),
             0.25,
             BAR_COLOR,
         )
@@ -200,7 +200,7 @@ def plot_results(data: pandas.DataFrame, runners_up: list, metric: str):
     )
     fig.text(
         TITLE_X,
-        0.83,
+        0.85,
         f"First round picks, "
         f"min {MIN_MINUTES_PER_GAME} min per game and {MIN_GAMES} games ({len(data)} rookies)",
         fontsize=13,
@@ -228,7 +228,7 @@ def plot_results(data: pandas.DataFrame, runners_up: list, metric: str):
         va="top",
         color="#666666",
     )
-    pyplot.tight_layout(rect=(0, 0, 0.95, 0.78))
+    pyplot.tight_layout(rect=(0, 0, 0.95, 0.82))
     fig.savefig(f"data/rookie_{metric}.png")
 
 
