@@ -209,18 +209,17 @@ def plot_results(data: pandas.DataFrame, runners_up: pandas.DataFrame, metric: s
     ax.yaxis.set_major_locator(pyplot.MaxNLocator(integer=True))
     ax.set_ylim(0, counts.max() * 1.15)
     ax.set_xlim(counts.index.min() - 0.7, counts.index.max() + 0.7)
-    ax.grid(axis="y", color=GRID_COLOR, linewidth=1, zorder=0)
+    ax.grid(axis="both", color=GRID_COLOR, linewidth=1, zorder=0)
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
     fig.text(
         0.98,
-        0.02,
+        0.97,
         "@wontcalltimeout",
-        fontsize=11,
+        fontsize=14,
         ha="right",
-        va="bottom",
-        color=MUTED_COLOR,
-        alpha=0.7,
+        va="top",
+        color="#666666",
     )
     pyplot.tight_layout(rect=(0, 0, 1, 0.78))
     fig.savefig(f"data/rookie_{metric}.png")
