@@ -1,4 +1,6 @@
 import argparse
+import datetime
+import math
 import os
 
 from bs4 import BeautifulSoup
@@ -6,6 +8,7 @@ from matplotlib import pyplot
 from matplotlib.colors import to_rgb
 from matplotlib.font_manager import FontProperties
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from matplotlib.ticker import MultipleLocator
 import numpy
 import pandas
 import seaborn
@@ -26,6 +29,7 @@ MUTED_COLOR = "#999999"
 GRID_COLOR = "#ececec"
 TITLE_X = 0.02
 RUNNER_UP_SPACING = 0.06
+Y_TICK_STEP = 20
 BOLD_FONT = FontProperties(fname="/System/Library/Fonts/Supplemental/Verdana Bold.ttf")
 STATS = {
     "games": "G",
@@ -201,8 +205,8 @@ def plot_results(data: pandas.DataFrame, runners_up: list, metric: str):
     fig.text(
         TITLE_X,
         0.85,
-        f"First round picks, "
-        f"min {MIN_MINUTES_PER_GAME} min per game and {MIN_GAMES} games ({len(data)} rookies)",
+        f"1st round picks, ≥{MIN_MINUTES_PER_GAME} MPG, ≥{MIN_GAMES} GP ({len(data)} rookies). "
+        f"As of {datetime.date.today():%b %-d, %Y}.",
         fontsize=13,
         color=MUTED_COLOR,
         ha="left",
@@ -212,23 +216,23 @@ def plot_results(data: pandas.DataFrame, runners_up: list, metric: str):
     ax.set_ylabel("Rookies", fontsize=18, labelpad=10)
     ax.set_xticks(counts.index)
     ax.tick_params(axis="both", labelsize=14, colors=MUTED_COLOR, length=0)
-    ax.yaxis.set_major_locator(pyplot.MaxNLocator(integer=True))
-    ax.set_ylim(0, counts.max() * 1.15)
+    ax.yaxis.set_major_locator(MultipleLocator(Y_TICK_STEP))
+    ax.set_ylim(0, math.ceil(counts.max() / Y_TICK_STEP) * Y_TICK_STEP)
     ax.set_xlim(counts.index.min() - 0.7, counts.index.max() + 0.7)
     ax.grid(axis="both", color=GRID_COLOR, linewidth=1, zorder=0)
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
-    fig.text(
-        0.975,
-        0.97,
+    ax.text(
+        0.99,
+        0.98,
         "@wontcalltimeout",
-        fontsize=14,
-        rotation=90,
+        transform=ax.transAxes,
+        fontsize=11,
         ha="right",
         va="top",
         color="#666666",
     )
-    pyplot.tight_layout(rect=(0, 0, 0.95, 0.82))
+    pyplot.tight_layout(rect=(0, 0, 0.98, 0.82))
     fig.savefig(f"data/rookie_{metric}.png")
 
 
